@@ -3,6 +3,14 @@
 
 #include "framework.h"
 #include "Tetris.h"
+#include "Configuration.h"
+#include "Drawer.h"
+
+#include <Unknwn.h>
+#include <Windows.h>
+#include <gdiplus.h>
+using namespace Gdiplus;
+#pragma comment (lib,"Gdiplus.lib")
 
 #define MAX_LOADSTRING 100
 
@@ -16,6 +24,10 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
+
+// gdiolus
+GdiplusStartupInput gdiplusStartupInput;
+ULONG_PTR gdiplusToken;
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
@@ -32,6 +44,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     LoadStringW(hInstance, IDC_TETRIS, szWindowClass, MAX_LOADSTRING);
     MyRegisterClass(hInstance);
 
+	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+
     // Perform application initialization:
     if (!InitInstance (hInstance, nCmdShow))
     {
@@ -43,14 +57,24 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
 
     // Main message loop:
-    while (GetMessage(&msg, nullptr, 0, 0))
-    {
-        if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
-        {
-            TranslateMessage(&msg);
-            DispatchMessage(&msg);
-        }
-    }
+	while (true)
+	{
+		if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
+		{
+			if (msg.message == WM_QUIT)
+			{
+				break;
+			}
+			if (!TranslateAccelerator(msg.hwnd, hAccelTable, &msg))
+			{
+				TranslateMessage(&msg);
+				DispatchMessage(&msg);
+			}
+		}
+		//Game_Main();
+	}
+
+	GdiplusShutdown(gdiplusToken);
 
     return (int) msg.wParam;
 }
@@ -106,7 +130,12 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    }
 
    ShowWindow(hWnd, nCmdShow);
-   UpdateWindow(hWnd);
+
+   Configuration::singleton.Initialize();
+   Drawer::mainDrawer.Initialize(&Configuration::singleton);
+
+   InvalidateRect(hWnd, NULL, TRUE);
+   //UpdateWindow(hWnd);
 
    return TRUE;
 }
@@ -146,8 +175,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             PAINTSTRUCT ps;
             HDC hdc = BeginPaint(hWnd, &ps);
-            // TODO: Add any drawing code that uses hdc here...
-            EndPaint(hWnd, &ps);
+
+			Drawer* pDrawer = &Drawer::mainDrawer;
+			pDrawer->AttachDC(hdc);
+			pDrawer->DrawElements();
+			pDrawer->DetachDC();
+			
+			EndPaint(hWnd, &ps);
         }
         break;
     case WM_DESTROY:

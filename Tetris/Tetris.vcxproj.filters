@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="inis">
+      <UniqueIdentifier>{88f1b6c6-af29-404f-809d-7c00a3f64057}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inis\bitmaps">
+      <UniqueIdentifier>{953762ee-6436-4cfa-9dda-22fc8dbdb6eb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="inis\shapes">
+      <UniqueIdentifier>{ff54c9f0-d403-4cb5-8310-dac2efdd9ddc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -27,9 +36,39 @@
     <ClInclude Include="Tetris.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Configuration.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Drawer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TetrisShape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="TetrisType.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Configuration.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Controller.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Drawer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TetrisShape.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="TetrisType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -45,5 +84,28 @@
     <Image Include="Tetris.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="inis\bitmaps\border color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\dropped color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\frame color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="inis\configuration.txt">
+      <Filter>inis</Filter>
+    </Text>
+    <Text Include="inis\shapes\B.txt">
+      <Filter>inis\shapes</Filter>
+    </Text>
+    <Text Include="inis\shapes\classic.txt">
+      <Filter>inis\shapes</Filter>
+    </Text>
   </ItemGroup>
 </Project>
