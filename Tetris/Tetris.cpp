@@ -172,16 +172,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_PAINT:
-        {
-            PAINTSTRUCT ps;
-            HDC hdc = BeginPaint(hWnd, &ps);
+	{
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
 
-			Drawer* pDrawer = &Drawer::mainDrawer;
-			pDrawer->AttachDC(hdc);
-			pDrawer->DrawElements();
-			pDrawer->DetachDC();
-			
-			EndPaint(hWnd, &ps);
+		Drawer* pDrawer = &Drawer::mainDrawer;
+		pDrawer->AttachDC(hdc);
+		pDrawer->DrawElements();
+		pDrawer->DetachDC();
+
+		EndPaint(hWnd, &ps);
         }
         break;
     case WM_DESTROY:

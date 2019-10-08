@@ -1,29 +1,35 @@
 #pragma once
 #include <tchar.h>
-#include <vector>
+#include <list>
 using namespace std;
-
-#define TETRIS_GROUP_CHARS 16
-#define TETRIS_TYPE_CHARS 16
 
 class TetrisType
 {
 public:
-	TetrisType(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, size_t color);
-	bool Initialize(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, size_t color);
-	void Append(TetrisType* pTetrisType);
-	void Remove(TetrisType* pTetirsType);
+	static void Create(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+	static void Delete(TetrisType* pTetrisType);
+	static void Clear(TetrisType* pTetirsType);
 
-protected:
+private:
+	TetrisType(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+	~TetrisType();
+	bool Initialize(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+
+	int GetPostion(int x, int y);
+	void GetXY(int pos, int* px, int* py);
+
+public:
 	TCHAR* group;
 	TCHAR* name;
 	bool penetrable;
 	int row;
 	int col;
 	char* pData;
-	size_t color;
+	int color;
+	int centerX, centerY; // for rotate center
+	bool canRotate;
 
 private:
-	vector<TetrisType> vecTetrisTypes;
+	static list<TetrisType*> lstTetrisTypes;
 };
 

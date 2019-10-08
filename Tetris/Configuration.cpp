@@ -138,7 +138,7 @@ bool Configuration::LoadShapes()
 		TCHAR name[BUFFER_CHARS] = _T("");
 		bool penetrable = false;
 		int row = 0, col = 0;
-		size_t color = 0;
+		int color = 0;
 		vector<char> vecData;
 			
 		while (true)
@@ -149,7 +149,7 @@ bool Configuration::LoadShapes()
 			{
 				if (_T("") != name && row != 0 && col != 0)
 				{
-					TetrisType(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+					TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
 					color++;
 				}
 				SplitStringToStrInt(GetStringBuffer, _T(':'), name, penetrable);
@@ -162,7 +162,7 @@ bool Configuration::LoadShapes()
 				continue;
 			else // shape data
 			{
-				col = _tcslen(GetStringBuffer);
+				col = (int)_tcslen(GetStringBuffer);
 				row++;
 				for (int i = 0; i < col; i++)
 					vecData.push_back((char)GetStringBuffer[i]);

@@ -2,12 +2,15 @@
 #include "TetrisType.h"
 #include <vector>
 #include <tchar.h>
+#include <msxml.h>
 using namespace std;
+
+enum class TetrisRotation {TetrisRotation0, TetrisRotation1, TetrisRotation2,	TetrisRotation3};
 
 class TetrisShape
 {
-private:
-	void From(TetrisType* pType);
+public:
+	TetrisShape(TetrisType* pTetrisType);
 
 public:
 	void Rotate();
@@ -15,9 +18,19 @@ public:
 	void StepDown();
 	void DropDown();
 
+	bool ValidateXY(int x, int y);
+	char GetData(int x, int y);
+	bool IsSolid(int x, int y);
+	int GetWidth();
+	int GetHeight();
+	int GetLeft();
+	int GetRight();
+	int GetTop();
+	int GetBottom();
+
 private:
-	
-	int width, height;
-	int centerX, centerY; // for rotate center
+	TetrisType* pTetrisType;
+	int posX, posY;
+	TetrisRotation rotation;
 };
 
