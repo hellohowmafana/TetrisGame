@@ -1,8 +1,8 @@
 #include "Drawer.h"
 
-#define CreateSolidPen(hpn, width, color) (hpn) = CreatePen(PS_SOLID, (width), (color))
+#define CreateSolidPen(width, color) CreatePen(PS_SOLID, (width), (color))
 
-Drawer Drawer::mainDrawer;
+Drawer Drawer::singleton;
 
 Drawer::Drawer()
 :hpnBorder(NULL), hpnSeparator(NULL), hdc(NULL), initialized(false)
@@ -15,18 +15,15 @@ bool Drawer::Initialize(Configuration* pConfiguration)
 	try {
 		this->pConfiguration = pConfiguration;
 
-		COLORREF color;
-		GetColorFromFile(pConfiguration->pathFrameColorFile.c_str(), &color);
-		CreateSolidPen(hpnBorder, pConfiguration->borderThickness, color);
-		GetColorFromFile(pConfiguration->pathSeparatorColorFile.c_str(), &color);
-		CreateSolidPen(hpnSeparator, pConfiguration->separatorThickness, color);
+		hpnBorder = CreateSolidPen(pConfiguration->borderThickness, pConfiguration->colorBorder);
+		hpnSeparator = CreateSolidPen(pConfiguration->separatorThickness, pConfiguration->colorSeparator);
 
-		vector<COLORREF> colors;
-		GetColorsFromFile(pConfiguration->pathColorFile.c_str(), &colors);
-		for (size_t i = 0; i < colors.size(); i++)
+		for (size_t i = 0; i < pConfiguration->vecTetrisColors.size(); i++)
 		{
-			vecColorBrushes.push_back(CreateSolidBrush(colors[i]));
+			vecTetrisBrushes.push_back(CreateSolidBrush(pConfiguration->vecTetrisColors[i]));
 		}
+
+		hbsAccretion = CreateSolidBrush(pConfiguration->colorAccretion);
 	}
 	catch (...){
 		return false;
@@ -53,11 +50,11 @@ void Drawer::DrawElements()
 	{
 		DrawFrame();
 
-		DrawUnit(0, 0, vecColorBrushes[1]);
-		DrawUnit(3, 1, vecColorBrushes[0]);
-		DrawUnit(1, 2, vecColorBrushes[5]);
-		DrawUnit(1, 5, vecColorBrushes[6]);
-		DrawUnit(9, 19, vecColorBrushes[3]);
+		DrawUnit(0, 0, vecTetrisBrushes[1]);
+		DrawUnit(3, 1, vecTetrisBrushes[0]);
+		DrawUnit(1, 2, vecTetrisBrushes[5]);
+		DrawUnit(1, 5, vecTetrisBrushes[6]);
+		DrawUnit(9, 19, vecTetrisBrushes[3]);
 	}
 }
 
@@ -131,6 +128,29 @@ void Drawer::DrawBackgroud()
 	if (!initialized || NULL == hdc) return;
 }
 
+void Drawer::DrawTetrisShape(TetrisShape* pTetrisShape)
+{
+	for (int i = pTetrisShape->GetLeft(); i < pTetrisShape->GetRight(); i++)
+	{
+		for (int j = pTetrisShape->GetTop(); j < pTetrisShape->GetBottom(); j++)
+		{
+			DrawUnit(i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
+		}
+	}
+}
+
+void Drawer::DrawAccretion(Accretion* pAccretion)
+{
+	for (size_t i = pAccretion->GetTop(); i < (size_t)Configuration::singleton.frameSizeY; i++)
+	{
+		for (size_t j = 0; j < (size_t)Configuration::singleton.frameSizeX; j++)
+		{
+			if (pAccretion->IsSolid(j, i))
+				DrawUnit(j, i, hbsAccretion);
+		}
+	}
+}
+
 void Drawer::DrawUnit(int x, int y, HBRUSH brush)
 {
 	if (!initialized || NULL == hdc) return;
@@ -153,48 +173,20 @@ void Drawer::DrawShape()
 	if (!initialized || NULL == hdc) return;
 }
 
-bool Drawer::GetColorFromFile(const TCHAR* file, COLORREF* pColor)
+void Drawer::DrawPromptFrame()
 {
-	try {
-		Bitmap* pbmp;
-		Color color;
-		pbmp = Bitmap::FromFile(file);
-		pbmp->GetPixel(0, 0, &color);
-		*pColor = color.ToCOLORREF();
-		return true;
-	}
-	catch (...)
-	{
-		return (COLORREF)0;
-	}
 }
 
-bool Drawer::GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors)
+void Drawer::DrawPromptUnit(int x, int y, HBRUSH brush)
 {
-	try {
-		pvecColors->clear();
-		Bitmap* pbmp;
-		Color color;
-		pbmp = Bitmap::FromFile(file);
-		for (UINT i = 0; i < pbmp->GetWidth(); i++)
-		{
-			for (UINT j = 0; j < pbmp->GetHeight(); j++)
-			{
-				pbmp->GetPixel(i, j, &color);
-				if (pvecColors->end() ==
-					find(pvecColors->begin(), pvecColors->end(), color.ToCOLORREF()))
-				{
-					pvecColors->push_back(color.ToCOLORREF());
-				}
-			}
-		}
-		return true;
-	}
-	catch (...)
-	{
-		pvecColors->clear();
-		return false;
-	}
+}
+
+void Drawer::DrawPromptShape()
+{
+}
+
+void Drawer::DrawInfoFrameFrame()
+{
 }
 
 Drawer::~Drawer()

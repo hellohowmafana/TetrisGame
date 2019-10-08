@@ -179,6 +179,7 @@
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Accretion.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="Controller.h" />
     <ClInclude Include="Drawer.h" />
@@ -191,6 +192,7 @@
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Accretion.cpp" />
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Drawer.cpp" />
@@ -203,12 +205,12 @@
     <ResourceCompile Include="Tetris.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="inis\bitmaps\border color.bmp" />
-    <Image Include="inis\bitmaps\color.bmp">
+    <Image Include="inis\bitmaps\accretion color.bmp" />
+    <Image Include="inis\bitmaps\separator color.bmp" />
+    <Image Include="inis\bitmaps\tetris color.bmp">
       <DeploymentContent>true</DeploymentContent>
     </Image>
-    <Image Include="inis\bitmaps\dropped color.bmp" />
-    <Image Include="inis\bitmaps\frame color.bmp" />
+    <Image Include="inis\bitmaps\border color.bmp" />
     <Image Include="small.ico" />
     <Image Include="Tetris.ico" />
   </ItemGroup>

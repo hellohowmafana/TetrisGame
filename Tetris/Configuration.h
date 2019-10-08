@@ -1,5 +1,6 @@
 #include <string>
 #include <Windows.h>
+#include <vector>
 using namespace std;
 
 #pragma once
@@ -13,10 +14,10 @@ private:
 	const wstring SHAPES_PATH = INIS_PATH + L"\\shapes";
 
 	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
-	const wstring COLOR_FILE_PATH = BITMAPS_PATH + L"\\color.bmp";
-	const wstring DROPPED_COLOR_FILE_PATH = BITMAPS_PATH + L"\\dropped color.bmp";
-	const wstring FRAME_COLOR_FILE_PATH = BITMAPS_PATH + L"\\frame color.bmp";
+	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.bmp";
+	const wstring ACCRETION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\accretion color.bmp";
 	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.bmp";
+	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.bmp";
 	const wstring CLASSIC_SHAPES_PATH = SHAPES_PATH + L"\\classic.txt";
 
 public:
@@ -26,9 +27,9 @@ public:
 	wstring pathShapes;
 
 	wstring pathConfiguration;
-	wstring pathColorFile;
-	wstring pathDroppedColorFile;
-	wstring	pathFrameColorFile;
+	wstring pathTetrisColorFile;
+	wstring pathAccretionColorFile;
+	wstring	pathBorderColorFile;
 	wstring pathSeparatorColorFile;
 	wstring pathClassicShapes;
 
@@ -108,7 +109,6 @@ public:
 	wstring musicRotate;
 	wstring musicDrop;
 	wstring musicDropped;
-
 	wstring musicBgm;
 
 	// bitmaps
@@ -116,6 +116,12 @@ public:
 	bool useColorRandom;
 	wstring unitBitmap;
 	bool useDroppedColor;
+
+public:
+	COLORREF colorBorder;
+	COLORREF colorSeparator;
+	vector<COLORREF> vecTetrisColors;
+	COLORREF colorAccretion;
 
 public:
 	static Configuration singleton;
@@ -129,6 +135,9 @@ private:
 	bool LoadParameters();
 	bool LoadShapes();
 	bool LoadColors();
+	bool GetColorFromFile(const TCHAR* file, COLORREF* pColor);
+	bool GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors);
+
 	bool SaveWindowPostion(int w, int h, int l, int t, bool c);
 
 private:

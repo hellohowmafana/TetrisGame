@@ -131,11 +131,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
 
-   Configuration::singleton.Initialize();
-   Drawer::mainDrawer.Initialize(&Configuration::singleton);
+   if (!Configuration::singleton.Initialize())
+   {
+	   MessageBox(hWnd, _T("Load configuration failed."), NULL, MB_OK);
+	   PostQuitMessage(0);
+   }
+   Drawer::singleton.Initialize(&Configuration::singleton);
 
    InvalidateRect(hWnd, NULL, TRUE);
-   //UpdateWindow(hWnd);
 
    return TRUE;
 }
@@ -176,13 +179,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(hWnd, &ps);
 
-		Drawer* pDrawer = &Drawer::mainDrawer;
+		Drawer* pDrawer = &Drawer::singleton;
 		pDrawer->AttachDC(hdc);
 		pDrawer->DrawElements();
 		pDrawer->DetachDC();
 
 		EndPaint(hWnd, &ps);
-        }
+	}
         break;
     case WM_DESTROY:
         PostQuitMessage(0);

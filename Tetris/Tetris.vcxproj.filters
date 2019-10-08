@@ -54,6 +54,9 @@
     <ClInclude Include="Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Accretion.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
@@ -77,6 +80,9 @@
     <ClCompile Include="Utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Accretion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tetris.rc">
@@ -90,28 +96,28 @@
     <Image Include="Tetris.ico">
       <Filter>Resource Files</Filter>
     </Image>
+    <Image Include="inis\bitmaps\tetris color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\accretion color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\separator color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
     <Image Include="inis\bitmaps\border color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\dropped color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\frame color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
-    <Text Include="inis\configuration.txt">
-      <Filter>inis</Filter>
-    </Text>
     <Text Include="inis\shapes\B.txt">
       <Filter>inis\shapes</Filter>
     </Text>
     <Text Include="inis\shapes\classic.txt">
       <Filter>inis\shapes</Filter>
+    </Text>
+    <Text Include="inis\configuration.txt">
+      <Filter>inis</Filter>
     </Text>
   </ItemGroup>
 </Project>

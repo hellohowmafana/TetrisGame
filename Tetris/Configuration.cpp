@@ -1,9 +1,9 @@
 #include "Configuration.h"
-#include <Windows.h>
 #include <tchar.h>
 #include <fstream> 
 #include "TetrisShape.h"
-using namespace std;
+#include <gdiplus.h>
+using namespace Gdiplus;
 
 #define PATH_LENGTH 512
 #define BUFFER_CHARS 32
@@ -58,10 +58,10 @@ bool Configuration::InitializeIniPaths()
 	pathShapes = path + SHAPES_PATH;
 
 	pathConfiguration = path + CONFIGURATION_PATH;
-	pathColorFile = path + COLOR_FILE_PATH;
-	pathDroppedColorFile = path + DROPPED_COLOR_FILE_PATH;
-	pathFrameColorFile = path + FRAME_COLOR_FILE_PATH;
-	pathSeparatorColorFile = path + BORDER_COLOR_FILE_PATH;
+	pathTetrisColorFile = path + TETRIS_COLOR_FILE_PATH;
+	pathAccretionColorFile = path + ACCRETION_COLOR_FILE_PATH;
+	pathBorderColorFile = path + BORDER_COLOR_FILE_PATH;
+	pathSeparatorColorFile = path + SEPARATOR_COLOR_FILE_PATH;
 	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
 
 	return true;
@@ -140,10 +140,9 @@ bool Configuration::LoadShapes()
 		int row = 0, col = 0;
 		int color = 0;
 		vector<char> vecData;
-			
+
 		while (true)
 		{
-
 			fs.getline(GetStringBuffer, BUFFER_CHARS);
 			if (_tcschr(GetStringBuffer, _T(':'))) // shape declare
 			{
@@ -157,7 +156,13 @@ bool Configuration::LoadShapes()
 				vecData.clear();
 			}
 			else if (fs.rdstate() & wfstream::eofbit) // end of file
+			{
+				if (_T("") != name && row != 0 && col != 0)
+				{
+					TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+				}
 				break;
+			}
 			else if (*GetStringBuffer == _T('\0')) // blank line
 				continue;
 			else // shape data
@@ -168,18 +173,74 @@ bool Configuration::LoadShapes()
 					vecData.push_back((char)GetStringBuffer[i]);
 			}
 		}
-		fs.close();
 	}
 	catch(...)
 	{
 	}
+
+	if (fs.is_open())
+		fs.close();
 
 	return true;
 }
 
 bool Configuration::LoadColors()
 {
-	return false;
+	try {
+		GetColorFromFile(pathBorderColorFile.c_str(), &colorBorder);
+		GetColorFromFile(pathSeparatorColorFile.c_str(), &colorSeparator);
+		GetColorsFromFile(pathTetrisColorFile.c_str(), &vecTetrisColors);
+		GetColorFromFile(pathAccretionColorFile.c_str(), &colorAccretion);
+	}
+	catch (...)
+	{
+		return false;
+	}
+	return true;
+}
+
+bool Configuration::GetColorFromFile(const TCHAR* file, COLORREF* pColor)
+{
+	try {
+		Bitmap* pbmp;
+		Color color;
+		pbmp = Bitmap::FromFile(file);
+		pbmp->GetPixel(0, 0, &color);
+		*pColor = color.ToCOLORREF();
+		return true;
+	}
+	catch (...)
+	{
+		return (COLORREF)0;
+	}
+}
+
+bool Configuration::GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors)
+{
+	try {
+		pvecColors->clear();
+		Bitmap* pbmp;
+		Color color;
+		pbmp = Bitmap::FromFile(file);
+		for (UINT i = 0; i < pbmp->GetWidth(); i++)
+		{
+			for (UINT j = 0; j < pbmp->GetHeight(); j++)
+			{
+				pbmp->GetPixel(i, j, &color);
+				if (pvecColors->end() ==
+					find(pvecColors->begin(), pvecColors->end(), color.ToCOLORREF()))
+				{
+					pvecColors->push_back(color.ToCOLORREF());
+				}
+			}
+		}
+		return true;
+	}
+	catch (...)
+	{
+		pvecColors->clear();
+		return false;
+	}
 }
 
 bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)

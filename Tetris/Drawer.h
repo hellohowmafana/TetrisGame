@@ -1,16 +1,14 @@
 #pragma once
-#include <Windows.h>
 #include <vector>
-#include <Unknwn.h>
-#include <gdiplus.h>
 #include "Configuration.h"
+#include "TetrisShape.h"
+#include "Accretion.h"
 using namespace std;
-using namespace Gdiplus;
 
 class Drawer
 {
 public:
-	static Drawer mainDrawer;
+	static Drawer singleton;
 
 public:
 	bool Initialize(Configuration* pConfiguration);
@@ -35,8 +33,9 @@ private:
 
 	void DrawBackgroud();
 
-	bool GetColorFromFile(const TCHAR* file, COLORREF* pColor);
-	bool GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors);
+	void DrawTetrisShape(TetrisShape* pTetrisShape);
+	void DrawAccretion(Accretion* pAccretion);
+
 	~Drawer();
 
 private:
@@ -44,7 +43,8 @@ private:
 	HDC hdc;
 	HPEN hpnBorder;
 	HPEN hpnSeparator;
-	vector<HBRUSH> vecColorBrushes;
+	vector<HBRUSH> vecTetrisBrushes;
+	HBRUSH hbsAccretion;
 
 	bool initialized;
 };

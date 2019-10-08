@@ -122,3 +122,8 @@ int TetrisShape::GetBottom()
 {
 	return posY + GetHeight();
 }
+
+int TetrisShape::GetColor()
+{
+	return pTetrisType->color;
+}

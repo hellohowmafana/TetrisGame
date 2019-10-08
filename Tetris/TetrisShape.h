@@ -2,7 +2,6 @@
 #include "TetrisType.h"
 #include <vector>
 #include <tchar.h>
-#include <msxml.h>
 using namespace std;
 
 enum class TetrisRotation {TetrisRotation0, TetrisRotation1, TetrisRotation2,	TetrisRotation3};
@@ -27,6 +26,7 @@ public:
 	int GetRight();
 	int GetTop();
 	int GetBottom();
+	int GetColor();
 
 private:
 	TetrisType* pTetrisType;
