@@ -15,7 +15,7 @@ private:
 
 	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
 	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.bmp";
-	const wstring ACCRETION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\accretion color.bmp";
+	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.bmp";
 	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.bmp";
 	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.bmp";
 	const wstring CLASSIC_SHAPES_PATH = SHAPES_PATH + L"\\classic.txt";
@@ -28,7 +28,7 @@ public:
 
 	wstring pathConfiguration;
 	wstring pathTetrisColorFile;
-	wstring pathAccretionColorFile;
+	wstring pathMassColorFile;
 	wstring	pathBorderColorFile;
 	wstring pathSeparatorColorFile;
 	wstring pathClassicShapes;
@@ -121,7 +121,7 @@ public:
 	COLORREF colorBorder;
 	COLORREF colorSeparator;
 	vector<COLORREF> vecTetrisColors;
-	COLORREF colorAccretion;
+	COLORREF colorMass;
 
 public:
 	static Configuration singleton;

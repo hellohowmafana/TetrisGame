@@ -9,6 +9,8 @@
 #include <Unknwn.h>
 #include <Windows.h>
 #include <gdiplus.h>
+#include "GameFrame.h"
+#include "Controller.h"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
@@ -79,8 +81,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     return (int) msg.wParam;
 }
 
-
-
 //
 //  FUNCTION: MyRegisterClass()
 //
@@ -131,12 +131,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
 
-   if (!Configuration::singleton.Initialize())
+   Configuration* pConfiguration = &Configuration::singleton;
+   if (!pConfiguration->Initialize())
    {
 	   MessageBox(hWnd, _T("Load configuration failed."), NULL, MB_OK);
 	   PostQuitMessage(0);
    }
-   Drawer::singleton.Initialize(&Configuration::singleton);
+
+   GameFrame* pGameFrame = &GameFrame::singleton;
+   pGameFrame->Initialize(pConfiguration);
+
+   Drawer* pDrawer = &Drawer::singleton;
+   pDrawer->Initialize(pGameFrame);
+
+   Controller* pController = &Controller::singleton;
+   pController->SetGameFrame(pGameFrame);
+   pController->Start();
 
    InvalidateRect(hWnd, NULL, TRUE);
 
@@ -175,18 +185,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         }
         break;
     case WM_PAINT:
-	{
-		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
+		{
+			if (!Controller::singleton.IsStarted()) break;
 
-		Drawer* pDrawer = &Drawer::singleton;
-		pDrawer->AttachDC(hdc);
-		pDrawer->DrawElements();
-		pDrawer->DetachDC();
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(hWnd, &ps);
 
-		EndPaint(hWnd, &ps);
-	}
-        break;
+			Drawer* pDrawer = &Drawer::singleton;
+			pDrawer->AttachDC(hdc);
+			pDrawer->DrawElements();
+			pDrawer->DetachDC();
+
+			EndPaint(hWnd, &ps);
+		}
+		break;
+	case WM_KEYDOWN:
+		{
+			Controller* pController = &Controller::singleton;
+			switch (wParam)
+			{
+				case VK_LEFT:
+					pController->StepHorizontal(true);
+					break;
+				case VK_RIGHT:
+					pController->StepHorizontal(false);
+					break;
+				case VK_DOWN:
+					pController->Rotate();
+					break;
+				case VK_SPACE:
+					pController->Drop();
+					break;
+				default:
+					break;
+			}
+		}
+		break;
     case WM_DESTROY:
         PostQuitMessage(0);
         break;

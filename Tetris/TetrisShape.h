@@ -4,22 +4,28 @@
 #include <tchar.h>
 using namespace std;
 
-enum class TetrisRotation {TetrisRotation0, TetrisRotation1, TetrisRotation2,	TetrisRotation3};
+class GameFrame;
+enum class TetrisRotation {Rotation0, Rotation1, Rotation2, Rotation3};
 
 class TetrisShape
 {
 public:
-	TetrisShape(TetrisType* pTetrisType);
+	TetrisShape();
+	void InitializeRandom();
+	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation);
 
 public:
-	void Rotate();
-	void Move();
-	void StepDown();
-	void DropDown();
+	bool Move(int offestX, int offsetY);
+	bool Rotate();
+	bool StepLeft();
+	bool StepRight();
+	bool StepDown();
 
-	bool ValidateXY(int x, int y);
-	char GetData(int x, int y);
-	bool IsSolid(int x, int y);
+	bool ValidateX(int x, bool frameCoordinate);
+	bool ValidateY(int y, bool frameCoordinate);
+	bool ValidateXY(int x, int y, bool frameCoordinate);
+	char GetData(int x, int y, bool frameCoordinate);
+	bool IsSolid(int x, int y, bool frameCoordinate);
 	int GetWidth();
 	int GetHeight();
 	int GetLeft();
@@ -27,10 +33,16 @@ public:
 	int GetTop();
 	int GetBottom();
 	int GetColor();
+	
+	int GetBottommostSolidY(int x, bool frameCoordinate = false);
+
+	void SetGameFrame(GameFrame* pGameFrame);
 
 private:
 	TetrisType* pTetrisType;
 	int posX, posY;
 	TetrisRotation rotation;
+
+	GameFrame* pGameFrame;
 };
 

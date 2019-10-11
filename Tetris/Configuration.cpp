@@ -59,7 +59,7 @@ bool Configuration::InitializeIniPaths()
 
 	pathConfiguration = path + CONFIGURATION_PATH;
 	pathTetrisColorFile = path + TETRIS_COLOR_FILE_PATH;
-	pathAccretionColorFile = path + ACCRETION_COLOR_FILE_PATH;
+	pathMassColorFile = path + MASS_COLOR_FILE_PATH;
 	pathBorderColorFile = path + BORDER_COLOR_FILE_PATH;
 	pathSeparatorColorFile = path + SEPARATOR_COLOR_FILE_PATH;
 	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
@@ -144,7 +144,7 @@ bool Configuration::LoadShapes()
 		while (true)
 		{
 			fs.getline(GetStringBuffer, BUFFER_CHARS);
-			if (_tcschr(GetStringBuffer, _T(':'))) // shape declare
+			if (_tcschr(GetStringBuffer, _T(':'))) // type declare
 			{
 				if (_T("") != name && row != 0 && col != 0)
 				{
@@ -157,15 +157,30 @@ bool Configuration::LoadShapes()
 			}
 			else if (fs.rdstate() & wfstream::eofbit) // end of file
 			{
-				if (_T("") != name && row != 0 && col != 0)
+				if (*GetStringBuffer == _T('\0')) // blank line
 				{
-					TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+					break;
 				}
-				break;
+				else
+				{
+					// type data
+					col = (int)_tcslen(GetStringBuffer);
+					row++;
+					for (int i = 0; i < col; i++)
+						vecData.push_back((char)GetStringBuffer[i]);
+					// last type
+					if (_T("") != name && row != 0 && col != 0)
+					{
+						TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+					}
+					break;
+				}
 			}
 			else if (*GetStringBuffer == _T('\0')) // blank line
+			{
 				continue;
-			else // shape data
+			}
+			else // type data
 			{
 				col = (int)_tcslen(GetStringBuffer);
 				row++;
@@ -190,7 +205,7 @@ bool Configuration::LoadColors()
 		GetColorFromFile(pathBorderColorFile.c_str(), &colorBorder);
 		GetColorFromFile(pathSeparatorColorFile.c_str(), &colorSeparator);
 		GetColorsFromFile(pathTetrisColorFile.c_str(), &vecTetrisColors);
-		GetColorFromFile(pathAccretionColorFile.c_str(), &colorAccretion);
+		GetColorFromFile(pathMassColorFile.c_str(), &colorMass);
 	}
 	catch (...)
 	{

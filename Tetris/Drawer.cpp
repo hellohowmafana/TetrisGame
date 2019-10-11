@@ -10,20 +10,20 @@ Drawer::Drawer()
 
 }
 
-bool Drawer::Initialize(Configuration* pConfiguration)
+bool Drawer::Initialize(GameFrame* pGameFrame)
 {
 	try {
-		this->pConfiguration = pConfiguration;
+		this->pGameFrame = pGameFrame;
 
-		hpnBorder = CreateSolidPen(pConfiguration->borderThickness, pConfiguration->colorBorder);
-		hpnSeparator = CreateSolidPen(pConfiguration->separatorThickness, pConfiguration->colorSeparator);
+		hpnBorder = CreateSolidPen(pGameFrame->borderThickness, *pGameFrame->pBorderColor);
+		hpnSeparator = CreateSolidPen(pGameFrame->separatorThickness, *pGameFrame->pSeparatorColor);
 
-		for (size_t i = 0; i < pConfiguration->vecTetrisColors.size(); i++)
+		for (size_t i = 0; i < pGameFrame->pTetrisColors->size(); i++)
 		{
-			vecTetrisBrushes.push_back(CreateSolidBrush(pConfiguration->vecTetrisColors[i]));
+			vecTetrisBrushes.push_back(CreateSolidBrush(pGameFrame->pTetrisColors->at(i)));
 		}
 
-		hbsAccretion = CreateSolidBrush(pConfiguration->colorAccretion);
+		hbsMass = CreateSolidBrush(*pGameFrame->pMassColor);
 	}
 	catch (...){
 		return false;
@@ -50,11 +50,30 @@ void Drawer::DrawElements()
 	{
 		DrawFrame();
 
-		DrawUnit(0, 0, vecTetrisBrushes[1]);
+		/*DrawUnit(0, 0, vecTetrisBrushes[1]);
 		DrawUnit(3, 1, vecTetrisBrushes[0]);
 		DrawUnit(1, 2, vecTetrisBrushes[5]);
 		DrawUnit(1, 5, vecTetrisBrushes[6]);
-		DrawUnit(9, 19, vecTetrisBrushes[3]);
+		DrawUnit(9, 19, vecTetrisBrushes[3]);*/
+
+		//TetrisShape t1;
+		//t1.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("T")), TetrisRotation::Rotation0);
+		//t1.SetGameFrame(&GameFrame::singleton);
+		//t1.Move(4,4);
+		//DrawShape(&t1);
+
+		//TetrisShape t2;
+		//t2.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("Z")), TetrisRotation::Rotation0);
+		//t2.SetGameFrame(&GameFrame::singleton);
+		//DrawShape(&t2);
+
+		TetrisShape t3;
+		//t3.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("L")), TetrisRotation::Rotation3);
+		//t3.SetGameFrame(&GameFrame::singleton);
+		//t3.Move(2, 2);
+		//DrawShape(&t3);
+		DrawShape(pGameFrame->GetShape());
+		//DrawMass(pGameFrame->GetMass());
 	}
 }
 
@@ -70,19 +89,19 @@ void Drawer::DrawBorder()
 {
 	if (!initialized || NULL == hdc) return;
 
-	if (pConfiguration->borderThickness == 0) return;
+	if (pGameFrame->borderThickness == 0) return;
 
 	SelectObject(hdc, hpnBorder);
-	int innerWidth = (pConfiguration->unitWidth + pConfiguration->separatorThickness) * pConfiguration->frameSizeX
-		+ pConfiguration->separatorThickness;
-	int innerHeight = (pConfiguration->unitWidth + pConfiguration->separatorThickness) * pConfiguration->frameSizeY
-		+ pConfiguration->separatorThickness;
-	int totalWidth = pConfiguration->borderThickness * 2 + innerWidth;
-	int totalHeight = pConfiguration->borderThickness * 2 + innerHeight;
-	int left = pConfiguration->frameLeft + pConfiguration->borderThickness / 2;
-	int top = pConfiguration->frameTop + pConfiguration->borderThickness / 2;
-	int width = totalWidth - pConfiguration->borderThickness;
-	int height = totalHeight - pConfiguration->borderThickness;
+	int innerWidth = (pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeX
+		+ pGameFrame->separatorThickness;
+	int innerHeight = (pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeY
+		+ pGameFrame->separatorThickness;
+	int totalWidth = pGameFrame->borderThickness * 2 + innerWidth;
+	int totalHeight = pGameFrame->borderThickness * 2 + innerHeight;
+	int left = pGameFrame->left + pGameFrame->borderThickness / 2;
+	int top = pGameFrame->top + pGameFrame->borderThickness / 2;
+	int width = totalWidth - pGameFrame->borderThickness;
+	int height = totalHeight - pGameFrame->borderThickness;
 	Rectangle(hdc, left, top, left + width + 1, top + height + 1);
 }
 
@@ -90,34 +109,34 @@ void Drawer::DrawSeparators()
 {
 	if (!initialized || NULL == hdc) return;
 
-	if (pConfiguration->separatorThickness == 0) return;
+	if (pGameFrame->separatorThickness == 0) return;
 
 	SelectObject(hdc, hpnSeparator);
 
-	int top = pConfiguration->frameTop + pConfiguration->borderThickness;
+	int top = pGameFrame->top + pGameFrame->borderThickness;
 	int bottom = top +
-		(pConfiguration->unitWidth + pConfiguration->separatorThickness) * pConfiguration->frameSizeY
-		+ pConfiguration->separatorThickness;
+		(pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeY
+		+ pGameFrame->separatorThickness;
 
-	for (int n = 0; n <= pConfiguration->frameSizeX; n++)
+	for (int n = 0; n <= pGameFrame->sizeX; n++)
 	{
-		int x1 = pConfiguration->frameLeft + pConfiguration->borderThickness
-			+ n * (pConfiguration->unitWidth + pConfiguration->separatorThickness)
-			+ pConfiguration->separatorThickness / 2;
+		int x1 = pGameFrame->left + pGameFrame->borderThickness
+			+ n * (pGameFrame->unitWidth + pGameFrame->separatorThickness)
+			+ pGameFrame->separatorThickness / 2;
 		int x2 = x1 + 1;
 		Rectangle(hdc, x1, top, x2, bottom + 1);
 	}
 
-	int left = pConfiguration->frameLeft + pConfiguration->borderThickness;
+	int left = pGameFrame->left + pGameFrame->borderThickness;
 	int right = left +
-		(pConfiguration->unitWidth + pConfiguration->separatorThickness) * pConfiguration->frameSizeX
-		+ pConfiguration->separatorThickness;
+		(pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeX
+		+ pGameFrame->separatorThickness;
 
-	for (int n = 0; n <= pConfiguration->frameSizeY; n++)
+	for (int n = 0; n <= pGameFrame->sizeY; n++)
 	{
-		int y1 = pConfiguration->frameTop + pConfiguration->borderThickness
-			+ n * (pConfiguration->unitWidth + pConfiguration->separatorThickness)
-			+ pConfiguration->separatorThickness / 2;
+		int y1 = pGameFrame->top + pGameFrame->borderThickness
+			+ n * (pGameFrame->unitWidth + pGameFrame->separatorThickness)
+			+ pGameFrame->separatorThickness / 2;
 		int y2 = y1 + 1;
 		Rectangle(hdc, left, y1, right, y2);
 	}
@@ -128,49 +147,50 @@ void Drawer::DrawBackgroud()
 	if (!initialized || NULL == hdc) return;
 }
 
-void Drawer::DrawTetrisShape(TetrisShape* pTetrisShape)
+void Drawer::DrawShape(TetrisShape* pTetrisShape)
 {
-	for (int i = pTetrisShape->GetLeft(); i < pTetrisShape->GetRight(); i++)
+	if (!initialized || NULL == hdc) return;
+
+	for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
 	{
-		for (int j = pTetrisShape->GetTop(); j < pTetrisShape->GetBottom(); j++)
+		for (int j = pTetrisShape->GetTop(); j <= pTetrisShape->GetBottom(); j++)
 		{
-			DrawUnit(i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
+			if(pTetrisShape->IsSolid(i, j, true))
+				DrawUnit(i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
 		}
 	}
 }
 
-void Drawer::DrawAccretion(Accretion* pAccretion)
+void Drawer::DrawMass(Mass* pMass)
 {
-	for (size_t i = pAccretion->GetTop(); i < (size_t)Configuration::singleton.frameSizeY; i++)
-	{
-		for (size_t j = 0; j < (size_t)Configuration::singleton.frameSizeX; j++)
-		{
-			if (pAccretion->IsSolid(j, i))
-				DrawUnit(j, i, hbsAccretion);
-		}
-	}
+	if (!initialized || NULL == hdc) return;
+
+	//for (pMass->GetFirstLineIterator(); i = pMass->GetTop(); i < pMass->GetBottom(); i++)
+	//{
+	//	for (int j = 0; j < pMass->GetRight(); j++)
+	//	{
+	//		if (pMass->IsSolid(j, i))
+	//			DrawUnit(j, i, hbsMass);
+	//	}
+	//}
 }
 
 void Drawer::DrawUnit(int x, int y, HBRUSH brush)
 {
 	if (!initialized || NULL == hdc) return;
-	if (x < 0 || x >= pConfiguration->frameSizeX
-		|| y < 0 || y >= pConfiguration->frameSizeY)
+
+	if (x < 0 || x >= pGameFrame->sizeX
+		|| y < 0 || y >= pGameFrame->sizeY)
 		return;
 
-	LONG left = pConfiguration->frameLeft + pConfiguration->borderThickness
-		+ pConfiguration->separatorThickness * (x + 1) + pConfiguration->unitWidth * x;
-	LONG right = left + pConfiguration->unitWidth;
-	LONG top = pConfiguration->frameTop + pConfiguration->borderThickness
-		+ pConfiguration->separatorThickness * (y + 1) + pConfiguration->unitWidth * y;
-	LONG bottom = top + pConfiguration->unitWidth;
+	LONG left = pGameFrame->left + pGameFrame->borderThickness
+		+ pGameFrame->separatorThickness * (x + 1) + pGameFrame->unitWidth * x;
+	LONG right = left + pGameFrame->unitWidth;
+	LONG top = pGameFrame->top + pGameFrame->borderThickness
+		+ pGameFrame->separatorThickness * (y + 1) + pGameFrame->unitWidth * y;
+	LONG bottom = top + pGameFrame->unitWidth;
 	RECT rect = { left, top, right, bottom };
 	FillRect(hdc, &rect, brush);
-}
-
-void Drawer::DrawShape()
-{
-	if (!initialized || NULL == hdc) return;
 }
 
 void Drawer::DrawPromptFrame()

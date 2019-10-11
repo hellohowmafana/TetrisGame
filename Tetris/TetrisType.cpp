@@ -1,26 +1,86 @@
 #include "TetrisType.h"
+#include "Utility.h"
 
-void TetrisType::Create(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+void TetrisType::Create(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
 {
-	lstTetrisTypes.push_back(new TetrisType(group, name, penetrable, row, col, pData, dataCount, color));
+	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
+	if (!pTetrisTypeGroup)
+		pTetrisTypeGroup = CreateGroup();
+	pTetrisTypeGroup->push_back(new TetrisType(group, name, penetrable, row, col, pData, dataCount, color));
 }
 
 void TetrisType::Delete(TetrisType* pTetrisType)
 {
-	lstTetrisTypes.remove(pTetrisType);
+	GetGroup(pTetrisType->group)->remove(pTetrisType);
 	delete pTetrisType;
 }
 
-void TetrisType::Clear(TetrisType* pTetirsType)
+void TetrisType::Clear()
 {
-	for (list<TetrisType*>::iterator it = lstTetrisTypes.begin(); it != lstTetrisTypes.end(); it++)
+	for (TetrisTypeLibrary::iterator itl = tetrisTypeLibrary.begin(); itl != tetrisTypeLibrary.end(); itl++)
 	{
-		delete* it;
+		for (TetrisTypeGroup::iterator itg = (*itl)->begin(); itg != (*itl)->end(); itg++)
+		{
+			delete *itg;
+		}
+		delete *itl;
 	}
-	lstTetrisTypes.clear();
+	tetrisTypeLibrary.clear();
 }
 
-TetrisType::TetrisType(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+TetrisTypeGroup* TetrisType::CreateGroup()
+{
+	TetrisTypeGroup* pTetrisTypeGroup = new TetrisTypeGroup;
+	tetrisTypeLibrary.push_back(pTetrisTypeGroup);
+	return pTetrisTypeGroup;
+}
+
+void TetrisType::DeleteGroup(TCHAR const* group)
+{
+	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
+	tetrisTypeLibrary.remove(pTetrisTypeGroup);
+	delete pTetrisTypeGroup;
+}
+
+bool TetrisType::ExsitGroup(TCHAR const* group)
+{
+	return nullptr != GetGroup(group);
+}
+
+TetrisTypeGroup* TetrisType::GetGroup(TCHAR const* group)
+{
+	for (TetrisTypeLibrary::iterator it = tetrisTypeLibrary.begin(); it != tetrisTypeLibrary.end(); it++)
+	{
+		TetrisType* pTetrisType = *((*it)->begin());
+		if (0 == _tcscmp(pTetrisType->group, group))
+			return *it;
+	}
+	return nullptr;
+}
+
+TetrisType* TetrisType::Random()
+{
+	TetrisTypeGroup* pTetrisTypeGroup = *next(tetrisTypeLibrary.begin(), Utility::Random(0, tetrisTypeLibrary.size() - 1));
+	TetrisType* pTetrisType = *next(pTetrisTypeGroup->begin(), Utility::Random(0, pTetrisTypeGroup->size() - 1));
+	return pTetrisType;
+}
+
+TetrisType* TetrisType::GetTetrisType(TCHAR const* group, TCHAR const* name)
+{
+	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
+	if (!pTetrisTypeGroup)
+		return nullptr;
+
+	for (TetrisTypeGroup::iterator it = pTetrisTypeGroup->begin(); it != pTetrisTypeGroup->end(); it++)
+	{
+		if (0 == _tcscmp(name, (*it)->name))
+			return *it;
+	}
+	return nullptr;
+}
+
+
+TetrisType::TetrisType(TCHAR const* const group, TCHAR const* const name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
 :group(NULL), name(NULL), pData(NULL)
 {
 	Initialize(group, name, penetrable, row, col, pData, dataCount, color);
@@ -33,7 +93,7 @@ TetrisType::~TetrisType()
 	delete[] pData;
 }
 
-bool TetrisType::Initialize(TCHAR* group, TCHAR* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+bool TetrisType::Initialize(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
 {
 	size_t len;
 	
@@ -81,4 +141,4 @@ void TetrisType::GetXY(int pos, int* px, int* py)
 	*py = pos / col;
 }
 
-list<TetrisType*> TetrisType::lstTetrisTypes;
+TetrisTypeLibrary TetrisType::tetrisTypeLibrary;

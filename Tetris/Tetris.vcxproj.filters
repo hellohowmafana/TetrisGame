@@ -54,7 +54,10 @@
     <ClInclude Include="Utility.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Accretion.h">
+    <ClInclude Include="GameFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Mass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -80,7 +83,10 @@
     <ClCompile Include="Utility.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Accretion.cpp">
+    <ClCompile Include="GameFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Mass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -99,13 +105,13 @@
     <Image Include="inis\bitmaps\tetris color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
-    <Image Include="inis\bitmaps\accretion color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
     <Image Include="inis\bitmaps\separator color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
     <Image Include="inis\bitmaps\border color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\mass color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
   </ItemGroup>
