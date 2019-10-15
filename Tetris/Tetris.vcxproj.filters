@@ -22,6 +22,9 @@
     <Filter Include="inis\shapes">
       <UniqueIdentifier>{ff54c9f0-d403-4cb5-8310-dac2efdd9ddc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="archive">
+      <UniqueIdentifier>{095a6d46-91de-497a-8a89-cb59269f5869}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -60,6 +63,15 @@
     <ClInclude Include="Mass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Archive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="tcharstd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ISerializable.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
@@ -87,6 +99,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Mass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Archive.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -124,6 +139,12 @@
     </Text>
     <Text Include="inis\configuration.txt">
       <Filter>inis</Filter>
+    </Text>
+    <Text Include="readme.txt">
+      <Filter>inis</Filter>
+    </Text>
+    <Text Include="archive\save1.txt">
+      <Filter>archive</Filter>
     </Text>
   </ItemGroup>
 </Project>

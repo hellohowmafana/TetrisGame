@@ -10,7 +10,10 @@ typedef list<TetrisTypeGroup*> TetrisTypeLibrary;
 class TetrisType
 {
 public:
-	static void Create(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+	static void Create(TCHAR const* group, TCHAR const* name,
+		bool penetrable, bool twoRotation, bool clockwiseRotation,
+		int horizontalCenterOffset,
+		int row, int col, char* pData, size_t dataCount, int color);
 	static void Delete(TetrisType* pTetrisType);
 	static void Clear();
 	static TetrisTypeGroup* CreateGroup();
@@ -21,9 +24,15 @@ public:
 	static TetrisType* Random();
 
 private:
-	TetrisType(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+	TetrisType(TCHAR const* group, TCHAR const* name,
+		bool penetrable, bool twoRotation, bool clockwiseRotation,
+		int horizontalCenterOffset,
+		int row, int col, char* pData, size_t dataCount, int color);
 	~TetrisType();
-	bool Initialize(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color);
+	bool Initialize(TCHAR const* group, TCHAR const* name,
+		bool penetrable, bool twoRotation, bool clockwiseRotation,
+		int horizontalCenterOffset,
+		int row, int col, char* pData, size_t dataCount, int color);
 
 	int GetPostion(int x, int y);
 	void GetXY(int pos, int* px, int* py);
@@ -32,6 +41,9 @@ public:
 	TCHAR* group;
 	TCHAR* name;
 	bool penetrable;
+	bool twoRotation;
+	bool clockwiseRotation;
+	int horizontalCenterOffset;
 	int row;
 	int col;
 	char* pData;

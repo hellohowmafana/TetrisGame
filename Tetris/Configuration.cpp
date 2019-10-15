@@ -120,16 +120,16 @@ bool Configuration::LoadParameters()
 	useColor = GetConfigurationBool(keyBitmap, keyUseColor);
 	useColorRandom = GetConfigurationBool(keyBitmap, keyUseColorRandom);
 	GetConfigurationStr(keyBitmap, keyUnitBitmap, unitBitmap);
-	useDroppedColor = GetConfigurationBool(keyBitmap, keyUseDroppedColor);
+	useMassColor = GetConfigurationBool(keyBitmap, keyUseMassColor);
 
 	return true;
 }
 
 bool Configuration::LoadShapes()
 {
-	wfstream fs;
+	tfstream fs;
 	try {
-		fs.open(pathClassicShapes, wfstream::in);
+		fs.open(pathClassicShapes, tfstream::in);
 
 		ClaimStringBuffer;
 		
@@ -137,6 +137,9 @@ bool Configuration::LoadShapes()
 		_tsplitpath(pathClassicShapes.c_str(), NULL, NULL, group, NULL);
 		TCHAR name[BUFFER_CHARS] = _T("");
 		bool penetrable = false;
+		bool twoRotation;
+		bool clockwiseRotation;
+		int horizontalCenterOffset = 0;
 		int row = 0, col = 0;
 		int color = 0;
 		vector<char> vecData;
@@ -144,48 +147,53 @@ bool Configuration::LoadShapes()
 		while (true)
 		{
 			fs.getline(GetStringBuffer, BUFFER_CHARS);
-			if (_tcschr(GetStringBuffer, _T(':'))) // type declare
+			TCHAR* psz = GetStringBuffer +_tcsspn(GetStringBuffer, _T(" \t"));
+			if (_tcschr(psz, _T(':'))) // type declare
 			{
 				if (_T("") != name && row != 0 && col != 0)
 				{
-					TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+					TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
+						horizontalCenterOffset,
+						row, col, vecData.data(), vecData.size(), color);
 					color++;
 				}
-				SplitStringToStrInt(GetStringBuffer, _T(':'), name, penetrable);
+				ParseTetrisTypeDeclaration(psz, name, &penetrable, &twoRotation, &clockwiseRotation, &horizontalCenterOffset);
 				row = col = 0;
 				vecData.clear();
 			}
 			else if (fs.rdstate() & wfstream::eofbit) // end of file
 			{
-				if (*GetStringBuffer == _T('\0')) // blank line
+				if (*psz == _T('\0')) // blank line
 				{
 					break;
 				}
 				else
 				{
 					// type data
-					col = (int)_tcslen(GetStringBuffer);
+					col = (int)_tcslen(psz);
 					row++;
 					for (int i = 0; i < col; i++)
-						vecData.push_back((char)GetStringBuffer[i]);
+						vecData.push_back((char)psz[i]);
 					// last type
 					if (_T("") != name && row != 0 && col != 0)
 					{
-						TetrisType::Create(group, name, penetrable, row, col, vecData.data(), vecData.size(), color);
+						TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
+							horizontalCenterOffset,
+							row, col, vecData.data(), vecData.size(), color);
 					}
 					break;
 				}
 			}
-			else if (*GetStringBuffer == _T('\0')) // blank line
+			else if (_T('\0') == *psz) // blank line
 			{
 				continue;
 			}
 			else // type data
 			{
-				col = (int)_tcslen(GetStringBuffer);
+				col = (int)_tcslen(psz);
 				row++;
 				for (int i = 0; i < col; i++)
-					vecData.push_back((char)GetStringBuffer[i]);
+					vecData.push_back((char)psz[i]);
 			}
 		}
 	}
@@ -266,11 +274,11 @@ bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)
 bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2)
 {
 	try {
-		wstring strBuffer(szStr);
+		tstring strBuffer(szStr);
 		size_t pos = strBuffer.find(ch);
 		if (string::npos == pos)
 		return false;
-		wstring strVal = strBuffer.substr(0, pos);
+		tstring strVal = strBuffer.substr(0, pos);
 		*v1 = stoi(strVal);
 		strVal = strBuffer.substr(pos + 1);
 		*v2 = stoi(strVal);
@@ -285,9 +293,9 @@ bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2)
 bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2, int* v3, int* v4)
 {
 	try {
-		wstring strBuffer(szStr);
+		tstring strBuffer(szStr);
 		size_t pos;
-		wstring strVal;
+		tstring strVal;
 
 		if(string::npos == (pos = strBuffer.find(ch)))
 			return false;
@@ -320,17 +328,27 @@ bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2, 
 	}
 }
 
-bool Configuration::SplitStringToStrInt(TCHAR* szStr, TCHAR ch, TCHAR* szv, int iv)
+bool Configuration::ParseTetrisTypeDeclaration(TCHAR* szStr, TCHAR* name, bool* pPenetrable,
+	bool* pTwoRotation, bool* pClockwiseRotation, int* pHorizontalCenterOffset)
 {
 	try {
-		wstring strBuffer(szStr);
-		size_t pos = strBuffer.find(ch);
+		tstring strBuffer(szStr);
+		size_t pos = strBuffer.find(_T(':'));
 		if (string::npos == pos)
 			return false;
-		wstring strVal = strBuffer.substr(0, pos);
-		copy(strVal.begin(), strVal.end(), szv);
+		tstring strVal = strBuffer.substr(0, pos);
+		copy(strVal.begin(), strVal.end(), name);
 		strVal = strBuffer.substr(pos + 1);
-		iv = stoi(strVal);
+		pos = strVal.find(_T(','));
+		*pPenetrable = _T("1") == strVal.substr(0, pos);
+		strVal = strVal.substr(pos + 1);
+		pos = strVal.find(_T(','));
+		*pTwoRotation = _T("1") == strVal.substr(0, pos);
+		strVal = strVal.substr(pos + 1);
+		pos = strVal.find(_T(','));
+		*pClockwiseRotation = _T("1") == strVal.substr(0, pos);
+		strVal = strVal.substr(pos + 1);
+		*pHorizontalCenterOffset = stoi(strVal);
 		return true;
 	}
 	catch (...)

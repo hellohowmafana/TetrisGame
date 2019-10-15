@@ -50,30 +50,8 @@ void Drawer::DrawElements()
 	{
 		DrawFrame();
 
-		/*DrawUnit(0, 0, vecTetrisBrushes[1]);
-		DrawUnit(3, 1, vecTetrisBrushes[0]);
-		DrawUnit(1, 2, vecTetrisBrushes[5]);
-		DrawUnit(1, 5, vecTetrisBrushes[6]);
-		DrawUnit(9, 19, vecTetrisBrushes[3]);*/
-
-		//TetrisShape t1;
-		//t1.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("T")), TetrisRotation::Rotation0);
-		//t1.SetGameFrame(&GameFrame::singleton);
-		//t1.Move(4,4);
-		//DrawShape(&t1);
-
-		//TetrisShape t2;
-		//t2.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("Z")), TetrisRotation::Rotation0);
-		//t2.SetGameFrame(&GameFrame::singleton);
-		//DrawShape(&t2);
-
-		TetrisShape t3;
-		//t3.Initialize(TetrisType::GetTetrisType(_T("classic"), _T("L")), TetrisRotation::Rotation3);
-		//t3.SetGameFrame(&GameFrame::singleton);
-		//t3.Move(2, 2);
-		//DrawShape(&t3);
 		DrawShape(pGameFrame->GetShape());
-		//DrawMass(pGameFrame->GetMass());
+		DrawMass(pGameFrame->GetMass());
 	}
 }
 
@@ -151,6 +129,8 @@ void Drawer::DrawShape(TetrisShape* pTetrisShape)
 {
 	if (!initialized || NULL == hdc) return;
 
+	if (nullptr == pTetrisShape) return;
+
 	for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
 	{
 		for (int j = pTetrisShape->GetTop(); j <= pTetrisShape->GetBottom(); j++)
@@ -165,14 +145,29 @@ void Drawer::DrawMass(Mass* pMass)
 {
 	if (!initialized || NULL == hdc) return;
 
-	//for (pMass->GetFirstLineIterator(); i = pMass->GetTop(); i < pMass->GetBottom(); i++)
-	//{
-	//	for (int j = 0; j < pMass->GetRight(); j++)
-	//	{
-	//		if (pMass->IsSolid(j, i))
-	//			DrawUnit(j, i, hbsMass);
-	//	}
-	//}
+	if (nullptr == pMass) return;
+
+	int y = pMass->GetTop();
+	for (MassBlock::iterator it = pMass->GetTopLineIterator();
+		it != pMass->GetBottomLineIterator(); it++)
+	{
+		DrawMassLine(*it, y++);
+	}
+}
+
+void Drawer::DrawMassLine(MassLine* pMassLine, int y)
+{
+	if (!initialized || NULL == hdc) return;
+
+	int x = 0;
+	for (MassLine::iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
+	{
+		if (it->isSolid)
+		{
+			DrawUnit(x, y, pGameFrame->useMassColor ? hbsMass : vecTetrisBrushes[it->color]);
+		}
+		x++;
+	}
 }
 
 void Drawer::DrawUnit(int x, int y, HBRUSH brush)

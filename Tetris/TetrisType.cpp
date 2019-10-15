@@ -1,12 +1,15 @@
 #include "TetrisType.h"
 #include "Utility.h"
 
-void TetrisType::Create(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+void TetrisType::Create(TCHAR const* group, TCHAR const* name,
+	bool penetrable, bool twoRotation, bool clockwiseRotation,
+	int horizontalCenterOffset,
+	int row, int col, char* pData, size_t dataCount, int color)
 {
 	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
 	if (!pTetrisTypeGroup)
 		pTetrisTypeGroup = CreateGroup();
-	pTetrisTypeGroup->push_back(new TetrisType(group, name, penetrable, row, col, pData, dataCount, color));
+	pTetrisTypeGroup->push_back(new TetrisType(group, name, penetrable, twoRotation, clockwiseRotation, horizontalCenterOffset, row, col, pData, dataCount, color));
 }
 
 void TetrisType::Delete(TetrisType* pTetrisType)
@@ -79,11 +82,13 @@ TetrisType* TetrisType::GetTetrisType(TCHAR const* group, TCHAR const* name)
 	return nullptr;
 }
 
-
-TetrisType::TetrisType(TCHAR const* const group, TCHAR const* const name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+TetrisType::TetrisType(TCHAR const* const group, TCHAR const* const name,
+	bool penetrable, bool twoRotation, bool clockwiseRotation,
+	int horizontalCenterOffset,
+	int row, int col, char* pData, size_t dataCount, int color)
 :group(NULL), name(NULL), pData(NULL)
 {
-	Initialize(group, name, penetrable, row, col, pData, dataCount, color);
+	Initialize(group, name, penetrable, twoRotation, clockwiseRotation, horizontalCenterOffset, row, col, pData, dataCount, color);
 }
 
 TetrisType::~TetrisType()
@@ -93,7 +98,10 @@ TetrisType::~TetrisType()
 	delete[] pData;
 }
 
-bool TetrisType::Initialize(TCHAR const* group, TCHAR const* name, bool penetrable, int row, int col, char* pData, size_t dataCount, int color)
+bool TetrisType::Initialize(TCHAR const* group, TCHAR const* name,
+	bool penetrable, bool twoRotation, bool clockwiseRotation,
+	int horizontalCenterOffset,
+	int row, int col, char* pData, size_t dataCount, int color)
 {
 	size_t len;
 	
@@ -106,6 +114,9 @@ bool TetrisType::Initialize(TCHAR const* group, TCHAR const* name, bool penetrab
 	_tcscpy(this->name, name);
 
 	this->penetrable = penetrable;
+	this->twoRotation = twoRotation;
+	this->clockwiseRotation = clockwiseRotation;
+	this->horizontalCenterOffset = horizontalCenterOffset;
 	this->row = row;
 	this->col = col;
 	

@@ -1,7 +1,5 @@
 #pragma once
-#include "TetrisShape.h"
-
-class GameFrame;
+#include "GameFrame.h"
 
 enum class GameState
 {
@@ -25,6 +23,12 @@ public:
 	void Resume();
 
 	bool IsStarted();
+
+public:
+	GameFrame* GetGameFrame();
+	TetrisShape* GetTetrisShape();
+	TetrisShape* GetNextTetrisShape();
+	Mass* GetMass();
 
 private:
 	Controller() {};

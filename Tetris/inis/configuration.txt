@@ -70,5 +70,5 @@ UseColorRandom=1
 ;随机
 UnitBitmap=
 ;单位贴图
-UseDroppedColor=1
+UseMassColor=1
 ;落地变色

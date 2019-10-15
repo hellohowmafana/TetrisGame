@@ -61,3 +61,23 @@ bool Controller::IsStarted()
 {
 	return gameState!=GameState::Stop;
 }
+
+GameFrame* Controller::GetGameFrame()
+{
+	return pGameFrame;
+}
+
+TetrisShape* Controller::GetTetrisShape()
+{
+	return pGameFrame->GetShape();
+}
+
+TetrisShape* Controller::GetNextTetrisShape()
+{
+	return pGameFrame->GetNextShape();
+}
+
+Mass* Controller::GetMass()
+{
+	return pGameFrame->GetMass();
+}

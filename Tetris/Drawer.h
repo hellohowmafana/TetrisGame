@@ -31,6 +31,7 @@ private:
 
 	void DrawShape(TetrisShape* pTetrisShape);
 	void DrawMass(Mass* pMass);
+	void DrawMassLine(MassLine* pMassLine, int y);
 	void DrawUnit(int x, int y, HBRUSH brush);
 
 	~Drawer();

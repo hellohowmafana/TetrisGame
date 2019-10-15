@@ -1,5 +1,6 @@
 #pragma once
 #include <random>
+#include <tchar.h>
 using namespace std;
 
 class Utility
@@ -18,6 +19,20 @@ public:
 		mt19937 mt(rd());
 		uniform_real_distribution<double> dist(0.0, 1.0);
 		return dist(mt) < rate;
+	}
+
+	static int SplitString(TCHAR* szString, TCHAR delimiter, TCHAR** tokens, int count)
+	{
+		TCHAR szDelimiters[2] = { delimiter, 0 };
+		TCHAR* ptr = _tcstok(szString, szDelimiters);
+		int leftCount = count;
+		while (ptr != NULL && leftCount)
+		{
+			*tokens++ = ptr;
+			ptr = _tcstok(NULL, szDelimiters);
+			leftCount--;
+		}
+		return count - leftCount;
 	}
 };
 

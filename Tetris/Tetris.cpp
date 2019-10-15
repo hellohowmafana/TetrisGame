@@ -27,7 +27,7 @@ BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 INT_PTR CALLBACK    About(HWND, UINT, WPARAM, LPARAM);
 
-// gdiolus
+// gdiplus
 GdiplusStartupInput gdiplusStartupInput;
 ULONG_PTR gdiplusToken;
 
@@ -211,6 +211,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					pController->StepHorizontal(false);
 					break;
 				case VK_DOWN:
+					pController->StepDown();
+					break;
+				case VK_UP:
 					pController->Rotate();
 					break;
 				case VK_SPACE:
@@ -219,6 +222,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				default:
 					break;
 			}
+			InvalidateRect(hWnd, NULL, FALSE);
 		}
 		break;
     case WM_DESTROY:

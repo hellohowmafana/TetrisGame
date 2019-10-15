@@ -1,7 +1,7 @@
 #pragma once
-#include "Mass.h"
 #include <list>
 #include <vector>
+#include "ISerializable.h"
 using namespace std;
 
 class GameFrame;
@@ -16,16 +16,22 @@ struct MassUnit
 typedef vector<MassUnit> MassLine;
 typedef list<MassLine*> MassBlock;
 
-class Mass
+class Mass : ISerializable
 {
 public:
-	bool HasTouched(TetrisShape* pTetrisShape);
-	int DistanceFrom(TetrisShape* pTetrisShape);
+	bool Initialize();
+
+	bool IsEmpty();
+	int GetTopmostSolidY(int x, int yFrom);
+	bool IsTouched(TetrisShape* pTetrisShape);
+	int CalculateDistanceY(TetrisShape* pTetrisShape);
+
 	bool CanInsert(TetrisShape* pTetrisShape, int x, int y);
 	int FindBottommostBlankY(TetrisShape* pTetrisShape, int x);
 	bool HasBlank(TetrisShape* pTetrisShape, int x);
 
-	void Union(TetrisShape* pTetrisShape);
+	bool HitTest(TetrisShape* pTetrisShape);
+	bool Union(TetrisShape* pTetrisShape);
 	void RemoveLine(int line);
 	void GenerateLine(int line, int blankRate);
 
@@ -38,14 +44,14 @@ public:
 	int GetHeight();
 	bool IsSolid(int x, int y);
 	bool IsSolid(MassLine *pMassLine, int x);
-	int GetTopmostSolidY(int x);
 
 	void SetGameFrame(GameFrame* pGameFrame);
+	GameFrame* GetGameFrame();
 	MassUnit* GetUnit(int x, int y);
 	MassLine* GetLine(int line);
 	MassBlock::iterator GetLineIterator(int line);
-	MassBlock::iterator GetFirstLineIterator();
-	MassBlock::iterator GetLastLineIterator();
+	MassBlock::iterator GetTopLineIterator();
+	MassBlock::iterator GetBottomLineIterator();
 
 private:
 	MassLine* CreateLine();
@@ -53,9 +59,14 @@ private:
 	void InsertLines(int at, MassBlock* pMassBlock);
 	void DeleteLine(int at);
 	void DeleteLines(int at, int count);
+	void ClearLines();
 
 	MassBlock massBlock;
 	int top;
 	
 	GameFrame* pGameFrame;
+
+public:
+	virtual bool Save(TCHAR* szString);
+	virtual bool Load(TCHAR* szString);
 };
