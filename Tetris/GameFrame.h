@@ -46,8 +46,6 @@ public:
 	bool ValidateX(int x);
 	bool ValidateY(int y);
 	bool ValidateXY(int x, int y);
-	void Insert(Mass* pMass, TetrisShape* pTetrisShape);
-	bool HasTouched(Mass* pMass, TetrisShape* pTetrisShape);
 	void StepLeft();
 	void StepRight();
 	void StepDown();

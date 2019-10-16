@@ -145,6 +145,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pDrawer->Initialize(pGameFrame);
 
    Controller* pController = &Controller::singleton;
+   pController->Initialize(pConfiguration);
+   pController->SetHWnd(hWnd);
    pController->SetGameFrame(pGameFrame);
    pController->Start();
 

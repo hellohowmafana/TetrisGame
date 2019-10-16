@@ -63,15 +63,6 @@ bool GameFrame::ValidateXY(int x, int y)
 	return ValidateX(x) && ValidateY(y);
 }
 
-void GameFrame::Insert(Mass* pMass, TetrisShape* pTetrisShape)
-{
-}
-
-bool GameFrame::HasTouched(Mass* pMass, TetrisShape* pTetrisShape)
-{
-	return false;
-}
-
 void GameFrame::StepLeft()
 {
 	if(tetrisShape.StepLeft())
@@ -88,19 +79,26 @@ void GameFrame::StepRight()
 
 void GameFrame::StepDown()
 {
-	if (tetrisShape.StepDown())
+	bool isDropped = false;
+	if (tetrisShape.IsOnBottom())
 	{
-		if (mass.IsTouched(&tetrisShape))
+		isDropped = true;
+	}
+	else if (tetrisShape.StepDown())
+	{
+		if(mass.IsTouched(&tetrisShape))
 		{
 			tetrisShape.StepUp();
-			mass.Union(&tetrisShape);
-			tetrisShape.Reborn();
+			isDropped = true;
 		}
 	}
-	else
+
+	if(isDropped)
 	{
 		mass.Union(&tetrisShape);
-		tetrisShape.Reborn();
+		mass.RemoveFullLines(tetrisShape.GetTop(), tetrisShape.GetBottom());
+		tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation());
+		nextTetrisShape.InitializeRandom();
 	}
 }
 
@@ -109,7 +107,9 @@ void GameFrame::Drop()
 	int distance = mass.CalculateDistanceY(&tetrisShape);
 	tetrisShape.Move(0, distance - 1);
 	mass.Union(&tetrisShape);
-	tetrisShape.Reborn();
+	mass.RemoveFullLines(tetrisShape.GetTop(), tetrisShape.GetBottom());
+	tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation());
+	nextTetrisShape.InitializeRandom();
 }
 
 void GameFrame::Rotate()

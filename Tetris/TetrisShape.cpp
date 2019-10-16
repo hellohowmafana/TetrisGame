@@ -45,10 +45,26 @@ void TetrisShape::Initialize(TetrisType* pTetrisType, TetrisRotation rotation)
 	this->rotation = rotation;
 }
 
-void TetrisShape::Reborn()
+void TetrisShape::RebornRandom()
 {
 	InitializeRandom();
 	SetTopCenterPostion(false);
+}
+
+void TetrisShape::Reborn(TetrisType* pTetrisType, TetrisRotation rotation)
+{
+	Initialize(pTetrisType, rotation);
+	SetTopCenterPostion(false);
+}
+
+TetrisType* TetrisShape::GetType()
+{
+	return pTetrisType;
+}
+
+TetrisRotation TetrisShape::GetRotation()
+{
+	return rotation;
 }
 
 void TetrisShape::CenterHorizontal(bool leanLeft)
@@ -364,6 +380,16 @@ int TetrisShape::GetBottom()
 int TetrisShape::GetColor()
 {
 	return pTetrisType->color;
+}
+
+bool TetrisShape::IsOnTop()
+{
+	return GetTop() == 0;
+}
+
+bool TetrisShape::IsOnBottom()
+{
+	return GetBottom() == pGameFrame->sizeY - 1;
 }
 
 int TetrisShape::GetBottommostSolidY(int x, bool frameCoordinate)

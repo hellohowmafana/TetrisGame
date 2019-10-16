@@ -32,7 +32,10 @@ public:
 
 	bool HitTest(TetrisShape* pTetrisShape);
 	bool Union(TetrisShape* pTetrisShape);
+	bool IsLineFull(int line);
+	bool IsLineFull(MassLine* pMassLine);
 	void RemoveLine(int line);
+	int RemoveFullLines(int from, int to);
 	void GenerateLine(int line, int blankRate);
 
 	bool ValidateX(int x);
@@ -58,6 +61,7 @@ private:
 	void InsertLine(int at, MassLine *pMassLine);
 	void InsertLines(int at, MassBlock* pMassBlock);
 	void DeleteLine(int at);
+	void DeleteLine(MassLine* pMassLine);
 	void DeleteLines(int at, int count);
 	void ClearLines();
 

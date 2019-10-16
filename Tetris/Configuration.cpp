@@ -96,9 +96,9 @@ bool Configuration::LoadParameters()
 	unitWidth = GetConfigurationInt(keySetting, keyUnitWidth);
 	separatorThickness = GetConfigurationInt(keySetting, keySeparatorThickness);
 	// timespan
+	stepDownTimespan = GetConfigurationInt(keySetting, keyStepDownTimespan);
 	dropTimespan = GetConfigurationInt(keySetting, keyDropTimespan);
 	dropDelay = GetConfigurationInt(keySetting, keyDropDelay);
-	droppedDelay = GetConfigurationInt(keySetting, keyDroppedDelay);
 	removeDelay = GetConfigurationInt(keySetting, keyRemoveDelay);
 	removeBlinkTimespan = GetConfigurationInt(keySetting, keyRemoveBlinkTimespan);
 

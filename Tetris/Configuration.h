@@ -51,9 +51,9 @@ private:
 	const tstring keyBorderThickness = L"BorderThickness";
 	const tstring keyUnitWidth = L"UnitWidth";
 	const tstring keySeparatorThickness = L"SeparatorThickness";
+	const tstring keyStepDownTimespan = L"StepDownTimespan";
 	const tstring keyDropTimespan = L"DropTimespan";
 	const tstring keyDropDelay = L"DropDelay";
-	const tstring keyDroppedDelay = L"DroppedDelay";
 	const tstring keyRemoveDelay = L"RemoveDelay";
 	const tstring keyRemoveBlinkTimespan = L"RemoveBlinkTimespan";
 	
@@ -93,9 +93,9 @@ public:
 	int unitWidth;
 
 	// timespan
+	int stepDownTimespan;
 	int dropTimespan;
 	int dropDelay;
-	int droppedDelay;
 	int removeDelay;
 	int removeBlinkTimespan;
 

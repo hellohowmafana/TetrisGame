@@ -27,11 +27,11 @@ SeparatorThickness=5
 ;内框厚度
 UnitWidth=20
 ;单位宽度
-DropTimespan=100
+StepDownTimespan=1000
 ;下降速度
-DropDelay=150
+DropTimespan=150
 ;降落延迟
-DroppedDelay=300
+DropDelay=1000
 ;落地延迟
 RemoveDelay=1200
 ;消除延迟

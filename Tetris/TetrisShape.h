@@ -14,9 +14,12 @@ public:
 	TetrisShape();
 	void InitializeRandom();
 	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation);
-	void Reborn();
+	void RebornRandom();
+	void Reborn(TetrisType* pTetrisType, TetrisRotation rotation);
 
-public:
+	TetrisType* GetType();
+	TetrisRotation GetRotation();
+
 	void CenterHorizontal(bool leanLeft);
 	void SetTopCenterPostion(bool leanLeft);
 	bool SetPostion(int x, int y);
@@ -42,6 +45,8 @@ public:
 	int GetBottom();
 	int GetColor();
 	
+	bool IsOnTop();
+	bool IsOnBottom();
 	int GetBottommostSolidY(int x, bool frameCoordinate);
 
 	void SetGameFrame(GameFrame* pGameFrame);

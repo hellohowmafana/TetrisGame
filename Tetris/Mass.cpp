@@ -133,10 +133,50 @@ bool Mass::Union(TetrisShape* pTetrisShape)
 	return true;
 }
 
+bool Mass::IsLineFull(int line)
+{
+	return IsLineFull(GetLine(line));
+}
+
+bool Mass::IsLineFull(MassLine* pMassLine)
+{
+	for (MassLine::iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
+	{
+		if (!it->isSolid)
+			return false;
+	}
+	return true;
+}
+
 void Mass::RemoveLine(int line)
 {
 	if (!ValidateY(line)) return;
 	DeleteLine(line - top);
+	top++;
+}
+
+int Mass::RemoveFullLines(int from, int to)
+{
+	if (!ValidateY(from) || !ValidateY(to)) return 0;
+	if (from > to)
+		swap(from, to);
+	MassBlock::iterator it = GetLineIterator(from);
+	MassBlock::iterator itto = next(it, to - from + 1);
+	int count = 0;
+	while (it != itto)
+	{
+		if (IsLineFull(*it))
+		{
+			DeleteLine(*it++); // increment it before delete
+			count++;
+		}
+		else
+		{
+			it++;
+		}
+	}
+	top += count;
+	return count;
 }
 
 void Mass::GenerateLine(int line, int blankRate)
@@ -279,6 +319,12 @@ void Mass::DeleteLine(int at)
 	MassBlock::iterator it = next(massBlock.begin(), at);
 	delete *it;
 	massBlock.erase(it);
+}
+
+void Mass::DeleteLine(MassLine* pMassLine)
+{
+	delete pMassLine;
+	massBlock.erase(find(massBlock.begin(), massBlock.end(), pMassLine));
 }
 
 void Mass::DeleteLines(int at, int count)
