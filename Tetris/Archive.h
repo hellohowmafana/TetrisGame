@@ -9,8 +9,8 @@ class Controller;
 class Archive
 {
 public:
-	bool Save(TCHAR* szFile, Controller* pController);
-	bool Load(TCHAR* szFile, Controller* pController);
+	static bool Save(TCHAR* szArchive, Controller* pController);
+	static bool Load(TCHAR* szArchive, Controller* pController);
 
 public:
 	static const tstring labelFrame;
@@ -18,5 +18,6 @@ public:
 	static const tstring labelCurrent;
 	static const tstring labelMass;
 	static const tstring labelScore;
+	static const tstring labelMark;
 };
 

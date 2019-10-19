@@ -2,21 +2,15 @@
 #include "Configuration.h"
 #include "Mass.h"
 #include "TetrisShape.h"
+#include "UnitFrame.h"
 #include "ISerializable.h"
 #include <Windows.h>
 
-class GameFrame : ISerializable
+class GameFrame : public UnitFrame, public ISerializable
 {
 public:
 	static GameFrame singleton;
 
-	int left;
-	int top;
-	int sizeX;
-	int sizeY;
-	int unitWidth;
-	int borderThickness;
-	int separatorThickness;
 	double startLineBlankRate;
 	bool useColor;
 	bool useColorRandom;
@@ -43,9 +37,6 @@ public:
 	void Pause();
 	void Resume();
 
-	bool ValidateX(int x);
-	bool ValidateY(int y);
-	bool ValidateXY(int x, int y);
 	void StepLeft();
 	void StepRight();
 	void StepDown();
@@ -57,7 +48,7 @@ public:
 	TetrisShape* GetNextShape();
 
 public:
-	virtual bool Save(TCHAR* szString);
-	virtual bool Load(TCHAR* szString);
+	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
+	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
 };
 

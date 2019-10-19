@@ -9,6 +9,6 @@
 class ISerializable
 {
 public:
-	virtual bool Save(TCHAR* szString) = 0;
-	virtual bool Load(TCHAR* szString) = 0;
+	virtual bool Save(const TCHAR* szSection, TCHAR** pszString) = 0;
+	virtual bool Load(const TCHAR* szSection, TCHAR* szString) = 0;
 };

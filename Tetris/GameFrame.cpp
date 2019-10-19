@@ -4,6 +4,7 @@ GameFrame GameFrame::singleton;
 
 void GameFrame::Initialize(Configuration* pConfiguration)
 {
+	// initialize from configuration
 	left = pConfiguration->frameLeft;
 	top = pConfiguration->frameTop;
 	sizeX = pConfiguration->frameSizeX;
@@ -20,20 +21,19 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	pSeparatorColor = &pConfiguration->colorSeparator;
 	pTetrisColors = &pConfiguration->vecTetrisColors;
 	pMassColor = &pConfiguration->colorMass;
+
+	// initialize game
+	tetrisShape.SetFrame(this);
+	tetrisShape.InitializeRandom();
+	tetrisShape.SetTopCenterPostion(false);
+	mass.SetGameFrame(this);
+	mass.Initialize();
+	nextTetrisShape.InitializeRandom();
+	score = 0;
 }
 
 void GameFrame::Start()
 {
-	tetrisShape.SetGameFrame(this);
-	mass.SetGameFrame(this);
-	
-	tetrisShape.InitializeRandom();
-	tetrisShape.SetTopCenterPostion(false);
-	mass.Initialize();
-
-	nextTetrisShape.InitializeRandom();
-
-	score = 0;
 }
 
 void GameFrame::Stop()
@@ -46,21 +46,6 @@ void GameFrame::Pause()
 
 void GameFrame::Resume()
 {
-}
-
-bool GameFrame::ValidateX(int x)
-{
-	return x >= 0 && x < sizeX;
-}
-
-bool GameFrame::ValidateY(int y)
-{
-	return y >= 0 && y < sizeY;
-}
-
-bool GameFrame::ValidateXY(int x, int y)
-{
-	return ValidateX(x) && ValidateY(y);
 }
 
 void GameFrame::StepLeft()
@@ -114,7 +99,9 @@ void GameFrame::Drop()
 
 void GameFrame::Rotate()
 {
-	tetrisShape.Rotate();
+	if(tetrisShape.Rotate())
+		if (mass.HitTest(&tetrisShape))
+			tetrisShape.RotateBack();
 }
 
 Mass* GameFrame::GetMass()
@@ -132,26 +119,25 @@ TetrisShape* GameFrame::GetNextShape()
 	return &nextTetrisShape;
 }
 
-bool GameFrame::Save(TCHAR* szString)
+bool GameFrame::Save(const TCHAR* szSection, TCHAR** pszString)
 {
 	return false;
 }
 
-bool GameFrame::Load(TCHAR* szString)
+bool GameFrame::Load(const TCHAR* szSection, TCHAR* szString)
 {
-	int pos;
 	tstring str(szString);
-	if (tstring::npos != (pos = str.find(Archive::labelFrame)))
+	if (Archive::labelFrame == szSection)
 	{
 		TCHAR* szs[2];
-		Utility::SplitString((TCHAR*)(str.substr(pos + 1).c_str()), _T(','), szs, 2);
+		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 2);
 		sizeX = stoi(szs[0]);
 		sizeY = stoi(szs[1]);
 		return false;
 	}
-	else if (tstring::npos != (pos = str.find(Archive::labelScore)))
+	else if (Archive::labelScore == szSection)
 	{
-		score = stoi(str.substr(pos + 1));
+		score = stoi(str);
 	}
 	return true;
 }

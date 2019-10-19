@@ -11,6 +11,7 @@
 #include <gdiplus.h>
 #include "GameFrame.h"
 #include "Controller.h"
+#include "ArchiveDialog.h"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
@@ -150,7 +151,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pController->SetGameFrame(pGameFrame);
    pController->Start();
 
-   InvalidateRect(hWnd, NULL, TRUE);
+   InvalidateRect(hWnd, NULL, FALSE);
 
    return TRUE;
 }
@@ -175,6 +176,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             // Parse the menu selections:
             switch (wmId)
             {
+			case ID_SAVE:
+				//Controller::singleton.SaveGame();
+				break;
+			case ID_LOAD:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ARCHIVEDIALOG), hWnd, ArchiveDialog::ArchiveDialogProc);
+				Controller::singleton.LoadGame(ArchiveDialog::singleton.GetSelectedArchive());
+				InvalidateRect(hWnd, NULL, FALSE);
+				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;
@@ -201,6 +210,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			EndPaint(hWnd, &ps);
 		}
 		break;
+	case WM_ERASEBKGND:
+		return 1;
 	case WM_KEYDOWN:
 		{
 			Controller* pController = &Controller::singleton;

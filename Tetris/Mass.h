@@ -16,7 +16,7 @@ struct MassUnit
 typedef vector<MassUnit> MassLine;
 typedef list<MassLine*> MassBlock;
 
-class Mass : ISerializable
+class Mass : public ISerializable
 {
 public:
 	bool Initialize();
@@ -71,6 +71,6 @@ private:
 	GameFrame* pGameFrame;
 
 public:
-	virtual bool Save(TCHAR* szString);
-	virtual bool Load(TCHAR* szString);
+	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
+	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
 };

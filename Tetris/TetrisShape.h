@@ -5,10 +5,10 @@
 #include "ISerializable.h"
 using namespace std;
 
-class GameFrame;
+class UnitFrame;
 enum class TetrisRotation {Rotation0, Rotation1, Rotation2, Rotation3};
 
-class TetrisShape : ISerializable
+class TetrisShape : public ISerializable
 {
 public:
 	TetrisShape();
@@ -26,6 +26,7 @@ public:
 	bool Move(int offestX, int offsetY);
 	void CalculateRotationPosition(TetrisRotation dst, TetrisRotation src, int* pPosX, int* pPosY);
 	bool Rotate();
+	bool RotateBack();
 	bool StepLeft();
 	bool StepRight();
 	bool StepDown();
@@ -49,19 +50,20 @@ public:
 	bool IsOnBottom();
 	int GetBottommostSolidY(int x, bool frameCoordinate);
 
-	void SetGameFrame(GameFrame* pGameFrame);
-	GameFrame* GetGameFrame();
+	void SetFrame(UnitFrame* pUnitFrame);
+	UnitFrame* GetFrame();
 
 private:
 	TetrisType* pTetrisType;
 	int posX, posY;
 	TetrisRotation rotation;
 
-	GameFrame* pGameFrame;
+	UnitFrame* pUnitFrame;
 
 public:
-	virtual bool Save(TCHAR* szString);
-	virtual bool Load(TCHAR* szString);
+	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
+	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
 	TetrisRotation IntToTetrisRotation(int irotation);
+	int TetrisRotationToInt(TetrisRotation rotation);
 };
 

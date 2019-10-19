@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include "Configuration.h"
 #include "GameFrame.h"
+#include "Archive.h"
 
 Controller Controller::singleton;
 
@@ -75,6 +76,19 @@ void Controller::Resume()
 bool Controller::IsStarted()
 {
 	return gameState!=GameState::Stop;
+}
+
+bool Controller::SaveGame(TCHAR* szArchive)
+{
+	return false;
+}
+
+bool Controller::LoadGame(TCHAR* szArchive)
+{
+	Stop();
+	Archive::Load(szArchive, this);
+	Start();
+	return false;
 }
 
 GameFrame* Controller::GetGameFrame()

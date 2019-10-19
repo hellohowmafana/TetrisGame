@@ -4,8 +4,10 @@
 
 Drawer Drawer::singleton;
 
-Drawer::Drawer()
-:hpnBorder(NULL), hpnSeparator(NULL), hdc(NULL), initialized(false)
+Drawer::Drawer() :
+	pGameFrame(nullptr), hpnBorder(NULL), hpnSeparator(NULL), hbsMass(NULL),
+	hdc(NULL), hdcCmp(NULL), hbmCmp(NULL), initialized(false),
+	dcWidth(0), dcHeight(0)
 {
 
 }
@@ -37,27 +39,36 @@ bool Drawer::Initialize(GameFrame* pGameFrame)
 void Drawer::AttachDC(HDC hdc)
 {
 	this->hdc = hdc;
+	hdcCmp = CreateCompatibleDC(hdc);
+	GetDCSize(hdc, &dcWidth, &dcHeight);
+	hbmCmp = CreateCompatibleBitmap(hdc, dcWidth, dcHeight);
+	SelectObject(hdcCmp, hbmCmp);
 }
 
 void Drawer::DetachDC()
 {
 	this->hdc = NULL;
+	dcWidth = dcHeight = 0;
+	DeleteObject(hbmCmp);
+	hbmCmp = NULL;
+	DeleteDC(hdcCmp);
+	hdcCmp = NULL;
 }
 
 void Drawer::DrawElements()
 {
-	if (initialized && hdc)
+	if (initialized && hdcCmp && hdc)
 	{
 		DrawFrame();
-
 		DrawShape(pGameFrame->GetShape());
 		DrawMass(pGameFrame->GetMass());
+		BitBlt(hdc, 0, 0, dcWidth, dcHeight, hdcCmp, 0, 0, SRCCOPY);
 	}
 }
 
 void Drawer::DrawFrame()
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	DrawBorder();
 	DrawSeparators();
@@ -65,11 +76,11 @@ void Drawer::DrawFrame()
 
 void Drawer::DrawBorder()
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	if (pGameFrame->borderThickness == 0) return;
 
-	SelectObject(hdc, hpnBorder);
+	SelectObject(hdcCmp, hpnBorder);
 	int innerWidth = (pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeX
 		+ pGameFrame->separatorThickness;
 	int innerHeight = (pGameFrame->unitWidth + pGameFrame->separatorThickness) * pGameFrame->sizeY
@@ -80,16 +91,16 @@ void Drawer::DrawBorder()
 	int top = pGameFrame->top + pGameFrame->borderThickness / 2;
 	int width = totalWidth - pGameFrame->borderThickness;
 	int height = totalHeight - pGameFrame->borderThickness;
-	Rectangle(hdc, left, top, left + width + 1, top + height + 1);
+	Rectangle(hdcCmp, left, top, left + width + 1, top + height + 1);
 }
 
 void Drawer::DrawSeparators()
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	if (pGameFrame->separatorThickness == 0) return;
 
-	SelectObject(hdc, hpnSeparator);
+	SelectObject(hdcCmp, hpnSeparator);
 
 	int top = pGameFrame->top + pGameFrame->borderThickness;
 	int bottom = top +
@@ -102,7 +113,7 @@ void Drawer::DrawSeparators()
 			+ n * (pGameFrame->unitWidth + pGameFrame->separatorThickness)
 			+ pGameFrame->separatorThickness / 2;
 		int x2 = x1 + 1;
-		Rectangle(hdc, x1, top, x2, bottom + 1);
+		Rectangle(hdcCmp, x1, top, x2, bottom + 1);
 	}
 
 	int left = pGameFrame->left + pGameFrame->borderThickness;
@@ -116,18 +127,18 @@ void Drawer::DrawSeparators()
 			+ n * (pGameFrame->unitWidth + pGameFrame->separatorThickness)
 			+ pGameFrame->separatorThickness / 2;
 		int y2 = y1 + 1;
-		Rectangle(hdc, left, y1, right, y2);
+		Rectangle(hdcCmp, left, y1, right, y2);
 	}
 }
 
 void Drawer::DrawBackgroud()
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 }
 
 void Drawer::DrawShape(TetrisShape* pTetrisShape)
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	if (nullptr == pTetrisShape) return;
 
@@ -143,7 +154,7 @@ void Drawer::DrawShape(TetrisShape* pTetrisShape)
 
 void Drawer::DrawMass(Mass* pMass)
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	if (nullptr == pMass) return;
 
@@ -157,7 +168,7 @@ void Drawer::DrawMass(Mass* pMass)
 
 void Drawer::DrawMassLine(MassLine* pMassLine, int y)
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	int x = 0;
 	for (MassLine::iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
@@ -172,7 +183,7 @@ void Drawer::DrawMassLine(MassLine* pMassLine, int y)
 
 void Drawer::DrawUnit(int x, int y, HBRUSH brush)
 {
-	if (!initialized || NULL == hdc) return;
+	if (!initialized || NULL == hdcCmp) return;
 
 	if (x < 0 || x >= pGameFrame->sizeX
 		|| y < 0 || y >= pGameFrame->sizeY)
@@ -185,7 +196,7 @@ void Drawer::DrawUnit(int x, int y, HBRUSH brush)
 		+ pGameFrame->separatorThickness * (y + 1) + pGameFrame->unitWidth * y;
 	LONG bottom = top + pGameFrame->unitWidth;
 	RECT rect = { left, top, right, bottom };
-	FillRect(hdc, &rect, brush);
+	FillRect(hdcCmp, &rect, brush);
 }
 
 void Drawer::DrawPromptFrame()
@@ -210,4 +221,24 @@ Drawer::~Drawer()
 	hpnBorder = NULL;
 	DeleteObject(hpnSeparator);
 	hpnSeparator = NULL;
+	if (NULL != hbmCmp)
+	{
+		DeleteObject(hbmCmp);
+		hbmCmp = NULL;
+	}
+	if (NULL != hdcCmp)
+	{
+		DeleteDC(hdcCmp);
+		hdcCmp = NULL;
+	}
+}
+
+void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)
+{
+	BITMAP bm;
+	memset(&bm, 0, sizeof(BITMAP));
+	HGDIOBJ hbm = GetCurrentObject(hdc, OBJ_BITMAP);
+	GetObject(hbm, sizeof(BITMAP), &bm);
+	*pWidth = bm.bmWidth;
+	*pHeight = bm.bmHeight;
 }

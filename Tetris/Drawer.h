@@ -36,6 +36,8 @@ private:
 
 	~Drawer();
 
+	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
+
 private:
 	GameFrame* pGameFrame;
 	HDC hdc;
@@ -43,7 +45,10 @@ private:
 	HPEN hpnSeparator;
 	vector<HBRUSH> vecTetrisBrushes;
 	HBRUSH hbsMass;
-
 	bool initialized;
+
+	HDC hdcCmp;
+	HBITMAP hbmCmp;
+	LONG dcWidth, dcHeight;
 };
 

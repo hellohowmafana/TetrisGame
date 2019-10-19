@@ -101,7 +101,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"</Command>
+      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"
+XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -123,7 +124,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"</Command>
+      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"
+XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -149,7 +151,8 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"</Command>
+      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"
+XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -175,11 +178,14 @@
       </Command>
     </PostBuildEvent>
     <PreBuildEvent>
-      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"</Command>
+      <Command>XCOPY /E /Y /D /I "$(ProjectDir)inis" "$(OutputPath)inis"
+XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Archive.h" />
+    <ClInclude Include="ArchiveDialog.h" />
+    <ClInclude Include="Frame.h" />
     <ClInclude Include="ISerializable.h" />
     <ClInclude Include="Mass.h" />
     <ClInclude Include="Configuration.h" />
@@ -187,24 +193,30 @@
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameFrame.h" />
+    <ClInclude Include="PromptFrame.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="tcharstd.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tetris.h" />
     <ClInclude Include="TetrisShape.h" />
     <ClInclude Include="TetrisType.h" />
+    <ClInclude Include="UnitFrame.h" />
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Archive.cpp" />
+    <ClCompile Include="ArchiveDialog.cpp" />
+    <ClCompile Include="Frame.cpp" />
     <ClCompile Include="Mass.cpp" />
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="GameFrame.cpp" />
+    <ClCompile Include="PromptFrame.cpp" />
     <ClCompile Include="Tetris.cpp" />
     <ClCompile Include="TetrisShape.cpp" />
     <ClCompile Include="TetrisType.cpp" />
+    <ClCompile Include="UnitFrame.cpp" />
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -221,7 +233,7 @@
     <Image Include="Tetris.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="archive\save1.txt" />
+    <Text Include="archives\save1.txt" />
     <Text Include="inis\configuration.txt" />
     <Text Include="inis\shapes\B.txt">
       <DeploymentContent>true</DeploymentContent>

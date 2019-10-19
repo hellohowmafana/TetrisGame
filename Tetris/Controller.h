@@ -26,6 +26,9 @@ public:
 
 	bool IsStarted();
 
+	bool SaveGame(TCHAR* szArchive);
+	bool LoadGame(TCHAR* szArchive);
+
 public:
 	GameFrame* GetGameFrame();
 	TetrisShape* GetTetrisShape();

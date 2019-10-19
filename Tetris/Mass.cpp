@@ -30,8 +30,10 @@ bool Mass::IsTouched(TetrisShape* pTetrisShape)
 	for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
 	{
 		if (pTetrisShape->GetBottommostSolidY(i, true) == pGameFrame->sizeY ||
-			pTetrisShape->GetBottommostSolidY(i, true) == GetTopmostSolidY(i, pTetrisShape->GetBottom()))
+			IsSolid(i, pTetrisShape->GetBottommostSolidY(i, true)))
+		{
 			return true;
+		}
 	}
 
 	return false;
@@ -102,7 +104,7 @@ bool Mass::HitTest(TetrisShape* pTetrisShape)
 
 bool Mass::Union(TetrisShape* pTetrisShape)
 {
-	if (pTetrisShape->GetGameFrame() != GetGameFrame())
+	if (pTetrisShape->GetFrame() != (UnitFrame*)GetGameFrame())
 		return false;
 
 	int topTetrisShape = pTetrisShape->GetTop();
@@ -251,7 +253,7 @@ bool Mass::IsSolid(MassLine* pMassLine, int x)
 
 void Mass::SetGameFrame(GameFrame* pGameFrame)
 {
-	this->pGameFrame = pGameFrame;
+this->pGameFrame = pGameFrame;
 }
 
 GameFrame* Mass::GetGameFrame()
@@ -317,7 +319,7 @@ void Mass::InsertLines(int at, MassBlock* pMassBlock)
 void Mass::DeleteLine(int at)
 {
 	MassBlock::iterator it = next(massBlock.begin(), at);
-	delete *it;
+	delete* it;
 	massBlock.erase(it);
 }
 
@@ -332,7 +334,7 @@ void Mass::DeleteLines(int at, int count)
 	MassBlock::iterator it = next(massBlock.begin(), at);
 	while (count--)
 	{
-		delete *it;
+		delete* it;
 		massBlock.erase(it);
 		it++;
 	}
@@ -347,25 +349,48 @@ void Mass::ClearLines()
 	massBlock.clear();
 }
 
-bool Mass::Save(TCHAR* szString)
+bool Mass::Save(const TCHAR* szSection, TCHAR** pszString)
 {
-	return false;
+	if (Archive::labelMass == szSection)
+	{
+		tstring strMass;
+		for (MassBlock::iterator itb = massBlock.begin(); itb != massBlock.end(); itb++)
+		{
+			MassLine* pMassLine = *itb;
+			for (MassLine::iterator itl = pMassLine->begin(); itl != pMassLine->end() ; itl++)
+			{
+				strMass.append(itl->isSolid ? _T("1") : _T("0"));
+				strMass.append(_T(","));
+				strMass.append(to_tstring(itl->color));
+				strMass.append(_T(" "));
+			}
+			strMass.erase(strMass.end() - 1);
+			strMass.append(_T("\n"));
+		}
+		*pszString = (TCHAR*)strMass.c_str();
+	}
+	else
+	{
+		return false;
+	}
+
+	return true;
 }
 
-bool Mass::Load(TCHAR* szString)
+bool Mass::Load(const TCHAR* szSection, TCHAR* szString)
 {
 	tstring str;
 	tistringstream stringstream(szString);
-	getline(stringstream, str);
-	if (tstring::npos != str.find(Archive::labelMass))
+	if (Archive::labelMass == szSection)
 	{
+		ClearLines();
 		while (!stringstream.eof())
 		{
 			getline(stringstream, str);
 			MassLine* pMassLine = CreateLine();
 			TCHAR** szUnits = new TCHAR * [pGameFrame->sizeX];
 			Utility::SplitString((TCHAR*)(str.c_str()), _T(' '), szUnits, pGameFrame->sizeX);
-			for (size_t i = 0; i < str.size(); i++)
+			for (int i = 0; i < pGameFrame->sizeX; i++)
 			{
 				pMassLine->at(i).isSolid = szUnits[i][0] == _T('1');
 				pMassLine->at(i).color = stoi(szUnits[i] + 2);
@@ -373,6 +398,7 @@ bool Mass::Load(TCHAR* szString)
 			delete[] szUnits;
 			InsertLine(massBlock.size(), pMassLine);
 		}
+		top = pGameFrame->sizeY - massBlock.size();
 	}
 	else
 	{

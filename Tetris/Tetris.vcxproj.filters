@@ -22,7 +22,7 @@
     <Filter Include="inis\shapes">
       <UniqueIdentifier>{ff54c9f0-d403-4cb5-8310-dac2efdd9ddc}</UniqueIdentifier>
     </Filter>
-    <Filter Include="archive">
+    <Filter Include="archives">
       <UniqueIdentifier>{095a6d46-91de-497a-8a89-cb59269f5869}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -72,6 +72,18 @@
     <ClInclude Include="ISerializable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Frame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="UnitFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PromptFrame.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ArchiveDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
@@ -102,6 +114,18 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Archive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Frame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="UnitFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PromptFrame.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ArchiveDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -143,8 +167,8 @@
     <Text Include="readme.txt">
       <Filter>inis</Filter>
     </Text>
-    <Text Include="archive\save1.txt">
-      <Filter>archive</Filter>
+    <Text Include="archives\save1.txt">
+      <Filter>archives</Filter>
     </Text>
   </ItemGroup>
 </Project>

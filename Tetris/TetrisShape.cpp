@@ -1,12 +1,12 @@
 #include "TetrisShape.h"
-#include "GameFrame.h"
+#include "UnitFrame.h"
 #include "Utility.h"
 
 TetrisShape::TetrisShape()
 	:posX(0),
 	posY(0),
 	rotation(TetrisRotation::Rotation0),
-	pGameFrame(nullptr),
+	pUnitFrame(nullptr),
 	pTetrisType(nullptr)
 {
 }
@@ -69,16 +69,16 @@ TetrisRotation TetrisShape::GetRotation()
 
 void TetrisShape::CenterHorizontal(bool leanLeft)
 {
-	if (!pGameFrame) return;
+	if (!pUnitFrame) return;
 
-	posX = (pGameFrame->sizeX - pTetrisType->col + (leanLeft ? 0 : 1)) / 2 +
+	posX = (pUnitFrame->sizeX - pTetrisType->col + (leanLeft ? 0 : 1)) / 2 +
 		pTetrisType->horizontalCenterOffset;
 	CalculateRotationPosition(rotation, TetrisRotation::Rotation0, &posX, nullptr);
 }
 
 void TetrisShape::SetTopCenterPostion(bool leanLeft)
 {
-	if (pGameFrame)
+	if (pUnitFrame)
 	{
 		posY = 0;
 		CenterHorizontal(leanLeft);
@@ -218,7 +218,43 @@ bool TetrisShape::Rotate()
 		return false;
 	}
 
-	return true; 
+	return true;
+}
+
+bool TetrisShape::RotateBack()
+{
+	if (!pTetrisType->canRotate) return true;
+
+	TetrisRotation oldRotation = rotation;
+	int oldPosX = posX;
+	int oldPosY = posY;
+	switch (oldRotation)
+	{
+	case TetrisRotation::Rotation0:
+		rotation = pTetrisType->clockwiseRotation ^ pTetrisType->twoRotation ?
+			TetrisRotation::Rotation3 : TetrisRotation::Rotation1;
+		break;
+	case TetrisRotation::Rotation1:
+		rotation = pTetrisType->clockwiseRotation ? TetrisRotation::Rotation0 : TetrisRotation::Rotation2;
+		break;
+	case TetrisRotation::Rotation2:
+		rotation = pTetrisType->clockwiseRotation ? TetrisRotation::Rotation1 : TetrisRotation::Rotation3;
+		break;
+	case TetrisRotation::Rotation3:
+		rotation = pTetrisType->clockwiseRotation ? TetrisRotation::Rotation2 : TetrisRotation::Rotation0;
+		break;
+	}
+	CalculateRotationPosition(rotation, oldRotation, &posX, &posY);
+
+	if (!ValidateShape(posX, posY, true))
+	{
+		rotation = oldRotation;
+		posX = oldPosX;
+		posY = oldPosY;
+		return false;
+	}
+
+	return true;
 }
 
 bool TetrisShape::StepLeft()
@@ -269,7 +305,7 @@ bool TetrisShape::ValidateX(int x, bool frameCoordinate)
 {
 	if (frameCoordinate)
 	{
-		if (!pGameFrame->ValidateX(x))
+		if (!pUnitFrame->ValidateX(x))
 			return false;
 		x = x - posX;
 	}
@@ -280,7 +316,7 @@ bool TetrisShape::ValidateY(int y, bool frameCoordinate)
 {
 	if (frameCoordinate)
 	{
-		if (!pGameFrame->ValidateY(y))
+		if (!pUnitFrame->ValidateY(y))
 			return false;
 		y = y - posY;
 	}
@@ -389,7 +425,7 @@ bool TetrisShape::IsOnTop()
 
 bool TetrisShape::IsOnBottom()
 {
-	return GetBottom() == pGameFrame->sizeY - 1;
+	return GetBottom() == pUnitFrame->sizeY - 1;
 }
 
 int TetrisShape::GetBottommostSolidY(int x, bool frameCoordinate)
@@ -407,36 +443,57 @@ int TetrisShape::GetBottommostSolidY(int x, bool frameCoordinate)
 	return -1;
 }
 
-void TetrisShape::SetGameFrame(GameFrame* pGameFrame)
+void TetrisShape::SetFrame(UnitFrame* pUnitFrame)
 {
-	this->pGameFrame = pGameFrame;
+	this->pUnitFrame = pUnitFrame;
 }
 
-GameFrame* TetrisShape::GetGameFrame()
+UnitFrame* TetrisShape::GetFrame()
 {
-	return pGameFrame;
+	return pUnitFrame;
 }
 
-bool TetrisShape::Save(TCHAR* szString)
+bool TetrisShape::Save(const TCHAR* szSection, TCHAR** pszString)
 {
-	return false;
+	if (Archive::labelNext == szSection)
+	{
+		tstring str;
+		str.append(pTetrisType->group).append(_T(","))
+			.append(pTetrisType->name).append(_T(","))
+			.append(to_tstring(TetrisRotationToInt(rotation)));
+		*pszString = (TCHAR*)str.c_str();
+	}
+	else if(Archive::labelCurrent == szSection)
+	{
+		tstring str;
+		str.append(pTetrisType->group).append(_T(","))
+			.append(pTetrisType->name).append(_T(","))
+			.append(to_tstring(TetrisRotationToInt(rotation))).append(_T(","))
+			.append(to_tstring(posX)).append(_T(","))
+			.append(to_tstring(posY));
+		*pszString = (TCHAR*)str.c_str();
+	}
+	else
+	{
+		return false;
+	}
+	return true;
 }
 
-bool TetrisShape::Load(TCHAR* szString)
+bool TetrisShape::Load(const TCHAR* szSection, TCHAR* szString)
 {
-	int pos;
 	tstring str(szString);
-	if (tstring::npos != (pos = str.find(Archive::labelCurrent)))
+	if (Archive::labelCurrent == szSection)
 	{
 		TCHAR* szs[5];
-		Utility::SplitString((TCHAR*)(str.substr(pos + 1).c_str()), _T(','), szs, 5);
+		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 5);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])));
 		SetPostion(stoi(szs[3]), stoi(szs[4]));
 	}
-	else if (tstring::npos != (pos = str.find(Archive::labelNext)))
+	else if (Archive::labelNext == szSection)
 	{
 		TCHAR* szs[3];
-		Utility::SplitString((TCHAR*)(str.substr(pos + 1).c_str()), _T(','), szs, 3);
+		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 3);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])));
 	}
 	else
@@ -460,5 +517,22 @@ TetrisRotation TetrisShape::IntToTetrisRotation(int irotation)
 		return TetrisRotation::Rotation3;
 	default:
 		return TetrisRotation::Rotation0;
+	}
+}
+
+int TetrisShape::TetrisRotationToInt(TetrisRotation rotation)
+{
+	switch (rotation)
+	{
+	case TetrisRotation::Rotation0:
+		return 0;
+	case TetrisRotation::Rotation1:
+		return 1;
+	case TetrisRotation::Rotation2:
+		return 2;
+	case TetrisRotation::Rotation3:
+		return 3;
+	default:
+		return 0;
 	}
 }

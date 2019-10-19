@@ -64,6 +64,8 @@ bool Configuration::InitializeIniPaths()
 	pathSeparatorColorFile = path + SEPARATOR_COLOR_FILE_PATH;
 	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
 
+	pathArchives = path + ARCHIVES_PATH;
+
 	return true;
 }
 

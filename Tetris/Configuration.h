@@ -21,11 +21,14 @@ private:
 	const tstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.bmp";
 	const tstring CLASSIC_SHAPES_PATH = SHAPES_PATH + L"\\classic.txt";
 
+	const tstring ARCHIVES_PATH = L"archives";
+
 public:
 	// path for use
 	tstring pathInis;
 	tstring pathBitmaps;
 	tstring pathShapes;
+	tstring pathArchives;
 
 	tstring pathConfiguration;
 	tstring pathTetrisColorFile;
