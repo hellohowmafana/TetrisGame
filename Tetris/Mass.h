@@ -26,7 +26,6 @@ public:
 	bool IsTouched(TetrisShape* pTetrisShape);
 	int CalculateDistanceY(TetrisShape* pTetrisShape);
 
-	bool CanInsert(TetrisShape* pTetrisShape, int x, int y);
 	int FindBottommostBlankY(TetrisShape* pTetrisShape, int x);
 	bool HasBlank(TetrisShape* pTetrisShape, int x);
 
@@ -37,6 +36,7 @@ public:
 	void RemoveLine(int line);
 	int RemoveFullLines(int from, int to);
 	void GenerateLine(int line, int blankRate);
+	bool IsFull();
 
 	bool ValidateX(int x);
 	bool ValidateY(int y);

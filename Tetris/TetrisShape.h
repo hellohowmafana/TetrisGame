@@ -16,6 +16,7 @@ public:
 	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation);
 	void RebornRandom();
 	void Reborn(TetrisType* pTetrisType, TetrisRotation rotation);
+	TetrisShape* Clone(TetrisShape* pTetrisShape);
 
 	TetrisType* GetType();
 	TetrisRotation GetRotation();
@@ -24,6 +25,7 @@ public:
 	void SetTopCenterPostion(bool leanLeft);
 	bool SetPostion(int x, int y);
 	bool Move(int offestX, int offsetY);
+	bool MoveTo(int x, int y);
 	void CalculateRotationPosition(TetrisRotation dst, TetrisRotation src, int* pPosX, int* pPosY);
 	bool Rotate();
 	bool RotateBack();
@@ -57,7 +59,6 @@ private:
 	TetrisType* pTetrisType;
 	int posX, posY;
 	TetrisRotation rotation;
-
 	UnitFrame* pUnitFrame;
 
 public:

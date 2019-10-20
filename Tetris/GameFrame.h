@@ -6,6 +6,11 @@
 #include "ISerializable.h"
 #include <Windows.h>
 
+enum class GameState
+{
+	Start, Pause, End
+};
+
 class GameFrame : public UnitFrame, public ISerializable
 {
 public:
@@ -26,6 +31,7 @@ private:
 	TetrisShape tetrisShape;
 	TetrisShape nextTetrisShape;
 	int score;
+	GameState gameState;
 
 private:
 	GameFrame() {};
@@ -33,9 +39,10 @@ private:
 public:
 	void Initialize(Configuration* pConfiguration);
 	void Start();
-	void Stop();
+	void End();
 	void Pause();
 	void Resume();
+	bool IsGameOver();
 
 	void StepLeft();
 	void StepRight();

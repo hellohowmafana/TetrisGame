@@ -57,6 +57,12 @@ void TetrisShape::Reborn(TetrisType* pTetrisType, TetrisRotation rotation)
 	SetTopCenterPostion(false);
 }
 
+TetrisShape* TetrisShape::Clone(TetrisShape* pTetrisShape)
+{
+	*pTetrisShape = *this;
+	return pTetrisShape;
+}
+
 TetrisType* TetrisShape::GetType()
 {
 	return pTetrisType;
@@ -106,6 +112,21 @@ bool TetrisShape::Move(int offsetX, int offsetY)
 	int oldPosY = posY;
 	posX = posX + offsetX;
 	posY = posY + offsetY;
+	if (!ValidateShape(posX, posY, true))
+	{
+		posX = oldPosX;
+		posY = oldPosY;
+		return false;
+	}
+	return true;
+}
+
+bool TetrisShape::MoveTo(int x, int y)
+{
+	int oldPosX = posX;
+	int oldPosY = posY;
+	posX = x;
+	posY = y;
 	if (!ValidateShape(posX, posY, true))
 	{
 		posX = oldPosX;

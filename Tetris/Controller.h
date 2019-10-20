@@ -1,11 +1,6 @@
 #pragma once
 #include "GameFrame.h"
 
-enum class GameState
-{
-	Start, Stop, Pause, Resume
-};
-
 class Controller
 {
 public:
@@ -20,7 +15,7 @@ public:
 	void Drop();
 
 	void Start();
-	void Stop();
+	void End();
 	void Pause();
 	void Resume();
 

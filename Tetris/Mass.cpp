@@ -61,24 +61,14 @@ int Mass::CalculateDistanceY(TetrisShape* pTetrisShape)
 	return minimal;
 }
 
-bool Mass::CanInsert(TetrisShape* pTetrisShape, int x, int y)
-{
-	for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
-	{
-		for (int j = pTetrisShape->GetTop(); j < pTetrisShape->GetBottom(); j++)
-		{
-			if (!(!IsSolid(x, y) && pTetrisShape->IsSolid(i, j, true)))
-				return false;
-		}
-	}
-	return true;
-}
-
 int Mass::FindBottommostBlankY(TetrisShape* pTetrisShape, int x)
 {
-	for (int i = GetBottom() - pTetrisShape->GetHeight() + 1; i <= top; i--)
+	TetrisShape testTetrisShape;
+	pTetrisShape->Clone(&testTetrisShape);
+	for (int i = GetBottom() - pTetrisShape->GetHeight() + 1; i >= 0; i--)
 	{
-		if (CanInsert(pTetrisShape, x, i))
+		testTetrisShape.MoveTo(x, i);
+		if (!HitTest(&testTetrisShape))
 			return i;
 	}
 	return -1;
@@ -200,6 +190,11 @@ void Mass::GenerateLine(int line, int blankRate)
 	{
 		InsertLine(1, CreateLine());
 	}
+}
+
+bool Mass::IsFull()
+{
+	return 0 == top;
 }
 
 bool Mass::ValidateX(int x)

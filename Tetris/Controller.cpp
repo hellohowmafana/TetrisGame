@@ -57,10 +57,10 @@ void Controller::Start()
 	pGameFrame->Start();
 }
 
-void Controller::Stop()
+void Controller::End()
 {
-	gameState = GameState::Stop;
-	pGameFrame->Stop();
+	gameState = GameState::End;
+	pGameFrame->End();
 }
 
 void Controller::Pause()
@@ -70,12 +70,12 @@ void Controller::Pause()
 
 void Controller::Resume()
 {
-	gameState = GameState::Resume;
+	gameState = GameState::Start;
 }
 
 bool Controller::IsStarted()
 {
-	return gameState!=GameState::Stop;
+	return gameState!=GameState::End;
 }
 
 bool Controller::SaveGame(TCHAR* szArchive)
@@ -85,10 +85,12 @@ bool Controller::SaveGame(TCHAR* szArchive)
 
 bool Controller::LoadGame(TCHAR* szArchive)
 {
-	Stop();
+	if (0 == _tcslen(szArchive))
+		return false;
+	End();
 	Archive::Load(szArchive, this);
 	Start();
-	return false;
+	return true;
 }
 
 GameFrame* Controller::GetGameFrame()

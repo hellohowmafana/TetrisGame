@@ -241,6 +241,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <Text Include="inis\shapes\classic.txt">
       <DeploymentContent>true</DeploymentContent>
     </Text>
+    <Text Include="inis\shapes\penerable_calssic.txt" />
     <Text Include="readme.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
