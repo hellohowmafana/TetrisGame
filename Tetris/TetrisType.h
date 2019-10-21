@@ -1,11 +1,13 @@
 #pragma once
 #include <tchar.h>
 #include <list>
+#include <map>
+#include "tcharstd.h"
 using namespace std;
 
 class TetrisType;
 typedef list<TetrisType*> TetrisTypeGroup;
-typedef list<TetrisTypeGroup*> TetrisTypeLibrary;
+typedef map<tstring, TetrisTypeGroup*> TetrisTypeLibrary;
 
 class TetrisType
 {
@@ -16,11 +18,14 @@ public:
 		int row, int col, char* pData, size_t dataCount, int color);
 	static void Delete(TetrisType* pTetrisType);
 	static void Clear();
-	static TetrisTypeGroup* CreateGroup();
+	static TetrisTypeGroup* CreateGroup(TCHAR const* group);
 	static void DeleteGroup(TCHAR const* group);
 	static bool ExsitGroup(TCHAR const* group);
 	static TetrisType* GetTetrisType(TCHAR const* group, TCHAR const* name);
 	static TetrisTypeGroup* GetGroup(TCHAR const* group);
+	static int GetTetrisTypesCount();
+	static int GetTetrisTypesCount(TCHAR const* group);
+	static int GetRandomColor(TCHAR const* group);
 	static TetrisType* Random();
 
 private:
@@ -38,6 +43,7 @@ private:
 	void GetXY(int pos, int* px, int* py);
 
 public:
+	static const TCHAR* classic;
 	TCHAR* group;
 	TCHAR* name;
 	bool penetrable;

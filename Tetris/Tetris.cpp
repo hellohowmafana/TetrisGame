@@ -141,9 +141,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    GameFrame* pGameFrame = &GameFrame::singleton;
    pGameFrame->Initialize(pConfiguration);
+   PromptFrame* pPromptFrame = &PromptFrame::singleton;
+   pPromptFrame->Initialize(pConfiguration);
+   pGameFrame->SetPromptFrame(pPromptFrame);
+   pGameFrame->InitializeGame();
 
    Drawer* pDrawer = &Drawer::singleton;
-   pDrawer->Initialize(pGameFrame);
+   pDrawer->Initialize(pGameFrame, pPromptFrame);
 
    Controller* pController = &Controller::singleton;
    pController->Initialize(pConfiguration);
@@ -231,6 +235,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					break;
 				case VK_SPACE:
 					pController->Drop();
+					break;
+				case VK_RETURN:
+					pController->Restart();
 					break;
 				default:
 					break;

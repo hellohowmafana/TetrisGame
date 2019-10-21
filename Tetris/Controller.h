@@ -18,6 +18,7 @@ public:
 	void End();
 	void Pause();
 	void Resume();
+	void Restart();
 
 	bool IsStarted();
 

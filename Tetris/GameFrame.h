@@ -6,6 +6,9 @@
 #include "ISerializable.h"
 #include <Windows.h>
 
+class PromptFrame;
+class InfoFrame;
+
 enum class GameState
 {
 	Start, Pause, End
@@ -21,8 +24,6 @@ public:
 	bool useColorRandom;
 	bool useMassColor;
 
-	COLORREF* pBorderColor;
-	COLORREF* pSeparatorColor;
 	vector<COLORREF>* pTetrisColors;
 	COLORREF* pMassColor;
 
@@ -32,12 +33,18 @@ private:
 	TetrisShape nextTetrisShape;
 	int score;
 	GameState gameState;
+	PromptFrame* pPromptFrame;
+	InfoFrame* pInfoFrame;
 
 private:
 	GameFrame() {};
 
 public:
 	void Initialize(Configuration* pConfiguration);
+	void SetPromptFrame(PromptFrame* pPromptFrame);
+	void SetInfoFrame(InfoFrame* pInfoFrame);
+	void InitializeGame();
+
 	void Start();
 	void End();
 	void Pause();

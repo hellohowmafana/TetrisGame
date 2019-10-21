@@ -8,7 +8,7 @@ void TetrisType::Create(TCHAR const* group, TCHAR const* name,
 {
 	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
 	if (!pTetrisTypeGroup)
-		pTetrisTypeGroup = CreateGroup();
+		pTetrisTypeGroup = CreateGroup(group);
 	pTetrisTypeGroup->push_back(new TetrisType(group, name, penetrable, twoRotation, clockwiseRotation, horizontalCenterOffset, row, col, pData, dataCount, color));
 }
 
@@ -22,27 +22,29 @@ void TetrisType::Clear()
 {
 	for (TetrisTypeLibrary::iterator itl = tetrisTypeLibrary.begin(); itl != tetrisTypeLibrary.end(); itl++)
 	{
-		for (TetrisTypeGroup::iterator itg = (*itl)->begin(); itg != (*itl)->end(); itg++)
+		for (TetrisTypeGroup::iterator itg = itl->second->begin(); itg != itl->second->end(); itg++)
 		{
 			delete *itg;
 		}
-		delete *itl;
+		delete itl->second;
 	}
 	tetrisTypeLibrary.clear();
 }
 
-TetrisTypeGroup* TetrisType::CreateGroup()
+TetrisTypeGroup* TetrisType::CreateGroup(TCHAR const* group)
 {
+	if (ExsitGroup(group))
+		return nullptr;
 	TetrisTypeGroup* pTetrisTypeGroup = new TetrisTypeGroup;
-	tetrisTypeLibrary.push_back(pTetrisTypeGroup);
+	tetrisTypeLibrary.emplace(group, pTetrisTypeGroup);
 	return pTetrisTypeGroup;
 }
 
 void TetrisType::DeleteGroup(TCHAR const* group)
 {
 	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
-	tetrisTypeLibrary.remove(pTetrisTypeGroup);
 	delete pTetrisTypeGroup;
+	tetrisTypeLibrary.erase(group);
 }
 
 bool TetrisType::ExsitGroup(TCHAR const* group)
@@ -52,18 +54,37 @@ bool TetrisType::ExsitGroup(TCHAR const* group)
 
 TetrisTypeGroup* TetrisType::GetGroup(TCHAR const* group)
 {
+	if (tetrisTypeLibrary.end() == tetrisTypeLibrary.find(group))
+		return nullptr;
+	else
+		return tetrisTypeLibrary[group];
+}
+
+int TetrisType::GetTetrisTypesCount()
+{
+	int count = 0;
 	for (TetrisTypeLibrary::iterator it = tetrisTypeLibrary.begin(); it != tetrisTypeLibrary.end(); it++)
 	{
-		TetrisType* pTetrisType = *((*it)->begin());
-		if (0 == _tcscmp(pTetrisType->group, group))
-			return *it;
+		count += it->second->size();
 	}
-	return nullptr;
+	return count;
+}
+
+int TetrisType::GetTetrisTypesCount(TCHAR const* group)
+{
+	if(!ExsitGroup(group))
+		return 0;
+	return tetrisTypeLibrary[group]->size();
+}
+
+int TetrisType::GetRandomColor(TCHAR const* group)
+{
+	return Utility::Random(0, GetTetrisTypesCount(group) - 1);
 }
 
 TetrisType* TetrisType::Random()
 {
-	TetrisTypeGroup* pTetrisTypeGroup = *next(tetrisTypeLibrary.begin(), Utility::Random(0, tetrisTypeLibrary.size() - 1));
+	TetrisTypeGroup* pTetrisTypeGroup = next(tetrisTypeLibrary.begin(), Utility::Random(0, tetrisTypeLibrary.size() - 1))->second;
 	TetrisType* pTetrisType = *next(pTetrisTypeGroup->begin(), Utility::Random(0, pTetrisTypeGroup->size() - 1));
 	return pTetrisType;
 }
@@ -151,5 +172,7 @@ void TetrisType::GetXY(int pos, int* px, int* py)
 	*px = pos % col;
 	*py = pos / col;
 }
+
+const TCHAR* TetrisType::classic = _T("classic");
 
 TetrisTypeLibrary TetrisType::tetrisTypeLibrary;

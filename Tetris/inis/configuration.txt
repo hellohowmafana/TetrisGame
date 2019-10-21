@@ -13,7 +13,7 @@ FramePostion=30,30
 ;外框位置
 FrameSize=10,20
 ;外框尺寸
-PromptFramePostion=150,150
+PromptFramePostion=330,70
 ;提示框位置
 PromptFrameSize=5,6
 ;提示框尺寸

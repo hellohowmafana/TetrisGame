@@ -192,6 +192,11 @@ void Mass::GenerateLine(int line, int blankRate)
 	}
 }
 
+void Mass::Clear()
+{
+	ClearLines();
+}
+
 bool Mass::IsFull()
 {
 	return 0 == top;

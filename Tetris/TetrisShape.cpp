@@ -1,9 +1,10 @@
 #include "TetrisShape.h"
 #include "UnitFrame.h"
+#include "GameFrame.h"
 #include "Utility.h"
 
-TetrisShape::TetrisShape()
-	:posX(0),
+TetrisShape::TetrisShape() :
+	posX(0),
 	posY(0),
 	rotation(TetrisRotation::Rotation0),
 	pUnitFrame(nullptr),
@@ -37,24 +38,27 @@ void TetrisShape::InitializeRandom()
 			irotation = 3;
 	}
 	rotation = tetrisRotations[irotation];
+
+	randomColor = TetrisType::GetRandomColor(pTetrisType->group);
 }
 
-void TetrisShape::Initialize(TetrisType* pTetrisType, TetrisRotation rotation)
+void TetrisShape::Initialize(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor)
 {
 	this->pTetrisType = pTetrisType;
 	this->rotation = rotation;
+	this->randomColor = randomColor;
 }
 
 void TetrisShape::RebornRandom()
 {
 	InitializeRandom();
-	SetTopCenterPostion(false);
+	SetTopCenterPostion(false, true);
 }
 
-void TetrisShape::Reborn(TetrisType* pTetrisType, TetrisRotation rotation)
+void TetrisShape::Reborn(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor)
 {
-	Initialize(pTetrisType, rotation);
-	SetTopCenterPostion(false);
+	Initialize(pTetrisType, rotation, randomColor);
+	SetTopCenterPostion(false, true);
 }
 
 TetrisShape* TetrisShape::Clone(TetrisShape* pTetrisShape)
@@ -73,22 +77,37 @@ TetrisRotation TetrisShape::GetRotation()
 	return rotation;
 }
 
-void TetrisShape::CenterHorizontal(bool leanLeft)
+void TetrisShape::CenterHorizontal(bool leanLeft, bool careOffset)
 {
 	if (!pUnitFrame) return;
 
-	posX = (pUnitFrame->sizeX - pTetrisType->col + (leanLeft ? 0 : 1)) / 2 +
-		pTetrisType->horizontalCenterOffset;
-	CalculateRotationPosition(rotation, TetrisRotation::Rotation0, &posX, nullptr);
+	if (careOffset)
+	{
+		posX = (pUnitFrame->sizeX - pTetrisType->col + (leanLeft ? 0 : 1)) / 2
+			+ pTetrisType->horizontalCenterOffset;
+		CalculateRotationPosition(rotation, TetrisRotation::Rotation0, &posX, nullptr);
+	}
+	else
+	{
+		posX = (pUnitFrame->sizeX - GetWidth() + (leanLeft ? 0 : 1)) / 2;
+	}
 }
 
-void TetrisShape::SetTopCenterPostion(bool leanLeft)
+void TetrisShape::SetTopCenterPostion(bool leanLeft, bool careOffset)
 {
 	if (pUnitFrame)
 	{
 		posY = 0;
-		CenterHorizontal(leanLeft);
+		CenterHorizontal(leanLeft, careOffset);
 	}
+}
+
+void TetrisShape::CenterPostion(bool leanLeft, bool leanTop)
+{
+	if (!pUnitFrame) return;
+
+	posX = (pUnitFrame->sizeX - GetWidth() + (leanLeft ? 0 : 1)) / 2;
+	posY = (pUnitFrame->sizeY - GetHeight() + (leanTop ? 0 : 1)) / 2;
 }
 
 bool TetrisShape::SetPostion(int x, int y)
@@ -439,6 +458,11 @@ int TetrisShape::GetColor()
 	return pTetrisType->color;
 }
 
+int TetrisShape::GetRandomColor()
+{
+	return randomColor;
+}
+
 bool TetrisShape::IsOnTop()
 {
 	return GetTop() == 0;
@@ -503,19 +527,23 @@ bool TetrisShape::Save(const TCHAR* szSection, TCHAR** pszString)
 
 bool TetrisShape::Load(const TCHAR* szSection, TCHAR* szString)
 {
+	GameFrame* pGameFrame = dynamic_cast<GameFrame*>(pUnitFrame);
+	if (nullptr == pGameFrame)
+		return false;
+
 	tstring str(szString);
 	if (Archive::labelCurrent == szSection)
 	{
 		TCHAR* szs[5];
 		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 5);
-		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])));
+		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
 		SetPostion(stoi(szs[3]), stoi(szs[4]));
 	}
 	else if (Archive::labelNext == szSection)
 	{
 		TCHAR* szs[3];
 		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 3);
-		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])));
+		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
 	}
 	else
 	{

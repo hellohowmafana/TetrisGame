@@ -1,5 +1,5 @@
 #include "GameFrame.h"
-
+#include "PromptFrame.h"
 GameFrame GameFrame::singleton;
 
 void GameFrame::Initialize(Configuration* pConfiguration)
@@ -21,20 +21,43 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	pSeparatorColor = &pConfiguration->colorSeparator;
 	pTetrisColors = &pConfiguration->vecTetrisColors;
 	pMassColor = &pConfiguration->colorMass;
+}
 
+void GameFrame::SetPromptFrame(PromptFrame* pPromptFrame)
+{
+	this->pPromptFrame = pPromptFrame;
+}
+
+void GameFrame::SetInfoFrame(InfoFrame* pInfoFrame)
+{
+	this->pInfoFrame = pInfoFrame;
+}
+
+void GameFrame::InitializeGame()
+{
 	// initialize game
 	tetrisShape.SetFrame(this);
 	tetrisShape.InitializeRandom();
-	tetrisShape.SetTopCenterPostion(false);
+	tetrisShape.SetTopCenterPostion(false, true);
 	mass.SetGameFrame(this);
 	mass.Initialize();
 	nextTetrisShape.InitializeRandom();
+	nextTetrisShape.SetFrame(pPromptFrame);
+	nextTetrisShape.CenterPostion(false, false);
+	pPromptFrame->SetTetrisShape(&nextTetrisShape);
 	score = 0;
 }
 
 void GameFrame::Start()
 {
 	gameState = GameState::Start;
+	tetrisShape.InitializeRandom();
+	tetrisShape.SetTopCenterPostion(false, true);
+	mass.Clear();
+	mass.Initialize();
+	nextTetrisShape.InitializeRandom();
+	nextTetrisShape.CenterPostion(false, false);
+	score = 0;
 }
 
 void GameFrame::End()
@@ -107,8 +130,9 @@ void GameFrame::StepDown()
 			End();
 			return;
 		}
-		tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation());
+		tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation(), nextTetrisShape.GetRandomColor());
 		nextTetrisShape.InitializeRandom();
+		nextTetrisShape.CenterPostion(false, false);
 	}
 }
 
@@ -131,8 +155,9 @@ void GameFrame::Drop()
 		End();
 		return;
 	}
-	tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation());
+	tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation(), nextTetrisShape.GetRandomColor());
 	nextTetrisShape.InitializeRandom();
+	nextTetrisShape.CenterPostion(false, false);
 }
 
 void GameFrame::Rotate()

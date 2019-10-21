@@ -36,6 +36,7 @@ public:
 	void RemoveLine(int line);
 	int RemoveFullLines(int from, int to);
 	void GenerateLine(int line, int blankRate);
+	void Clear();
 	bool IsFull();
 
 	bool ValidateX(int x);

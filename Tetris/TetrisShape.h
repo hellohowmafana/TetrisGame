@@ -13,16 +13,17 @@ class TetrisShape : public ISerializable
 public:
 	TetrisShape();
 	void InitializeRandom();
-	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation);
+	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor);
 	void RebornRandom();
-	void Reborn(TetrisType* pTetrisType, TetrisRotation rotation);
+	void Reborn(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor);
 	TetrisShape* Clone(TetrisShape* pTetrisShape);
 
 	TetrisType* GetType();
 	TetrisRotation GetRotation();
 
-	void CenterHorizontal(bool leanLeft);
-	void SetTopCenterPostion(bool leanLeft);
+	void CenterHorizontal(bool leanLeft, bool careOffset);
+	void SetTopCenterPostion(bool leanLeft, bool careOffset);
+	void CenterPostion(bool leanLeft, bool leanTop);
 	bool SetPostion(int x, int y);
 	bool Move(int offestX, int offsetY);
 	bool MoveTo(int x, int y);
@@ -47,6 +48,7 @@ public:
 	int GetTop();
 	int GetBottom();
 	int GetColor();
+	int GetRandomColor();
 	
 	bool IsOnTop();
 	bool IsOnBottom();
@@ -59,6 +61,7 @@ private:
 	TetrisType* pTetrisType;
 	int posX, posY;
 	TetrisRotation rotation;
+	int randomColor;
 	UnitFrame* pUnitFrame;
 
 public:

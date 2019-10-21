@@ -186,6 +186,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Archive.h" />
     <ClInclude Include="ArchiveDialog.h" />
     <ClInclude Include="Frame.h" />
+    <ClInclude Include="InfoFrame.h" />
     <ClInclude Include="ISerializable.h" />
     <ClInclude Include="Mass.h" />
     <ClInclude Include="Configuration.h" />
@@ -207,6 +208,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="ArchiveDialog.cpp" />
     <ClCompile Include="Frame.cpp" />
+    <ClCompile Include="InfoFrame.cpp" />
     <ClCompile Include="Mass.cpp" />
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Controller.cpp" />

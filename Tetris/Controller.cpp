@@ -73,6 +73,12 @@ void Controller::Resume()
 	gameState = GameState::Start;
 }
 
+void Controller::Restart()
+{
+	End();
+	Start();
+}
+
 bool Controller::IsStarted()
 {
 	return gameState!=GameState::End;
