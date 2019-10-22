@@ -2,11 +2,11 @@
 #include <tchar.h>
 #include <fstream> 
 #include "TetrisShape.h"
+#include "Level.h"
 #include <gdiplus.h>
 using namespace Gdiplus;
 
-#define PATH_LENGTH 512
-#define BUFFER_CHARS 32
+#define BUFFER_CHARS 256
 #define ClaimStringBuffer TCHAR buffer[BUFFER_CHARS] = _T("");
 #define GetStringBuffer (buffer)
 #define GetConfigurationString(keySection, keyKey) GetPrivateProfileString((keySection).c_str(),\
@@ -35,6 +35,8 @@ bool Configuration::Initialize()
 			return false;
 		if(!LoadParameters())
 			return false;
+		if (!LoadLevels())
+			return false;
 		if(!LoadShapes())
 			return false;
 		if(!LoadColors())
@@ -49,8 +51,8 @@ bool Configuration::Initialize()
 
 bool Configuration::InitializeIniPaths()
 {
-	TCHAR path[PATH_LENGTH];
-	GetModuleFileName(nullptr, path, PATH_LENGTH);
+	TCHAR path[MAX_PATH];
+	GetModuleFileName(nullptr, path, MAX_PATH);
 	*(_tcsrchr(path, _T('\\')) + 1) = _T('\0');
 
 	pathInis = path + INIS_PATH;
@@ -62,6 +64,11 @@ bool Configuration::InitializeIniPaths()
 	pathMassColorFile = path + MASS_COLOR_FILE_PATH;
 	pathBorderColorFile = path + BORDER_COLOR_FILE_PATH;
 	pathSeparatorColorFile = path + SEPARATOR_COLOR_FILE_PATH;
+	pathInformationColor = path + INFORMATION_COLOR_FILE_PATH;
+	pathBackgroundColor = path + BACKGROUND_COLOR_FILE_PATH;
+	pathBackground = path + BACKGROUND_FILE_PATH;
+	FindFile(pathBackground);
+
 	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
 
 	pathArchives = path + ARCHIVES_PATH;
@@ -95,22 +102,28 @@ bool Configuration::LoadParameters()
 	GetConfigurationString(keySetting, keyInfoFrameSize);
 	SplitStringToInts(GetStringBuffer, _T(','), &infoFrameSizeX, &infoFrameSizeY);
 	borderThickness = GetConfigurationInt(keySetting, keyBorderThickness);
-	unitWidth = GetConfigurationInt(keySetting, keyUnitWidth);
 	separatorThickness = GetConfigurationInt(keySetting, keySeparatorThickness);
-	// timespan
-	stepDownTimespan = GetConfigurationInt(keySetting, keyStepDownTimespan);
-	dropTimespan = GetConfigurationInt(keySetting, keyDropTimespan);
-	dropDelay = GetConfigurationInt(keySetting, keyDropDelay);
-	removeDelay = GetConfigurationInt(keySetting, keyRemoveDelay);
-	removeBlinkTimespan = GetConfigurationInt(keySetting, keyRemoveBlinkTimespan);
+	unitWidth = GetConfigurationInt(keySetting, keyUnitWidth);
 
 	// game
-	level = GetConfigurationInt(keyGame, keyLevel);
+	startLevel = GetConfigurationInt(keyGame, keyStartLevel);
 	startLine = GetConfigurationInt(keyGame, keyStartLine);
 	startLineBlankRate = GetConfigurationDouble(keyGame, keyStartLineBlankRate);
 	GetConfigurationString(keyGame, keyRemoveScores);
-	SplitStringToInts(GetStringBuffer, _T(','), &removeScores[0], &removeScores[1], &removeScores[2], &removeScores[3]);
+	SplitStringToInts(GetStringBuffer, _T(','), vecRemoveScores);
 	droppedScore = GetConfigurationInt(keyGame, keyDroppedScore);
+	maxLevel = GetConfigurationInt(keyGame, keyMaxLevel);
+	GetConfigurationString(keyGame, keyScoreGainRate);
+	SplitStringToDoubles(GetStringBuffer, _T(','), vecScoreGainRate);
+	GetConfigurationString(keyGame, keyLevelScore);
+	SplitStringToInts(GetStringBuffer, _T(','), vecLevelScore);
+	GetConfigurationString(keyGame, keyStepDownTimespan);
+	SplitStringToInts(GetStringBuffer, _T(','), vecStepDownTimespan);
+	dropTimespan = GetConfigurationInt(keyGame, keyDropTimespan);
+	dropDelay = GetConfigurationInt(keyGame, keyDropDelay);
+	dropImmediate = GetConfigurationBool(keyGame, keyDropImmediate);
+	removeDelay = GetConfigurationInt(keyGame, keyRemoveDelay);
+	removeBlinkTimespan = GetConfigurationInt(keyGame, keyRemoveBlinkTimespan);
 
 	// music
 	GetConfigurationStr(keyMusic, keyMusicRotate, musicRotate);
@@ -123,7 +136,29 @@ bool Configuration::LoadParameters()
 	useColorRandom = GetConfigurationBool(keyBitmap, keyUseColorRandom);
 	GetConfigurationStr(keyBitmap, keyUnitBitmap, unitBitmap);
 	useMassColor = GetConfigurationBool(keyBitmap, keyUseMassColor);
+	useBackground = GetConfigurationBool(keyBitmap, keyUseBackground);
 
+	return true;
+}
+
+bool Configuration::LoadLevels()
+{
+	vector<Level>* pvecLevels = &Level::vecLevels;
+	pvecLevels->resize(maxLevel);
+	for (size_t i = 0; i < (size_t)maxLevel; i++)
+	{
+		pvecLevels->at(i).level = i + 1;
+		pvecLevels->at(i).minScore =
+			i < vecLevelScore.size() ? vecLevelScore[i] : -1;
+		pvecLevels->at(i).maxScore =
+			i < vecLevelScore.size() - 1 ? vecLevelScore[i + 1] : -1;
+		pvecLevels->at(i).stepDownTimeSpan =
+			i < vecStepDownTimespan.size() ? vecStepDownTimespan[i] : *(vecStepDownTimespan.end() - 1);
+		double scoreGainRate =
+			i < vecScoreGainRate.size() ? vecScoreGainRate[i] : *(vecScoreGainRate.end() - 1);
+		pvecLevels->at(i).scoreRate = 
+			(i == 0 ? 1 : pvecLevels->at(i - 1).scoreRate) + scoreGainRate;
+	}
 	return true;
 }
 
@@ -216,6 +251,8 @@ bool Configuration::LoadColors()
 		GetColorFromFile(pathSeparatorColorFile.c_str(), &colorSeparator);
 		GetColorsFromFile(pathTetrisColorFile.c_str(), &vecTetrisColors);
 		GetColorFromFile(pathMassColorFile.c_str(), &colorMass);
+		GetColorFromFile(pathInformationColor.c_str(), &colorInfo);
+		GetColorFromFile(pathBackgroundColor.c_str(), &colorBackground);
 	}
 	catch (...)
 	{
@@ -268,6 +305,36 @@ bool Configuration::GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecC
 	}
 }
 
+tstring& Configuration::FindFile(tstring& path)
+{
+	tstring dir = path.substr(0, path.find_last_of(_T('\\')) + 1);
+	WIN32_FIND_DATA findData;
+	HANDLE hFindFile = FindFirstFile(path.c_str(), &findData);
+	if (hFindFile)
+	{
+		if (!(FILE_ATTRIBUTE_DIRECTORY & findData.dwFileAttributes))
+			path = dir + findData.cFileName;
+		FindClose(hFindFile);
+	}
+	return path;
+}
+
+void Configuration::FindFiles(tstring& path, vector<tstring>* pvecFiles)
+{
+	tstring dir = path.substr(0, path.find_last_of(_T('\\')) + 1);
+	WIN32_FIND_DATA findData;
+	HANDLE hFindFile = FindFirstFile(path.c_str(), &findData);
+	if (hFindFile)
+	{
+		do
+		{
+			if (!(FILE_ATTRIBUTE_DIRECTORY & findData.dwFileAttributes))
+				pvecFiles->push_back(dir + findData.cFileName);
+		} while (FindNextFile(hFindFile, &findData));
+		FindClose(hFindFile);
+	}
+}
+
 bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)
 {
 	return false;
@@ -292,36 +359,36 @@ bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2)
 	}
 }
 
-bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2, int* v3, int* v4)
+bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, vector<int>& vecInts)
 {
 	try {
-		tstring strBuffer(szStr);
-		size_t pos;
-		tstring strVal;
+		vector<TCHAR*> tokens; // token pointers
+		tokens.resize(Utility::SplitString(szStr, _T(','), nullptr, 0));
+		Utility::SplitString(szStr, _T(','), tokens.data(), 0);
+		vecInts.clear();
+		for (size_t i = 0; i < tokens.size(); i++)
+		{
+			vecInts.push_back(stoi(tokens[i]));
+		}
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
 
-		if(string::npos == (pos = strBuffer.find(ch)))
-			return false;
-		strVal = strBuffer.substr(0, pos);
-		*v1 = stoi(strVal);
-		strBuffer.erase(0, pos + 1);
-
-		if (string::npos == (pos = strBuffer.find(ch)))
-			return false;
-		strVal = strBuffer.substr(0, pos);
-		*v2 = stoi(strVal);
-		strBuffer.erase(0, pos + 1);
-
-		if (string::npos == (pos = strBuffer.find(ch)))
-			return false;
-		strVal = strBuffer.substr(0, pos);
-		*v3 = stoi(strVal);
-		strBuffer.erase(0, pos + 1);
-
-		if (string::npos == (pos = strBuffer.find(ch)))
-			return false;
-		strVal = strBuffer.substr(0, pos);
-		*v4 = stoi(strVal);
-
+bool Configuration::SplitStringToDoubles(TCHAR* szStr, TCHAR ch, vector<double>& vecDoubles)
+{
+	try {
+		vector<TCHAR*> tokens; // token pointers
+		tokens.resize(Utility::SplitString(szStr, _T(','), nullptr, 0));
+		Utility::SplitString(szStr, _T(','), tokens.data(), 0);
+		vecDoubles.clear();
+		for (size_t i = 0; i < tokens.size(); i++)
+		{
+			vecDoubles.push_back(stod(tokens[i]));
+		}
 		return true;
 	}
 	catch (...)

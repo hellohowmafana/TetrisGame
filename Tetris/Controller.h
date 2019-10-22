@@ -8,6 +8,7 @@ public:
 	void Initialize(Configuration* pConfiguration);
 	void SetHWnd(HWND hWnd);
 	void SetGameFrame(GameFrame* pGameFrame);
+	bool IsInitialized();
 
 	void Rotate();
 	void StepHorizontal(bool left);
@@ -19,8 +20,6 @@ public:
 	void Pause();
 	void Resume();
 	void Restart();
-
-	bool IsStarted();
 
 	bool SaveGame(TCHAR* szArchive);
 	bool LoadGame(TCHAR* szArchive);
@@ -62,7 +61,7 @@ private:
 	Controller() {};
 	HWND hWnd;
 	GameFrame* pGameFrame;
-	GameState gameState;
+	bool isInitialized;
 
 	UINT stepDownTimespan;
 	UINT dropTimespan;

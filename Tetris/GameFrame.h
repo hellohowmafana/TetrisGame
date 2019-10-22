@@ -19,7 +19,11 @@ class GameFrame : public UnitFrame, public ISerializable
 public:
 	static GameFrame singleton;
 
+	int startLevel;
+	int startLine;
 	double startLineBlankRate;
+	vector<int> vecRemoveScores;
+	int droppedScore;
 	bool useColor;
 	bool useColorRandom;
 	bool useMassColor;
@@ -32,6 +36,7 @@ private:
 	TetrisShape tetrisShape;
 	TetrisShape nextTetrisShape;
 	int score;
+	int level;
 	GameState gameState;
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
@@ -49,12 +54,13 @@ public:
 	void End();
 	void Pause();
 	void Resume();
-	bool IsGameOver();
+	GameState GetGameState();
 
 	void StepLeft();
 	void StepRight();
 	void StepDown();
 	void Drop();
+	void EndDrop();
 	void Rotate();
 
 	Mass* GetMass();

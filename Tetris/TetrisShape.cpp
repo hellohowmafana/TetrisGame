@@ -61,6 +61,11 @@ void TetrisShape::Reborn(TetrisType* pTetrisType, TetrisRotation rotation, int r
 	SetTopCenterPostion(false, true);
 }
 
+void TetrisShape::SetUseRandomColor(bool useRandomColor)
+{
+	this->useRandomColor = useRandomColor;
+}
+
 TetrisShape* TetrisShape::Clone(TetrisShape* pTetrisShape)
 {
 	*pTetrisShape = *this;
@@ -455,7 +460,7 @@ int TetrisShape::GetBottom()
 
 int TetrisShape::GetColor()
 {
-	return pTetrisType->color;
+	return useRandomColor ? randomColor : pTetrisType->color;
 }
 
 int TetrisShape::GetRandomColor()

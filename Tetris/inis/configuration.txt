@@ -17,9 +17,9 @@ PromptFramePostion=330,70
 ;提示框位置
 PromptFrameSize=5,6
 ;提示框尺寸
-InfoFramePosition=150,300
+InfoFramePosition=355,300
 ;信息框位置
-InfoFrameSize=5,8
+InfoFrameSize=100,200
 ;信息框尺寸
 BorderThickness=7
 ;外框厚度
@@ -27,20 +27,10 @@ SeparatorThickness=5
 ;内框厚度
 UnitWidth=20
 ;单位宽度
-StepDownTimespan=1000
-;下降速度
-DropTimespan=150
-;降落延迟
-DropDelay=1000
-;落地延迟
-RemoveDelay=1200
-;消除延迟
-RemoveBlinkTimespan=300
-;闪烁间隔
 
 [Game]
 ;[游戏]
-Level=1
+StartLevel=1
 ;级别
 StartLine=0
 ;初始行
@@ -50,6 +40,24 @@ RemoveScores=100,200,400,800
 ;消除得分
 DroppedScore=10
 ;降落得分
+MaxLevel=13
+;最大级别
+ScoreGainRate=0.0,0.2,0.2,0.2,0.1,0.1
+;分数增加率
+LevelScore=0,2000,4000,7000,10000,150000,20000
+;级别分数
+StepDownTimespan=1600,1500,1350,1200,1000,900,800,700,600,500
+;下降速度
+DropTimespan=250
+;降落速度
+DropImmediate=1
+;立刻降落
+DropDelay=1000
+;落地延迟
+RemoveDelay=1200
+;消除延迟
+RemoveBlinkTimespan=300
+;闪烁间隔
 
 [Music]
 ;[音效]
@@ -72,3 +80,5 @@ UnitBitmap=
 ;单位贴图
 UseMassColor=1
 ;落地变色
+UseBackground=1
+;使用背景图

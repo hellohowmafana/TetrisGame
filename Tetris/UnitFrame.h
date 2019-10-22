@@ -5,9 +5,6 @@ class UnitFrame :
 	public Frame
 {
 public:
-	int sizeX;
-	int sizeY;
-
 	int unitWidth;
 	int borderThickness;
 	int separatorThickness;

@@ -23,10 +23,25 @@ public:
 
 	static int SplitString(TCHAR* szString, TCHAR delimiter, TCHAR** tokens, int count)
 	{
+		// return tokens count
+		if (nullptr == tokens)
+		{
+			count = 0;
+			TCHAR* pc = _tcschr(szString, delimiter);
+			count++;
+			while (pc != NULL)
+			{
+				pc = _tcschr(pc + 1, delimiter);
+				count++;
+			}
+			return count;
+		}
+		// 0 for maximum
 		TCHAR szDelimiters[2] = { delimiter, 0 };
 		TCHAR* ptr = _tcstok(szString, szDelimiters);
+		bool hasCount = 0 != count;
 		int leftCount = count;
-		while (ptr != NULL && leftCount)
+		while (ptr != NULL && (hasCount ? leftCount : true))
 		{
 			*tokens++ = ptr;
 			ptr = _tcstok(NULL, szDelimiters);

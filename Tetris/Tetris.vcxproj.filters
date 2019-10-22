@@ -87,6 +87,15 @@
     <ClInclude Include="InfoFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AnimatedGifPlayer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Background.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
@@ -134,6 +143,15 @@
     <ClCompile Include="InfoFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AnimatedGifPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Background.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tetris.rc">
@@ -157,6 +175,15 @@
       <Filter>inis\bitmaps</Filter>
     </Image>
     <Image Include="inis\bitmaps\mass color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\background.jpeg">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\background color.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\information color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
   </ItemGroup>

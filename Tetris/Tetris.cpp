@@ -144,10 +144,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    PromptFrame* pPromptFrame = &PromptFrame::singleton;
    pPromptFrame->Initialize(pConfiguration);
    pGameFrame->SetPromptFrame(pPromptFrame);
+   InfoFrame* pInfoFrame = &InfoFrame::singleton;
+   pInfoFrame->Initialize(pConfiguration);
+   pGameFrame->SetInfoFrame(pInfoFrame);
    pGameFrame->InitializeGame();
 
+   Background* pBackground = &Background::singleton;
+   pBackground->Initialize(pConfiguration);
+
    Drawer* pDrawer = &Drawer::singleton;
-   pDrawer->Initialize(pGameFrame, pPromptFrame);
+   pDrawer->Initialize(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
 
    Controller* pController = &Controller::singleton;
    pController->Initialize(pConfiguration);
@@ -201,7 +207,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
     case WM_PAINT:
 		{
-			if (!Controller::singleton.IsStarted()) break;
+			if (!Controller::singleton.IsInitialized()) break;
 
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(hWnd, &ps);

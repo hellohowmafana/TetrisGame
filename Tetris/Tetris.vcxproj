@@ -183,11 +183,14 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="AnimatedGifPlayer.h" />
     <ClInclude Include="Archive.h" />
     <ClInclude Include="ArchiveDialog.h" />
+    <ClInclude Include="Background.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="InfoFrame.h" />
     <ClInclude Include="ISerializable.h" />
+    <ClInclude Include="Level.h" />
     <ClInclude Include="Mass.h" />
     <ClInclude Include="Configuration.h" />
     <ClInclude Include="Controller.h" />
@@ -205,10 +208,13 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="AnimatedGifPlayer.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="ArchiveDialog.cpp" />
+    <ClCompile Include="Background.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="InfoFrame.cpp" />
+    <ClCompile Include="Level.cpp" />
     <ClCompile Include="Mass.cpp" />
     <ClCompile Include="Configuration.cpp" />
     <ClCompile Include="Controller.cpp" />
@@ -225,6 +231,9 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ResourceCompile Include="Tetris.rc" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="inis\bitmaps\background color.bmp" />
+    <Image Include="inis\bitmaps\background.jpeg" />
+    <Image Include="inis\bitmaps\information color.bmp" />
     <Image Include="inis\bitmaps\mass color.bmp" />
     <Image Include="inis\bitmaps\separator color.bmp" />
     <Image Include="inis\bitmaps\tetris color.bmp">

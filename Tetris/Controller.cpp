@@ -1,22 +1,20 @@
 #include "Controller.h"
 #include "Configuration.h"
 #include "GameFrame.h"
+#include "Level.h"
 #include "Archive.h"
 
 Controller Controller::singleton;
 
-void Controller::SetGameFrame(GameFrame* pGameFrame)
-{
-	this->pGameFrame = pGameFrame;
-}
-
 void Controller::Initialize(Configuration* pConfiguration)
 {
-	this->stepDownTimespan = pConfiguration->stepDownTimespan;
+	this->stepDownTimespan = Level::GetLevel(pConfiguration->startLevel)->stepDownTimeSpan;
 	this->dropTimespan = pConfiguration->dropTimespan;
 	this->dropDelayTimespan = pConfiguration->dropDelay;
 	this->removeDelayTimespan = pConfiguration->removeDelay;
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
+
+	isInitialized = true;
 }
 
 void Controller::SetHWnd(HWND hWnd)
@@ -24,13 +22,27 @@ void Controller::SetHWnd(HWND hWnd)
 	this->hWnd = hWnd;
 }
 
+void Controller::SetGameFrame(GameFrame* pGameFrame)
+{
+	this->pGameFrame = pGameFrame;
+}
+
+bool Controller::IsInitialized()
+{
+	return isInitialized;
+}
+
 void Controller::Rotate()
 {
+	if (GameState::Start != pGameFrame->GetGameState())
+		return;
 	pGameFrame->Rotate();
 }
 
 void Controller::StepHorizontal(bool left)
 {
+	if (GameState::Start != pGameFrame->GetGameState())
+		return;
 	if (left)
 	{
 		pGameFrame->StepLeft();
@@ -43,45 +55,40 @@ void Controller::StepHorizontal(bool left)
 
 void Controller::StepDown()
 {
+	if (GameState::Start != pGameFrame->GetGameState())
+		return;
 	pGameFrame->StepDown();
 }
 
 void Controller::Drop()
 {
+	if (GameState::Start != pGameFrame->GetGameState())
+		return;
 	pGameFrame->Drop();
 }
 
 void Controller::Start()
 {
-	gameState = GameState::Start;
 	pGameFrame->Start();
 }
 
 void Controller::End()
 {
-	gameState = GameState::End;
 	pGameFrame->End();
 }
 
 void Controller::Pause()
 {
-	gameState = GameState::Pause;
 }
 
 void Controller::Resume()
 {
-	gameState = GameState::Start;
 }
 
 void Controller::Restart()
 {
 	End();
 	Start();
-}
-
-bool Controller::IsStarted()
-{
-	return gameState!=GameState::End;
 }
 
 bool Controller::SaveGame(TCHAR* szArchive)

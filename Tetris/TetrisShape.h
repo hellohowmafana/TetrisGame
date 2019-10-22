@@ -16,8 +16,8 @@ public:
 	void Initialize(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor);
 	void RebornRandom();
 	void Reborn(TetrisType* pTetrisType, TetrisRotation rotation, int randomColor);
+	void SetUseRandomColor(bool useRandomColor);
 	TetrisShape* Clone(TetrisShape* pTetrisShape);
-
 	TetrisType* GetType();
 	TetrisRotation GetRotation();
 
@@ -61,6 +61,7 @@ private:
 	TetrisType* pTetrisType;
 	int posX, posY;
 	TetrisRotation rotation;
+	bool useRandomColor;
 	int randomColor;
 	UnitFrame* pUnitFrame;
 
