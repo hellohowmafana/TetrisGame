@@ -4,6 +4,7 @@
 #include "TetrisShape.h"
 #include "Level.h"
 #include <gdiplus.h>
+#include "Background.h"
 using namespace Gdiplus;
 
 #define BUFFER_CHARS 256
@@ -87,23 +88,26 @@ bool Configuration::LoadParameters()
 	SplitStringToInts(GetStringBuffer, _T(','), &windowLeft, &windowTop);
 	windowCenter = GetConfigurationBool(keyWindow, keyWindowCenter);
 
-	// setting
-	// draw
-	GetConfigurationString(keySetting, keyFramePostion);
+	// display
+	GetConfigurationString(keyDisplay, keyFramePostion);
 	SplitStringToInts(GetStringBuffer, _T(','), &frameLeft, &frameTop);
-	GetConfigurationString(keySetting, keyFrameSize);
+	GetConfigurationString(keyDisplay, keyFrameSize);
 	SplitStringToInts(GetStringBuffer, _T(','), &frameSizeX, &frameSizeY);
-	GetConfigurationString(keySetting, keyPromptFramePostion);
+	GetConfigurationString(keyDisplay, keyPromptFramePostion);
 	SplitStringToInts(GetStringBuffer, _T(','), &promptFrameLeft, &promptFrameTop);
-	GetConfigurationString(keySetting, keyPromptFrameSize);
+	GetConfigurationString(keyDisplay, keyPromptFrameSize);
 	SplitStringToInts(GetStringBuffer, _T(','), &promptFrameSizeX, &promptFrameSizeY);
-	GetConfigurationString(keySetting, keyInfoFramePosition);
+	GetConfigurationString(keyDisplay, keyInfoFramePosition);
 	SplitStringToInts(GetStringBuffer, _T(','), &infoFrameLeft, &infoFrameTop);
-	GetConfigurationString(keySetting, keyInfoFrameSize);
+	GetConfigurationString(keyDisplay, keyInfoFrameSize);
 	SplitStringToInts(GetStringBuffer, _T(','), &infoFrameSizeX, &infoFrameSizeY);
-	borderThickness = GetConfigurationInt(keySetting, keyBorderThickness);
-	separatorThickness = GetConfigurationInt(keySetting, keySeparatorThickness);
-	unitWidth = GetConfigurationInt(keySetting, keyUnitWidth);
+	borderThickness = GetConfigurationInt(keyDisplay, keyBorderThickness);
+	separatorThickness = GetConfigurationInt(keyDisplay, keySeparatorThickness);
+	unitWidth = GetConfigurationInt(keyDisplay, keyUnitWidth);
+	GetConfigurationStr(keyDisplay, keyInfoFontFace, infoFontFace);
+	infoFontHeight = GetConfigurationInt(keyDisplay, keyInfoFontHeight);
+	infoFontWidth = GetConfigurationInt(keyDisplay, keyInfoFontWidth);
+	infoFontWeight = GetConfigurationInt(keyDisplay, keyInfoFontWeight);
 
 	// game
 	startLevel = GetConfigurationInt(keyGame, keyStartLevel);
@@ -136,7 +140,7 @@ bool Configuration::LoadParameters()
 	useColorRandom = GetConfigurationBool(keyBitmap, keyUseColorRandom);
 	GetConfigurationStr(keyBitmap, keyUnitBitmap, unitBitmap);
 	useMassColor = GetConfigurationBool(keyBitmap, keyUseMassColor);
-	useBackground = GetConfigurationBool(keyBitmap, keyUseBackground);
+	backgroundMode = (BackgroundMode)GetConfigurationInt(keyBitmap, keyBackgroundMode);
 
 	return true;
 }

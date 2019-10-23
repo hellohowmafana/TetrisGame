@@ -127,7 +127,7 @@ void AnimatedGifPlayer::TimerProc(HWND hWnd, UINT msg, UINT_PTR uIDEvent, DWORD 
 	// increase loop count, stop if over
 	if (m_uFrameCur == m_uFrameCount - 1)
 		m_sLoopedCount++;
-	if (!m_bLoopInfinate && 0 != m_sLoopCount && m_sLoopCount == m_sLoopedCount)
+	if (!m_bLoopInfinate && 0 != m_sLoopCount && m_sLoopCount + 1 == m_sLoopedCount)
 		return;
 
 	// set timer for next frame

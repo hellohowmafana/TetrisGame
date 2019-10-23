@@ -9,11 +9,6 @@
 class PromptFrame;
 class InfoFrame;
 
-enum class GameState
-{
-	Start, Pause, End
-};
-
 class GameFrame : public UnitFrame, public ISerializable
 {
 public:
@@ -37,7 +32,6 @@ private:
 	TetrisShape nextTetrisShape;
 	int score;
 	int level;
-	GameState gameState;
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
 
@@ -49,19 +43,17 @@ public:
 	void SetPromptFrame(PromptFrame* pPromptFrame);
 	void SetInfoFrame(InfoFrame* pInfoFrame);
 	void InitializeGame();
-
-	void Start();
-	void End();
-	void Pause();
-	void Resume();
-	GameState GetGameState();
+	void Reborn();
 
 	void StepLeft();
 	void StepRight();
-	void StepDown();
+	bool StepDown();
 	void Drop();
-	void EndDrop();
+	void Union();
+	void RemoveFullLines();
 	void Rotate();
+	void RebornTetrisShape();
+	bool IsFull();
 
 	Mass* GetMass();
 	TetrisShape* GetShape();

@@ -14,21 +14,14 @@ Drawer::Drawer() :
 
 Drawer::~Drawer()
 {
-	DeleteObject(hpnBorder);
-	hpnBorder = NULL;
-	DeleteObject(hpnSeparator);
-	hpnSeparator = NULL;
-	//delete pbmBackground;
-
-	if (NULL != hbmCmp)
+	if (attached)
 	{
-		DeleteObject(hbmCmp);
-		hbmCmp = NULL;
+		DetachDC();
 	}
-	if (NULL != hdcCmp)
+
+	if (initialized)
 	{
-		DeleteDC(hdcCmp);
-		hdcCmp = NULL;
+		Deinitialize();
 	}
 }
 
@@ -51,17 +44,51 @@ bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFr
 		hbsMass = CreateSolidBrush(*pGameFrame->pMassColor);
 
 		pbmBackground = new Bitmap(pBackground->pathBackground.c_str());
+		hbsBackground = CreateSolidBrush(pBackground->colorBackground);
+		hftInfo = CreateFont(pInfoFrame->fontHeight, pInfoFrame->fontWidth, 0, 0,
+			pInfoFrame->fontWeight*100, FALSE, FALSE, FALSE,
+			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+			DEFAULT_QUALITY, FF_DONTCARE, pInfoFrame->fontFace.c_str());
+
 		HDC hdc = GetDC(NULL);
 		pbmBackground->SetResolution((REAL)GetDeviceCaps(hdc, LOGPIXELSX),
 			(REAL)GetDeviceCaps(hdc, LOGPIXELSY));
 		DeleteDC(hdc);
-		hbsBackground = CreateSolidBrush(pBackground->color);
 	}
 	catch (...){
 		return false;
 	}
 
 	initialized = true;
+
+	return true;
+}
+
+bool Drawer::Deinitialize()
+{
+	this->pGameFrame = nullptr;
+	this->pPromptFrame = nullptr;
+	this->pInfoFrame = nullptr;
+	this->pBackground = nullptr;
+
+	DeleteObject(hpnBorder);
+	hpnBorder = NULL;
+	DeleteObject(hpnSeparator);
+	hpnSeparator = NULL;
+	for (size_t i = 0; i < vecTetrisBrushes.size(); i++)
+	{
+		DeleteObject(vecTetrisBrushes.at(i));
+	}
+	vecTetrisBrushes.clear();
+	DeleteObject(hbsMass);
+	hbsMass = NULL;
+	//delete pbmBackground;
+	DeleteObject(hbsBackground);
+	hbsBackground = NULL;
+	DeleteObject(hftInfo);
+	hftInfo = NULL;
+
+	initialized = false;
 
 	return true;
 }
@@ -73,6 +100,7 @@ void Drawer::AttachDC(HDC hdc)
 	GetDCSize(hdc, &dcWidth, &dcHeight);
 	hbmCmp = CreateCompatibleBitmap(hdc, dcWidth, dcHeight);
 	SelectObject(hdcCmp, hbmCmp);
+	attached = true;
 }
 
 void Drawer::DetachDC()
@@ -83,6 +111,7 @@ void Drawer::DetachDC()
 	hbmCmp = NULL;
 	DeleteDC(hdcCmp);
 	hdcCmp = NULL;
+	attached = false;
 }
 
 void Drawer::DrawElements()
@@ -106,16 +135,29 @@ void Drawer::DrawBackground()
 {
 	if (!IsValid()) return;
 
-	if (pBackground->useBackground)
+	switch (pBackground->backgroundMode)
 	{
-		Graphics graphics(hdcCmp);
-		graphics.DrawImage(pbmBackground, 0, 0);
-	}
-	else
-	{
-		HGDIOBJ hbsOld = SelectObject(hdcCmp, hbsBackground);
-		ExtFloodFill(hdcCmp, 0, 0, RGB(0,0,0), FLOODFILLSURFACE);
-		SelectObject(hdcCmp, hbsOld);
+		case BackgroundMode::Color:
+		{
+			HGDIOBJ hbsOld = SelectObject(hdcCmp, hbsBackground);
+			ExtFloodFill(hdcCmp, 0, 0, RGB(0, 0, 0), FLOODFILLSURFACE);
+			SelectObject(hdcCmp, hbsOld);
+		}
+		break;
+		case BackgroundMode::General:
+		{
+			Graphics graphics(hdcCmp);
+			graphics.DrawImage(pbmBackground, 0, 0);
+		}
+		break;
+		case BackgroundMode::Strech:
+		break;
+		case BackgroundMode::Tile:
+		break;
+		case BackgroundMode::UniformFill:
+		break;
+		case BackgroundMode::Uniform:
+		break;
 	}
 }
 
@@ -257,9 +299,9 @@ void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush)
 void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 {
 	tstring labels;
-	labels.append(_T("Level:\n\n"));
-	labels.append(_T("Score:\n\n"));
-	labels.append(_T("StartLine:\n\n"));
+	labels.append(_T("Level\n\n"));
+	labels.append(_T("Score\n\n"));
+	labels.append(_T("StartLine\n\n"));
 	tstring infos;
 	infos.append(to_tstring(*pInfoFrame->pLevel)).append(_T("\n\n"));
 	infos.append(to_tstring(*pInfoFrame->pScore)).append(_T("\n\n"));
@@ -268,6 +310,7 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 		pInfoFrame->left + pInfoFrame->sizeX, pInfoFrame->top + pInfoFrame->sizeY };
 	SetBkMode(hdcCmp, TRANSPARENT);
 	SetTextColor(hdcCmp, pInfoFrame->colorInfo);
+	SelectObject(hdcCmp, hftInfo);
 	DrawText(hdcCmp, labels.c_str(), labels.size(), &rcInfo, DT_LEFT);
 	DrawText(hdcCmp, infos.c_str(), infos.size(), &rcInfo, DT_RIGHT);
 }

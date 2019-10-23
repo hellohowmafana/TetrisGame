@@ -1,3 +1,4 @@
+#pragma once
 #include <string>
 #include <Windows.h>
 #include <vector>
@@ -5,7 +6,9 @@
 #include "tcharstd.h"
 using namespace std;
 
-#pragma once
+class Background;
+
+enum class BackgroundMode;
 
 class Configuration
 {
@@ -51,7 +54,7 @@ private:
 	const tstring keyWindowPostion = _T("WindowPostion");
 	const tstring keyWindowCenter = _T("WindowCenter");
 	
-	const tstring keySetting = _T("Setting");
+	const tstring keyDisplay = _T("Display");
 	const tstring keyFramePostion = _T("FramePostion");
 	const tstring keyFrameSize = _T("FrameSize");
 	const tstring keyPromptFramePostion = _T("PromptFramePostion");
@@ -61,6 +64,10 @@ private:
 	const tstring keyBorderThickness = _T("BorderThickness");
 	const tstring keySeparatorThickness = _T("SeparatorThickness");
 	const tstring keyUnitWidth = _T("UnitWidth");
+	const tstring keyInfoFontFace = _T("InfoFontFace");
+	const tstring keyInfoFontHeight = _T("InfoFontHeight");
+	const tstring keyInfoFontWidth = _T("InfoFontWidth"); 
+	const tstring keyInfoFontWeight = _T("InfoFontWeight");
 	
 	const tstring keyGame = _T("Game");
 	const tstring keyStartLevel = _T("StartLevel");
@@ -89,14 +96,14 @@ private:
 	const tstring keyUseColorRandom = _T("UseColorRandom");
 	const tstring keyUnitBitmap = _T("UnitBitmap");
 	const tstring keyUseMassColor = _T("UseMassColor");
-	const tstring keyUseBackground = _T("UseBackground");
+	const tstring keyBackgroundMode = _T("BackgroundMode");
 
 public:
 	// window
 	int windowWidth, windowHeight, windowLeft, windowTop;
 	bool windowCenter;
 	
-	// draw
+	// display
 	int frameLeft, frameTop;
 	int frameSizeX, frameSizeY;
 	int promptFrameLeft, promptFrameTop;
@@ -106,8 +113,12 @@ public:
 	int borderThickness;
 	int separatorThickness;
 	int unitWidth;
+	tstring infoFontFace;
+	int infoFontHeight;
+	int infoFontWidth;
+	int infoFontWeight;
 
-	// game setting
+	// game
 	int startLevel;
 	int startLine;
 	double startLineBlankRate;
@@ -134,7 +145,7 @@ public:
 	bool useColorRandom;
 	tstring unitBitmap;
 	bool useMassColor;
-	bool useBackground;
+	BackgroundMode backgroundMode;
 
 public:
 	COLORREF colorBorder;

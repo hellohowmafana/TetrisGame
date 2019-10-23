@@ -1,10 +1,11 @@
 #include "Background.h"
+#include "Configuration.h"
 
 void Background::Initialize(Configuration* pConfiguration)
 {
-	color = pConfiguration->colorBackground;
+	colorBackground = pConfiguration->colorBackground;
 	pathBackground = pConfiguration->pathBackground;
-	useBackground = pConfiguration->useBackground;
+	backgroundMode = pConfiguration->backgroundMode;
 }
 
 Background Background::singleton;

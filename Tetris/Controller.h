@@ -1,6 +1,11 @@
 #pragma once
 #include "GameFrame.h"
 
+enum class GameState
+{
+	Start, Pause, End
+};
+
 class Controller
 {
 public:
@@ -9,6 +14,7 @@ public:
 	void SetHWnd(HWND hWnd);
 	void SetGameFrame(GameFrame* pGameFrame);
 	bool IsInitialized();
+	GameState GetGameState();
 
 	void Rotate();
 	void StepHorizontal(bool left);
@@ -61,7 +67,8 @@ private:
 	Controller() {};
 	HWND hWnd;
 	GameFrame* pGameFrame;
-	bool isInitialized;
+	bool initialized;
+	GameState gameState;
 
 	UINT stepDownTimespan;
 	UINT dropTimespan;

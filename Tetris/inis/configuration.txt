@@ -7,8 +7,8 @@ WindowPosition=80,60
 WindowCenter=1
 ;窗口居中
 
-[Setting]
-;[设定]
+[Display]
+;[显示]
 FramePostion=30,30
 ;外框位置
 FrameSize=10,20
@@ -27,12 +27,20 @@ SeparatorThickness=5
 ;内框厚度
 UnitWidth=20
 ;单位宽度
+InfoFontFace=Bahnschrift
+;信息字体名
+InfoFontHeight=0
+;信息字体高度，默认0
+InfoFontWidth=0
+;信息字体宽度，默认0
+InfoFontWeight=8
+;信息字体粗度，1-10，默认0
 
 [Game]
 ;[游戏]
 StartLevel=1
 ;级别
-StartLine=0
+StartLine=3
 ;初始行
 StartLineBlankRate=0.5
 ;初始行空率
@@ -43,7 +51,7 @@ DroppedScore=10
 MaxLevel=13
 ;最大级别
 ScoreGainRate=0.0,0.2,0.2,0.2,0.1,0.1
-;分数增加率
+;分数增率
 LevelScore=0,2000,4000,7000,10000,150000,20000
 ;级别分数
 StepDownTimespan=1600,1500,1350,1200,1000,900,800,700,600,500
@@ -80,5 +88,6 @@ UnitBitmap=
 ;单位贴图
 UseMassColor=1
 ;落地变色
-UseBackground=1
-;使用背景图
+BackgroundMode=1
+;背景：0颜色，1贴图，2填满，3平铺，4等比填满，5等比留空
+

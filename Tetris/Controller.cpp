@@ -14,7 +14,8 @@ void Controller::Initialize(Configuration* pConfiguration)
 	this->removeDelayTimespan = pConfiguration->removeDelay;
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
 
-	isInitialized = true;
+	initialized = true;
+	gameState = GameState::End;
 }
 
 void Controller::SetHWnd(HWND hWnd)
@@ -29,19 +30,19 @@ void Controller::SetGameFrame(GameFrame* pGameFrame)
 
 bool Controller::IsInitialized()
 {
-	return isInitialized;
+	return initialized;
 }
 
 void Controller::Rotate()
 {
-	if (GameState::Start != pGameFrame->GetGameState())
+	if (GameState::Start != gameState)
 		return;
 	pGameFrame->Rotate();
 }
 
 void Controller::StepHorizontal(bool left)
 {
-	if (GameState::Start != pGameFrame->GetGameState())
+	if (GameState::Start != gameState)
 		return;
 	if (left)
 	{
@@ -55,34 +56,56 @@ void Controller::StepHorizontal(bool left)
 
 void Controller::StepDown()
 {
-	if (GameState::Start != pGameFrame->GetGameState())
+	if (GameState::Start != gameState)
 		return;
-	pGameFrame->StepDown();
+	if (pGameFrame->StepDown())
+	{
+		pGameFrame->Union();
+		pGameFrame->RemoveFullLines();
+		if (pGameFrame->IsFull())
+		{
+			End();
+			return;
+		}
+		pGameFrame->RebornTetrisShape();
+	}
 }
 
 void Controller::Drop()
 {
-	if (GameState::Start != pGameFrame->GetGameState())
+	if (GameState::Start != gameState)
 		return;
 	pGameFrame->Drop();
+	pGameFrame->Union();
+	pGameFrame->RemoveFullLines();
+	if (pGameFrame->IsFull())
+	{
+		End();
+		return;
+	}
+	pGameFrame->RebornTetrisShape();
 }
 
 void Controller::Start()
 {
-	pGameFrame->Start();
+	gameState = GameState::Start;
+	//SetStepDownTimer();
 }
 
 void Controller::End()
 {
-	pGameFrame->End();
+	gameState = GameState::End;
+	MessageBox(0, L"", L"", 0);
 }
 
 void Controller::Pause()
 {
+	gameState = GameState::Pause;
 }
 
 void Controller::Resume()
 {
+	gameState = GameState::Start;
 }
 
 void Controller::Restart()
@@ -138,6 +161,8 @@ void Controller::KillStepDownTimer()
 
 void Controller::StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
+	Controller* pController = &Controller::singleton;
+	pController->StepDown();
 }
 
 void Controller::SetDropTimer()
@@ -152,6 +177,8 @@ void Controller::KillDropTimer()
 
 void Controller::DropTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
+	Controller* pController = &Controller::singleton;
+	pController->Drop();
 }
 
 void Controller::SetDropDelayTimer()

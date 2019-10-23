@@ -45,6 +45,7 @@ void GameFrame::InitializeGame()
 	tetrisShape.SetTopCenterPostion(false, true);
 	mass.SetGameFrame(this);
 	mass.Initialize();
+	mass.GenerateLines(sizeY - startLine, startLine, startLineBlankRate);
 	nextTetrisShape.SetFrame(pPromptFrame);
 	nextTetrisShape.InitializeRandom();
 	nextTetrisShape.SetUseRandomColor(useColorRandom);
@@ -55,36 +56,16 @@ void GameFrame::InitializeGame()
 	pInfoFrame->SetInfomations(&level, &score, &startLine);
 }
 
-void GameFrame::Start()
+void GameFrame::Reborn()
 {
-	gameState = GameState::Start;
 	tetrisShape.InitializeRandom();
 	tetrisShape.SetTopCenterPostion(false, true);
 	mass.Clear();
-	mass.Initialize();
+	mass.GenerateLines(sizeY - startLine, startLine, startLineBlankRate);
 	nextTetrisShape.InitializeRandom();
 	nextTetrisShape.CenterPostion(false, false);
 	score = 0;
-}
-
-void GameFrame::End()
-{
-	gameState = GameState::End;
-}
-
-void GameFrame::Pause()
-{
-	gameState = GameState::Pause;
-}
-
-void GameFrame::Resume()
-{
-	gameState = GameState::Start;
-}
-
-GameState GameFrame::GetGameState()
-{
-	return gameState;
+	level = startLevel;
 }
 
 void GameFrame::StepLeft()
@@ -101,7 +82,7 @@ void GameFrame::StepRight()
 			tetrisShape.StepLeft();
 }
 
-void GameFrame::StepDown()
+bool GameFrame::StepDown()
 {
 	bool isDropped = false;
 	if (tetrisShape.IsOnBottom())
@@ -128,10 +109,7 @@ void GameFrame::StepDown()
 		}
 	}
 
-	if(isDropped)
-	{
-		EndDrop();
-	}
+	return isDropped;
 }
 
 void GameFrame::Drop()
@@ -146,30 +124,19 @@ void GameFrame::Drop()
 		int y = mass.FindBottommostBlankY(&tetrisShape, tetrisShape.GetLeft());
 		tetrisShape.MoveTo(tetrisShape.GetLeft(), y);
 	}
-	EndDrop();
 }
 
-void GameFrame::EndDrop()
+void GameFrame::Union()
 {
 	score += droppedScore;
 	mass.Union(&tetrisShape);
+}
+
+void GameFrame::RemoveFullLines()
+{
 	int removeLinesCount = mass.RemoveFullLines(tetrisShape.GetTop(), tetrisShape.GetBottom());
-	if(0 != removeLinesCount)
+	if (0 != removeLinesCount)
 		score += vecRemoveScores[removeLinesCount - 1];
-	if (mass.IsFull())
-	{
-		End();
-		return;
-	}
-	tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation(), nextTetrisShape.GetRandomColor());
-	nextTetrisShape.InitializeRandom();
-	nextTetrisShape.CenterPostion(false, false);
-	//if (mass.HitTest(&tetrisShape))
-	//{
-	//	mass.Union(&tetrisShape);
-	//	End();
-	//	return;
-	//}
 }
 
 void GameFrame::Rotate()
@@ -177,6 +144,18 @@ void GameFrame::Rotate()
 	if(tetrisShape.Rotate())
 		if (mass.HitTest(&tetrisShape))
 			tetrisShape.RotateBack();
+}
+
+void GameFrame::RebornTetrisShape()
+{
+	tetrisShape.Reborn(nextTetrisShape.GetType(), nextTetrisShape.GetRotation(), nextTetrisShape.GetRandomColor());
+	nextTetrisShape.InitializeRandom();
+	nextTetrisShape.CenterPostion(false, false);
+}
+
+bool GameFrame::IsFull()
+{
+	return mass.IsFull();
 }
 
 Mass* GameFrame::GetMass()

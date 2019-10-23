@@ -7,6 +7,10 @@ void InfoFrame::Initialize(Configuration* pConfiguration)
 	sizeX = pConfiguration->infoFrameSizeX;
 	sizeY = pConfiguration->infoFrameSizeY;
 	colorInfo = pConfiguration->colorInfo;
+	fontFace = pConfiguration->infoFontFace;
+	fontHeight = pConfiguration->infoFontHeight;
+	fontWidth = pConfiguration->infoFontWidth;
+	fontWeight = pConfiguration->infoFontWeight;
 }
 
 void InfoFrame::SetInfomations(int* pLevel, int* pScore, int* pStartLine)

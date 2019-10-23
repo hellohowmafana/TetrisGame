@@ -171,10 +171,10 @@ int Mass::RemoveFullLines(int from, int to)
 	return count;
 }
 
-void Mass::GenerateLine(int line, int blankRate)
+bool Mass::GenerateLines(int line, double blankRate)
 {
 	if (line <= 0 || line >= top)
-		return;
+		return false;
 
 	MassLine* pMassLine = CreateLine();
 	for (size_t i = 0; i < pMassLine->size(); i++)
@@ -184,12 +184,44 @@ void Mass::GenerateLine(int line, int blankRate)
 	}
 	InsertLine(0, pMassLine);
 
-	// substract line from top more than 1
+	// create lines from generated line to top
 	int diff = top - line - 1;
 	while (diff--)
 	{
 		InsertLine(1, CreateLine());
 	}
+
+	top = line;
+
+	return true;
+}
+
+bool Mass::GenerateLines(int line, int count, double blankRate)
+{
+	if (line <= 0 || line + count - 1 >= top)
+		return false;
+
+	for (int i = 0; i < count; i++)
+	{
+		MassLine* pMassLine = CreateLine();
+		for (size_t i = 0; i < pMassLine->size(); i++)
+		{
+			(*pMassLine)[i].color = -1;
+			(*pMassLine)[i].isSolid = Utility::RandomTrue(1.0 - blankRate);
+		}
+		InsertLine(0, pMassLine);
+	}
+
+	// create lines from generated lines to top
+	int diff = top - line - count;
+	while (diff--)
+	{
+		InsertLine(1, CreateLine());
+	}
+
+	top = line;
+
+	return true;
 }
 
 void Mass::Clear()

@@ -16,6 +16,7 @@ public:
 
 public:
 	bool Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFrame* pInfoFrame, Background* pBackground);
+	bool Deinitialize();
 	void AttachDC(HDC hdc);
 	void DetachDC();
 	void DrawElements();
@@ -54,7 +55,9 @@ private:
 	Bitmap* pbmBackground;
 	COLORREF clBackground;
 	HBRUSH hbsBackground;
+	HFONT hftInfo;
 	bool initialized;
+	bool attached;
 
 	HDC hdcCmp;
 	HBITMAP hbmCmp;

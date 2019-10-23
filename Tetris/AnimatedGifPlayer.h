@@ -37,7 +37,7 @@ private:
 	TCHAR m_szFilePath[MAX_PATH];    // gif file path
 	UINT m_uFrameCount;              // frame count
 	PropertyItem* m_pPropFrameDelay; // frame delay property
-	SHORT m_sLoopCount;              // loop count
+	SHORT m_sLoopCount;              // loop count, 0 forever
 	SHORT m_sLoopedCount;            // looped count
 	bool m_bLoopInfinate;            // loop infinate
 	UINT m_uFrameCur;                // current frame
