@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <tchar.h>
+#include <Windows.h>
 using namespace std;
 
 class Utility
@@ -48,6 +49,14 @@ public:
 			leftCount--;
 		}
 		return count - leftCount;
+	}
+
+	static COLORREF LightColor(COLORREF color, double percent)
+	{
+		int r = (int)(GetRValue(color) + (0xFF - GetRValue(color)) * percent);
+		int g = (int)(GetGValue(color) + (0xFF - GetGValue(color)) * percent);
+		int b = (int)(GetBValue(color) + (0xFF - GetBValue(color)) * percent);
+		return RGB(r, g, b);
 	}
 };
 

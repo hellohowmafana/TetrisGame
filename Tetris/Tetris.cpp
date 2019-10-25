@@ -154,11 +154,13 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    Drawer* pDrawer = &Drawer::singleton;
    pDrawer->Initialize(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
+   pDrawer->SetHWnd(hWnd);
 
    Controller* pController = &Controller::singleton;
    pController->Initialize(pConfiguration);
    pController->SetHWnd(hWnd);
    pController->SetGameFrame(pGameFrame);
+   pController->SetDrawer(pDrawer);
    pController->Start();
 
    InvalidateRect(hWnd, NULL, FALSE);

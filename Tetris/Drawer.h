@@ -17,9 +17,11 @@ public:
 public:
 	bool Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFrame* pInfoFrame, Background* pBackground);
 	bool Deinitialize();
+	void SetHWnd(HWND hWnd);
 	void AttachDC(HDC hdc);
 	void DetachDC();
 	void DrawElements();
+	void Invalid();
 
 private:
 	Drawer();
@@ -48,13 +50,16 @@ private:
 	InfoFrame* pInfoFrame;
 	Background* pBackground;
 	HDC hdc;
+	HWND hWnd;
 	HPEN hpnBorder;
 	HPEN hpnSeparator;
 	vector<HBRUSH> vecTetrisBrushes;
 	HBRUSH hbsMass;
-	Bitmap* pbmBackground;
+	HBRUSH hbsMassLight;
+	Bitmap* pBitmapBackground;
 	COLORREF clBackground;
 	HBRUSH hbsBackground;
+	HBITMAP hbmBackground;
 	HFONT hftInfo;
 	bool initialized;
 	bool attached;

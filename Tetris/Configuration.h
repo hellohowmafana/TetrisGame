@@ -82,8 +82,8 @@ private:
 	const tstring keyDropTimespan = _T("DropTimespan");
 	const tstring keyDropImmediate = _T("DropImmediate");
 	const tstring keyDropDelay = _T("DropDelay");
-	const tstring keyRemoveDelay = _T("RemoveDelay");
 	const tstring keyRemoveBlinkTimespan = _T("RemoveBlinkTimespan");
+	const tstring keyRemoveBlinkTimes = _T("RemoveBlinkTimes");
 
 	const tstring keyMusic = _T("Music");
 	const tstring keyMusicRotate = _T("MusicRotate");
@@ -131,8 +131,8 @@ public:
 	int dropTimespan;
 	bool dropImmediate;
 	int dropDelay;
-	int removeDelay;
 	int removeBlinkTimespan;
+	int removeBlinkTimes;
 
 	// music
 	tstring musicRotate;

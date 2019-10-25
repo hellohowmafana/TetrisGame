@@ -4,7 +4,7 @@ vector<Level> Level::vecLevels;
 
 Level* Level::GetLevel(int level)
 {
-	if (level >= (int)vecLevels.size())
+	if (level < 1 || level > (int)vecLevels.size())
 		return nullptr;
 	return &vecLevels[level - 1];
 }
@@ -17,7 +17,7 @@ Level* Level::JudgeLevel(int score)
 	{
 		if ((vecLevels[i].minScore == -1 ? false : score >= vecLevels[i].minScore) &&
 			(vecLevels[i].maxScore == -1 ? true : score < vecLevels[i].maxScore))
-			return GetLevel(i);
+			return &vecLevels[i];
 	}
 	return nullptr;
 }

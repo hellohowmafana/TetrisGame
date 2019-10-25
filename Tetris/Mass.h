@@ -39,6 +39,7 @@ public:
 	bool GenerateLines(int line, int count, double blankRate);
 	void Clear();
 	bool IsFull();
+	vector<MassLine*>* GetFullLines(vector<MassLine*>* pvecLines, int from, int to);
 
 	bool ValidateX(int x);
 	bool ValidateY(int y);

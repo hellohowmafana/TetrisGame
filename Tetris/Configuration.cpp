@@ -126,8 +126,8 @@ bool Configuration::LoadParameters()
 	dropTimespan = GetConfigurationInt(keyGame, keyDropTimespan);
 	dropDelay = GetConfigurationInt(keyGame, keyDropDelay);
 	dropImmediate = GetConfigurationBool(keyGame, keyDropImmediate);
-	removeDelay = GetConfigurationInt(keyGame, keyRemoveDelay);
 	removeBlinkTimespan = GetConfigurationInt(keyGame, keyRemoveBlinkTimespan);
+	removeBlinkTimes = GetConfigurationInt(keyGame, keyRemoveBlinkTimes);
 
 	// music
 	GetConfigurationStr(keyMusic, keyMusicRotate, musicRotate);

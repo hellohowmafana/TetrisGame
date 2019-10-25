@@ -234,6 +234,17 @@ bool Mass::IsFull()
 	return 0 == top;
 }
 
+vector<MassLine*>* Mass::GetFullLines(vector<MassLine*>* pvecLines, int from, int to)
+{
+	pvecLines->clear();
+	for (int i = from; i <= to; i++)
+	{
+		if(IsLineFull(i))
+			pvecLines->push_back(GetLine(i));
+	}
+	return pvecLines;
+}
+
 bool Mass::ValidateX(int x)
 {
 	return x >= 0 && x < pGameFrame->sizeX;

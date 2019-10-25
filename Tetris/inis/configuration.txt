@@ -9,21 +9,21 @@ WindowCenter=1
 
 [Display]
 ;[显示]
-FramePostion=30,30
+FramePostion=60,60
 ;外框位置
-FrameSize=10,20
+FrameSize=12,24
 ;外框尺寸
-PromptFramePostion=330,70
+PromptFramePostion=380,70
 ;提示框位置
 PromptFrameSize=5,6
 ;提示框尺寸
-InfoFramePosition=355,300
+InfoFramePosition=385,300
 ;信息框位置
 InfoFrameSize=100,200
 ;信息框尺寸
-BorderThickness=7
+BorderThickness=5
 ;外框厚度
-SeparatorThickness=5
+SeparatorThickness=2
 ;内框厚度
 UnitWidth=20
 ;单位宽度
@@ -54,18 +54,18 @@ ScoreGainRate=0.0,0.2,0.2,0.2,0.1,0.1
 ;分数增率
 LevelScore=0,2000,4000,7000,10000,150000,20000
 ;级别分数
-StepDownTimespan=1600,1500,1350,1200,1000,900,800,700,600,500
+StepDownTimespan=1200,1100,1000,900,800,700,600,500
 ;下降速度
 DropTimespan=250
 ;降落速度
 DropImmediate=1
 ;立刻降落
-DropDelay=1000
+DropDelay=100
 ;落地延迟
-RemoveDelay=1200
-;消除延迟
-RemoveBlinkTimespan=300
-;闪烁间隔
+RemoveBlinkTimespan=100
+;消除闪烁间隔时间
+RemoveBlinkTimes=3
+;消除闪烁次数
 
 [Music]
 ;[音效]
@@ -88,6 +88,6 @@ UnitBitmap=
 ;单位贴图
 UseMassColor=1
 ;落地变色
-BackgroundMode=1
+BackgroundMode=4
 ;背景：0颜色，1贴图，2填满，3平铺，4等比填满，5等比留空
 

@@ -11,8 +11,9 @@ void Controller::Initialize(Configuration* pConfiguration)
 	this->stepDownTimespan = Level::GetLevel(pConfiguration->startLevel)->stepDownTimeSpan;
 	this->dropTimespan = pConfiguration->dropTimespan;
 	this->dropDelayTimespan = pConfiguration->dropDelay;
-	this->removeDelayTimespan = pConfiguration->removeDelay;
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
+	this->removeBlinkTimes = pConfiguration->removeBlinkTimes;
+	removeBlinkCount = 0;
 
 	initialized = true;
 	gameState = GameState::End;
@@ -28,9 +29,19 @@ void Controller::SetGameFrame(GameFrame* pGameFrame)
 	this->pGameFrame = pGameFrame;
 }
 
+void Controller::SetDrawer(Drawer* pDrawer)
+{
+	this->pDrawer = pDrawer;
+}
+
 bool Controller::IsInitialized()
 {
 	return initialized;
+}
+
+GameState Controller::GetGameState()
+{
+	return gameState;
 }
 
 void Controller::Rotate()
@@ -60,14 +71,8 @@ void Controller::StepDown()
 		return;
 	if (pGameFrame->StepDown())
 	{
-		pGameFrame->Union();
-		pGameFrame->RemoveFullLines();
-		if (pGameFrame->IsFull())
-		{
-			End();
-			return;
-		}
-		pGameFrame->RebornTetrisShape();
+		EndStepDown();
+		StartDropDelay();
 	}
 }
 
@@ -76,36 +81,36 @@ void Controller::Drop()
 	if (GameState::Start != gameState)
 		return;
 	pGameFrame->Drop();
-	pGameFrame->Union();
-	pGameFrame->RemoveFullLines();
-	if (pGameFrame->IsFull())
-	{
-		End();
-		return;
-	}
-	pGameFrame->RebornTetrisShape();
+	EndStepDown();
+	StartDropDelay();
 }
 
 void Controller::Start()
 {
 	gameState = GameState::Start;
-	//SetStepDownTimer();
+	StartStepDown(false);
 }
 
 void Controller::End()
 {
 	gameState = GameState::End;
-	MessageBox(0, L"", L"", 0);
+	EndStepDown();
+	EndDropDelay();
+	EndRemoveBlink();
 }
 
 void Controller::Pause()
 {
+	EndStepDown();
+	EndDropDelay();
+	EndRemoveBlink();
 	gameState = GameState::Pause;
 }
 
 void Controller::Resume()
 {
 	gameState = GameState::Start;
+	StartStepDown(false);
 }
 
 void Controller::Restart()
@@ -149,76 +154,109 @@ Mass* Controller::GetMass()
 	return pGameFrame->GetMass();
 }
 
-void Controller::SetStepDownTimer()
+bool Controller::StartStepDown(bool isDropping)
 {
-	SetTimer(hWnd, ST_STEPDOWN, stepDownTimespan, StepDownTimerProc);
+	return SetTimer(hWnd, ST_STEPDOWN,
+		isDropping ? dropTimespan : stepDownTimespan,
+		StepDownTimerProcStatic);
 }
 
-void Controller::KillStepDownTimer()
+bool Controller::EndStepDown()
 {
-	KillTimer(hWnd, ST_STEPDOWN);
+	return KillTimer(hWnd, ST_STEPDOWN);
+}
+
+void Controller::StepDownTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.StepDownTimerProc(hWnd, msg, id, millisecond);
 }
 
 void Controller::StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
-	Controller* pController = &Controller::singleton;
-	pController->StepDown();
+	StepDown();
+	InvalidDraw();
 }
 
-void Controller::SetDropTimer()
+bool Controller::StartDropDelay()
 {
-	SetTimer(hWnd, ST_DROP, dropTimespan, DropTimerProc);
+	return SetTimer(hWnd, ST_DROPDELAY, dropDelayTimespan, DropDelayTimerProcStatic);
 }
 
-void Controller::KillDropTimer()
+bool Controller::EndDropDelay()
 {
-	KillTimer(hWnd, ST_DROP);
+	return KillTimer(hWnd, ST_DROPDELAY);
 }
 
-void Controller::DropTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+void Controller::DropDelayTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
-	Controller* pController = &Controller::singleton;
-	pController->Drop();
-}
-
-void Controller::SetDropDelayTimer()
-{
-	SetTimer(hWnd, ST_DROPDELAY, dropDelayTimespan, DropDelayTimerProc);
-}
-
-void Controller::KillDropDelayTimer()
-{
-	KillTimer(hWnd, ST_DROPDELAY);
+	Controller::singleton.DropDelayTimerProc(hWnd, msg, id, millisecond);
 }
 
 void Controller::DropDelayTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
+	EndDropDelay();
+
+	if (pGameFrame->Union() > 0)
+	{
+		InvalidDraw();
+		StartRemoveBlink();
+		return;
+	}
+	if (pGameFrame->IsFull())
+	{
+		End();
+		return;
+	}
+	pGameFrame->RebornTetrisShape();
+	InvalidDraw();
+	StartStepDown(false);
 }
 
-void Controller::SetRemoveDelayTimer()
+bool Controller::StartRemoveBlink()
 {
-	SetTimer(hWnd, ST_REMOVEDELAY, removeDelayTimespan, RemoveDelayTimerProc);
+	removeBlinkCount = 0;
+	return SetTimer(hWnd, ST_REMOVEBLINK, removeBlinkTimespan, RemoveBlinkTimerProcStatic);
 }
 
-void Controller::KillRemoveDelayTimer()
+bool Controller::EndRemoveBlink()
 {
-	KillTimer(hWnd, ST_REMOVEDELAY);
+	removeBlinkCount = 0;
+	return KillTimer(hWnd, ST_REMOVEBLINK);
 }
 
-void Controller::RemoveDelayTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+void Controller::RemoveBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
-}
-
-void Controller::SetRemoveBlinkTimer()
-{
-	SetTimer(hWnd, ST_REMOVEBLINK, removeBlinkTimespan, RemoveBlinkTimerProc);
-}
-
-void Controller::KillRemoveBlinkTimer()
-{
-	KillTimer(hWnd, ST_REMOVEBLINK);
+	Controller::singleton.RemoveBlinkTimerProc(hWnd, msg, id, millisecond);
 }
 
 void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
+	if (removeBlinkTimes == removeBlinkCount)
+	{
+		EndRemoveBlink();
+		pGameFrame->SetBlinkState(BlinkState::None);
+
+		pGameFrame->RemoveFullLines();
+		pGameFrame->RebornTetrisShape();
+		
+		InvalidDraw();
+
+		StartStepDown(false);
+	}
+	else
+	{
+		removeBlinkCount++;
+
+		BlinkState blinkState = pGameFrame->GetBlinkState();
+		pGameFrame->SetBlinkState(
+			BlinkState::None == blinkState || BlinkState::Normal == blinkState ?
+			BlinkState::Light : BlinkState::Normal);
+		
+		InvalidDraw();
+	}
+}
+
+void Controller::InvalidDraw()
+{
+	pDrawer->Invalid();
 }

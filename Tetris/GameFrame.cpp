@@ -1,6 +1,7 @@
 #include "GameFrame.h"
 #include "PromptFrame.h"
 #include "InfoFrame.h"
+#include "Level.h"
 GameFrame GameFrame::singleton;
 
 void GameFrame::Initialize(Configuration* pConfiguration)
@@ -126,17 +127,31 @@ void GameFrame::Drop()
 	}
 }
 
-void GameFrame::Union()
+int GameFrame::Union()
 {
-	score += droppedScore;
+	score += (int)(droppedScore * Level::GetLevel(level)->scoreRate);
+	level = level > Level::JudgeLevel(score)->level ? level : Level::JudgeLevel(score)->level;
+
 	mass.Union(&tetrisShape);
+	vecLastFullLines.clear();
+	for (int i = tetrisShape.GetTop(); i <= tetrisShape.GetBottom(); i++)
+	{
+		if (mass.IsLineFull(i))
+		{
+			vecLastFullLines.push_back(mass.GetLine(i));
+		}
+	}
+	return vecLastFullLines.size();
 }
 
 void GameFrame::RemoveFullLines()
 {
 	int removeLinesCount = mass.RemoveFullLines(tetrisShape.GetTop(), tetrisShape.GetBottom());
 	if (0 != removeLinesCount)
-		score += vecRemoveScores[removeLinesCount - 1];
+	{
+		score += (int)(vecRemoveScores[removeLinesCount - 1] * Level::GetLevel(level)->scoreRate);
+		level = level > Level::JudgeLevel(score)->level ? level : Level::JudgeLevel(score)->level;
+	}
 }
 
 void GameFrame::Rotate()
@@ -156,6 +171,26 @@ void GameFrame::RebornTetrisShape()
 bool GameFrame::IsFull()
 {
 	return mass.IsFull();
+}
+
+void GameFrame::SetBlinkState(BlinkState blinkState)
+{
+	this->blinkState = blinkState;
+}
+
+BlinkState GameFrame::GetBlinkState()
+{
+	return blinkState;
+}
+
+bool GameFrame::IsBlinkingLight()
+{
+	return BlinkState::Light == GetBlinkState();
+}
+
+bool GameFrame::IsBlinkingLine(MassLine* pMassLine)
+{
+	return vecLastFullLines.end() != find(vecLastFullLines.begin(), vecLastFullLines.end(), pMassLine);
 }
 
 Mass* GameFrame::GetMass()

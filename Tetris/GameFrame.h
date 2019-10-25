@@ -9,6 +9,8 @@
 class PromptFrame;
 class InfoFrame;
 
+enum class BlinkState { None, Light, Normal };
+
 class GameFrame : public UnitFrame, public ISerializable
 {
 public:
@@ -35,6 +37,9 @@ private:
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
 
+	BlinkState blinkState;
+	vector<MassLine*> vecLastFullLines;
+
 private:
 	GameFrame() {};
 
@@ -49,11 +54,16 @@ public:
 	void StepRight();
 	bool StepDown();
 	void Drop();
-	void Union();
+	int Union();
 	void RemoveFullLines();
 	void Rotate();
 	void RebornTetrisShape();
 	bool IsFull();
+
+	void SetBlinkState(BlinkState blinkState);
+	BlinkState GetBlinkState();
+	bool IsBlinkingLight();
+	bool IsBlinkingLine(MassLine* pMassLine);
 
 	Mass* GetMass();
 	TetrisShape* GetShape();

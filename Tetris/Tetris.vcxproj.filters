@@ -25,6 +25,9 @@
     <Filter Include="archives">
       <UniqueIdentifier>{095a6d46-91de-497a-8a89-cb59269f5869}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inis\icon">
+      <UniqueIdentifier>{17de7b85-bad1-46aa-b772-2a8241296f71}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -206,5 +209,13 @@
     <Text Include="inis\shapes\penerable_calssic.txt">
       <Filter>inis\shapes</Filter>
     </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="inis\icon\pause.emf">
+      <Filter>inis\icon</Filter>
+    </None>
+    <None Include="inis\icon\resume.emf">
+      <Filter>inis\icon</Filter>
+    </None>
   </ItemGroup>
 </Project>
