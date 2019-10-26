@@ -4,7 +4,7 @@
 
 enum class GameState
 {
-	Start, Pause, End
+	None, Start, Pause, End
 };
 
 class Controller
@@ -17,6 +17,9 @@ public:
 	void SetDrawer(Drawer* pDrawer);
 	bool IsInitialized();
 	GameState GetGameState();
+
+	void KeyDownAction(WPARAM keyCode);
+	void KeyUpAction(WPARAM keyCode);
 
 	void Rotate();
 	void StepHorizontal(bool left);
@@ -42,6 +45,7 @@ private:
 	const UINT_PTR ST_STEPDOWN = 1;
 	const UINT_PTR ST_DROPDELAY = 2;
 	const UINT_PTR ST_REMOVEBLINK = 3;
+	const UINT_PTR ST_ROLL = 5;
 
 	int removeBlinkTimes;
 	int removeBlinkCount;
@@ -61,9 +65,14 @@ private:
 	static void CALLBACK RemoveBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 
+	bool StartRoll();
+	bool EndRoll();
+	static void CALLBACK RollTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+
 private:
 	Controller() {};
-	void InvalidDraw();
+	void InvalidateDraw();
 	HWND hWnd;
 	GameFrame* pGameFrame;
 	Drawer* pDrawer;
@@ -75,5 +84,6 @@ private:
 	UINT dropDelayTimespan;
 	UINT removeDelayTimespan;
 	UINT removeBlinkTimespan;
+	UINT rollTimespan;
 };
 

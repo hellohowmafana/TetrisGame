@@ -35,7 +35,7 @@ public:
 	bool IsLineFull(MassLine* pMassLine);
 	void RemoveLine(int line);
 	int RemoveFullLines(int from, int to);
-	bool GenerateLines(int line, double blankRate);
+	bool GenerateLine(int line, double blankRate);
 	bool GenerateLines(int line, int count, double blankRate);
 	void Clear();
 	bool IsFull();

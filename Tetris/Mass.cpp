@@ -171,7 +171,7 @@ int Mass::RemoveFullLines(int from, int to)
 	return count;
 }
 
-bool Mass::GenerateLines(int line, double blankRate)
+bool Mass::GenerateLine(int line, double blankRate)
 {
 	if (line <= 0 || line >= top)
 		return false;
@@ -227,6 +227,7 @@ bool Mass::GenerateLines(int line, int count, double blankRate)
 void Mass::Clear()
 {
 	ClearLines();
+	top = pGameFrame->sizeY;
 }
 
 bool Mass::IsFull()

@@ -8,7 +8,8 @@ Drawer Drawer::singleton;
 Drawer::Drawer() :
 	pGameFrame(nullptr), hpnBorder(NULL), hpnSeparator(NULL), hbsMass(NULL),
 	hdc(NULL), hdcCmp(NULL), hbmCmp(NULL), initialized(false),
-	dcWidth(0), dcHeight(0)
+	dcWidth(0), dcHeight(0),
+	pAnimatedGifPoller(nullptr)
 {
 
 }
@@ -46,19 +47,23 @@ bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFr
 		hbsMassLight = CreateSolidBrush(Utility::LightColor(*pGameFrame->pMassColor, 0.5));
 
 		pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
+		SetBitmapDCResolution(pBitmapBackground, NULL);
 		pBitmapBackground->GetHBITMAP(Color(), &hbmBackground);
 		hbsBackground = BackgroundMode::Tile == pBackground->backgroundMode ?
 			CreatePatternBrush(hbmBackground) :
 			CreateSolidBrush(pBackground->colorBackground);
+		if (AnimatedGifPoller::IsAnimatedGif(pBitmapBackground))
+		{
+			pAnimatedGifPoller = new AnimatedGifPoller(pBitmapBackground, BackgroundFrameChangedProcStatic);
+			pAnimatedGifPoller->SetLoopInfinate(true);
+			pAnimatedGifPoller->Start();
+		}
+		isAnimatedBackground = AnimatedGifPoller::IsAnimatedGif(pBitmapBackground);
+
 		hftInfo = CreateFont(pInfoFrame->fontHeight, pInfoFrame->fontWidth, 0, 0,
 			pInfoFrame->fontWeight*100, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, FF_DONTCARE, pInfoFrame->fontFace.c_str());
-
-		HDC hdc = GetDC(NULL);
-		pBitmapBackground->SetResolution((REAL)GetDeviceCaps(hdc, LOGPIXELSX),
-			(REAL)GetDeviceCaps(hdc, LOGPIXELSY));
-		DeleteDC(hdc);
 	}
 	catch (...){
 		return false;
@@ -71,6 +76,8 @@ bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFr
 
 bool Drawer::Deinitialize()
 {
+	if (!initialized) return false;
+
 	this->pGameFrame = nullptr;
 	this->pPromptFrame = nullptr;
 	this->pInfoFrame = nullptr;
@@ -87,11 +94,19 @@ bool Drawer::Deinitialize()
 	vecTetrisBrushes.clear();
 	DeleteObject(hbsMass);
 	hbsMass = NULL;
-	//delete pbmBackground;
+
+	delete pBitmapBackground;
+	pBitmapBackground = nullptr;
 	DeleteObject(hbmBackground);
 	hbmBackground = NULL;
 	DeleteObject(hbsBackground);
 	hbsBackground = NULL;
+	if (pAnimatedGifPoller)
+	{
+		delete pAnimatedGifPoller;
+		pAnimatedGifPoller = nullptr;
+	}
+
 	DeleteObject(hftInfo);
 	hftInfo = NULL;
 
@@ -134,8 +149,11 @@ void Drawer::DrawElements()
 		DrawFrame(pGameFrame);
 		DrawShape(pGameFrame, pGameFrame->GetShape());
 		DrawMass(pGameFrame, pGameFrame->GetMass());
+		DrawRollingLines(pGameFrame);
+
 		DrawFrame(pPromptFrame);
 		DrawShape(pPromptFrame, pPromptFrame->GetTerisShape());
+
 		DrawFrame(pInfoFrame);
 		DrawInfo(pInfoFrame);
 
@@ -143,7 +161,7 @@ void Drawer::DrawElements()
 	}
 }
 
-void Drawer::Invalid()
+void Drawer::Invalidate()
 {
 	InvalidateRgn(hWnd, NULL, FALSE);
 }
@@ -308,6 +326,10 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 
 void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 {
+	if (GameFrameState::None == pGameFrame->state ||
+		GameFrameState::RollDown == pGameFrame->state)
+		return;
+
 	if (!IsValid()) return;
 
 	if (nullptr == pTetrisShape) return;
@@ -324,6 +346,10 @@ void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 
 void Drawer::DrawMass(GameFrame* pGameFrame, Mass* pMass)
 {
+	if (GameFrameState::None == pGameFrame->state ||
+		GameFrameState::RollDown == pGameFrame->state)
+		return;
+
 	if (!IsValid()) return;
 
 	if (nullptr == pMass) return;
@@ -374,6 +400,27 @@ void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush)
 	FillRect(hdcCmp, &rect, brush);
 }
 
+void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush)
+{
+	for (int i = 0; i < pUnitFrame->sizeX; i++)
+	{
+		DrawUnit(pUnitFrame, i, y, brush);
+	}
+}
+
+void Drawer::DrawRollingLines(GameFrame* pGameFrame)
+{
+	if (GameFrameState::RollUp == pGameFrame->state ||
+		GameFrameState::RollDown == pGameFrame->state)
+	{
+		for (int i = pGameFrame->sizeY - pGameFrame->rolledRows;
+			i < pGameFrame->sizeY; i++)
+		{
+			DrawLine(pGameFrame, i, hbsMass);
+		}
+	}
+}
+
 void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 {
 	tstring labels;
@@ -403,6 +450,27 @@ void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)
 	*pHeight = bm.bmHeight;
 }
 
+void Drawer::GetDCResolution(HDC hdc, int* px, int* py)
+{
+	*px = GetDeviceCaps(hdc, LOGPIXELSX);
+	*py = GetDeviceCaps(hdc, LOGPIXELSY);
+}
+
+void Drawer::SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc)
+{
+	int resX, resY;
+	bool useScreenDC;
+	if (NULL == hdc)
+	{
+		useScreenDC = true;
+		hdc = GetDC(NULL);
+	}
+	GetDCResolution(hdc, &resX, &resY);
+	if (useScreenDC)
+		DeleteDC(hdc);
+	pBitmap->SetResolution((REAL)resX, (REAL)resY);
+}
+
 HBRUSH Drawer::GetRandomTetrisBrush()
 {
 	return vecTetrisBrushes[Utility::Random(0, vecTetrisBrushes.size() - 1)];
@@ -411,4 +479,22 @@ HBRUSH Drawer::GetRandomTetrisBrush()
 bool Drawer::IsValid()
 {
 	return initialized && hdc && hdcCmp;
+}
+
+void Drawer::BackgroundFrameChangedProcStatic(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame)
+{
+	singleton.BackgroundFrameChangedProc(pBitmap, sLoopedCount, uCurrentFrame);
+}
+
+void Drawer::BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame)
+{
+	if (BackgroundMode::Tile == pBackground->backgroundMode)
+	{
+		DeleteObject(hbmBackground);
+		pBitmap->GetHBITMAP(Color(), &hbmBackground);
+		DeleteObject(hbsBackground);
+		hbsBackground = CreatePatternBrush(hbmBackground);
+	}
+
+	InvalidateRect(hWnd, NULL, FALSE);
 }

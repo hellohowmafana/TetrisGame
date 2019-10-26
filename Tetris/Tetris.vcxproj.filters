@@ -25,7 +25,7 @@
     <Filter Include="archives">
       <UniqueIdentifier>{095a6d46-91de-497a-8a89-cb59269f5869}</UniqueIdentifier>
     </Filter>
-    <Filter Include="inis\icon">
+    <Filter Include="inis\icons">
       <UniqueIdentifier>{17de7b85-bad1-46aa-b772-2a8241296f71}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -90,13 +90,13 @@
     <ClInclude Include="InfoFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AnimatedGifPlayer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Background.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Level.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AnimatedGifPoller.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -146,13 +146,13 @@
     <ClCompile Include="InfoFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AnimatedGifPlayer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="Background.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Level.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="AnimatedGifPoller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -211,11 +211,14 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="inis\icon\pause.emf">
-      <Filter>inis\icon</Filter>
+    <None Include="inis\icons\game over.emf">
+      <Filter>inis\icons</Filter>
     </None>
-    <None Include="inis\icon\resume.emf">
-      <Filter>inis\icon</Filter>
+    <None Include="inis\icons\pause.emf">
+      <Filter>inis\icons</Filter>
+    </None>
+    <None Include="inis\icons\resume.emf">
+      <Filter>inis\icons</Filter>
     </None>
   </ItemGroup>
 </Project>

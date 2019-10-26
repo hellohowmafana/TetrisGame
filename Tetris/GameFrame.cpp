@@ -173,19 +173,9 @@ bool GameFrame::IsFull()
 	return mass.IsFull();
 }
 
-void GameFrame::SetBlinkState(BlinkState blinkState)
-{
-	this->blinkState = blinkState;
-}
-
-BlinkState GameFrame::GetBlinkState()
-{
-	return blinkState;
-}
-
 bool GameFrame::IsBlinkingLight()
 {
-	return BlinkState::Light == GetBlinkState();
+	return GameFrameState::BlinkLight == state;
 }
 
 bool GameFrame::IsBlinkingLine(MassLine* pMassLine)

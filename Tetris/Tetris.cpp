@@ -153,8 +153,8 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pBackground->Initialize(pConfiguration);
 
    Drawer* pDrawer = &Drawer::singleton;
-   pDrawer->Initialize(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
    pDrawer->SetHWnd(hWnd);
+   pDrawer->Initialize(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
 
    Controller* pController = &Controller::singleton;
    pController->Initialize(pConfiguration);
@@ -227,33 +227,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_KEYDOWN:
 		{
 			Controller* pController = &Controller::singleton;
-			switch (wParam)
-			{
-				case VK_LEFT:
-					pController->StepHorizontal(true);
-					break;
-				case VK_RIGHT:
-					pController->StepHorizontal(false);
-					break;
-				case VK_DOWN:
-					pController->StepDown();
-					break;
-				case VK_UP:
-					pController->Rotate();
-					break;
-				case VK_SPACE:
-					pController->Drop();
-					break;
-				case VK_RETURN:
-					pController->Restart();
-					break;
-				default:
-					break;
-			}
-			InvalidateRect(hWnd, NULL, FALSE);
+			pController->KeyDownAction(wParam);
 		}
 		break;
     case WM_DESTROY:
+		Drawer::singleton.Deinitialize();
         PostQuitMessage(0);
         break;
     default:

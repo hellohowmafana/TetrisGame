@@ -9,7 +9,7 @@
 class PromptFrame;
 class InfoFrame;
 
-enum class BlinkState { None, Light, Normal };
+enum class GameFrameState { None, Normal, BlinkLight, BlinkNormal, RollUp, RollDown };
 
 class GameFrame : public UnitFrame, public ISerializable
 {
@@ -28,6 +28,11 @@ public:
 	vector<COLORREF>* pTetrisColors;
 	COLORREF* pMassColor;
 
+public:
+	GameFrameState state;
+	vector<MassLine*> vecLastFullLines;
+	int rolledRows;
+
 private:
 	Mass mass;
 	TetrisShape tetrisShape;
@@ -36,9 +41,6 @@ private:
 	int level;
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
-
-	BlinkState blinkState;
-	vector<MassLine*> vecLastFullLines;
 
 private:
 	GameFrame() {};
@@ -60,8 +62,6 @@ public:
 	void RebornTetrisShape();
 	bool IsFull();
 
-	void SetBlinkState(BlinkState blinkState);
-	BlinkState GetBlinkState();
 	bool IsBlinkingLight();
 	bool IsBlinkingLine(MassLine* pMassLine);
 

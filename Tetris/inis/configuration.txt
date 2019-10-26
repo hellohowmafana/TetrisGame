@@ -60,12 +60,14 @@ DropTimespan=250
 ;降落速度
 DropImmediate=1
 ;立刻降落
-DropDelay=100
+DropDelay=0
 ;落地延迟
 RemoveBlinkTimespan=100
 ;消除闪烁间隔时间
 RemoveBlinkTimes=3
 ;消除闪烁次数
+RollTimespan=100
+;卷起速度
 
 [Music]
 ;[音效]

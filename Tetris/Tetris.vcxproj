@@ -183,7 +183,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AnimatedGifPlayer.h" />
+    <ClInclude Include="AnimatedGifPoller.h" />
     <ClInclude Include="Archive.h" />
     <ClInclude Include="ArchiveDialog.h" />
     <ClInclude Include="Background.h" />
@@ -208,7 +208,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Utility.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="AnimatedGifPlayer.cpp" />
+    <ClCompile Include="AnimatedGifPoller.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="ArchiveDialog.cpp" />
     <ClCompile Include="Background.cpp" />
@@ -256,8 +256,9 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="inis\icon\pause.emf" />
-    <None Include="inis\icon\resume.emf" />
+    <None Include="inis\icons\game over.emf" />
+    <None Include="inis\icons\pause.emf" />
+    <None Include="inis\icons\resume.emf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

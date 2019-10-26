@@ -14,6 +14,7 @@ void Controller::Initialize(Configuration* pConfiguration)
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
 	this->removeBlinkTimes = pConfiguration->removeBlinkTimes;
 	removeBlinkCount = 0;
+	this->rollTimespan = pConfiguration->rollTimespan;
 
 	initialized = true;
 	gameState = GameState::End;
@@ -42,6 +43,38 @@ bool Controller::IsInitialized()
 GameState Controller::GetGameState()
 {
 	return gameState;
+}
+
+void Controller::KeyDownAction(WPARAM keyCode)
+{
+	switch (keyCode)
+	{
+	case VK_LEFT:
+		StepHorizontal(true);
+		break;
+	case VK_RIGHT:
+		StepHorizontal(false);
+		break;
+	case VK_DOWN:
+		StepDown();
+		break;
+	case VK_UP:
+		Rotate();
+		break;
+	case VK_SPACE:
+		Drop();
+		break;
+	case VK_RETURN:
+		Restart();
+		break;
+	default:
+		break;
+	}
+	InvalidateDraw();
+}
+
+void Controller::KeyUpAction(WPARAM keyCode)
+{
 }
 
 void Controller::Rotate()
@@ -88,6 +121,7 @@ void Controller::Drop()
 void Controller::Start()
 {
 	gameState = GameState::Start;
+	pGameFrame->state = GameFrameState::Normal;
 	StartStepDown(false);
 }
 
@@ -97,6 +131,7 @@ void Controller::End()
 	EndStepDown();
 	EndDropDelay();
 	EndRemoveBlink();
+	StartRoll();
 }
 
 void Controller::Pause()
@@ -174,7 +209,7 @@ void Controller::StepDownTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD
 void Controller::StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
 	StepDown();
-	InvalidDraw();
+	InvalidateDraw();
 }
 
 bool Controller::StartDropDelay()
@@ -198,17 +233,17 @@ void Controller::DropDelayTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mill
 
 	if (pGameFrame->Union() > 0)
 	{
-		InvalidDraw();
+		InvalidateDraw();
 		StartRemoveBlink();
 		return;
 	}
-	if (pGameFrame->IsFull())
+  	if (pGameFrame->IsFull())
 	{
 		End();
 		return;
 	}
 	pGameFrame->RebornTetrisShape();
-	InvalidDraw();
+	InvalidateDraw();
 	StartStepDown(false);
 }
 
@@ -234,12 +269,12 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 	if (removeBlinkTimes == removeBlinkCount)
 	{
 		EndRemoveBlink();
-		pGameFrame->SetBlinkState(BlinkState::None);
+		pGameFrame->state = GameFrameState::Normal;
 
 		pGameFrame->RemoveFullLines();
 		pGameFrame->RebornTetrisShape();
 		
-		InvalidDraw();
+		InvalidateDraw();
 
 		StartStepDown(false);
 	}
@@ -247,16 +282,65 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 	{
 		removeBlinkCount++;
 
-		BlinkState blinkState = pGameFrame->GetBlinkState();
-		pGameFrame->SetBlinkState(
-			BlinkState::None == blinkState || BlinkState::Normal == blinkState ?
-			BlinkState::Light : BlinkState::Normal);
+		GameFrameState state = pGameFrame->state;
+		pGameFrame->state = 
+			GameFrameState::Normal == state || GameFrameState::BlinkNormal == state ?
+			GameFrameState::BlinkLight : GameFrameState::BlinkNormal;
 		
-		InvalidDraw();
+		InvalidateDraw();
 	}
 }
 
-void Controller::InvalidDraw()
+bool Controller::StartRoll()
 {
-	pDrawer->Invalid();
+	pGameFrame->state = GameFrameState::RollUp;
+	pGameFrame->rolledRows = 0;
+	return SetTimer(hWnd, ST_ROLL, rollTimespan, RollTimerProcStatic);
+}
+
+bool Controller::EndRoll()
+{
+	pGameFrame->state = GameFrameState::None;
+	pGameFrame->rolledRows = 0;
+	return KillTimer(hWnd, ST_ROLL);
+}
+
+void Controller::RollTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.RollTimerProc(hWnd, msg, id, millisecond);
+}
+
+void Controller::RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	if (GameFrameState::RollUp == pGameFrame->state)
+	{
+		if (pGameFrame->sizeY == pGameFrame->rolledRows)
+		{
+			pGameFrame->state = GameFrameState::RollDown;
+			pGameFrame->rolledRows--;
+		}
+		else
+		{
+			pGameFrame->rolledRows++;
+		}
+	}
+	else if (GameFrameState::RollDown == pGameFrame->state)
+	{
+		if (0 == pGameFrame->rolledRows)
+		{
+			EndRoll();
+			pGameFrame->Reborn();
+			Start();
+		}
+		else
+		{
+			pGameFrame->rolledRows--;
+		}
+	}
+	InvalidateDraw();
+}
+
+void Controller::InvalidateDraw()
+{
+	pDrawer->Invalidate();
 }

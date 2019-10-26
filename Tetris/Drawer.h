@@ -6,6 +6,7 @@
 #include "Background.h"
 #include <Unknwn.h>
 #include <gdiplus.h>
+#include "AnimatedGifPoller.h"
 using namespace std;
 using namespace Gdiplus;
 
@@ -21,7 +22,7 @@ public:
 	void AttachDC(HDC hdc);
 	void DetachDC();
 	void DrawElements();
-	void Invalid();
+	void Invalidate();
 
 private:
 	Drawer();
@@ -37,12 +38,20 @@ private:
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
 	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush);
+	void DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush);
+	void DrawRollingLines(GameFrame* pGameFrame);
 
 	void DrawInfo(InfoFrame* pInfoFrame);
 
 	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
+	void GetDCResolution(HDC hdc, int* px, int* py);
+	void SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc);
 	HBRUSH GetRandomTetrisBrush();
+	
 	bool IsValid();
+
+	static void CALLBACK BackgroundFrameChangedProcStatic(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame);
+	void BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame);
 
 private:
 	GameFrame* pGameFrame;
@@ -60,6 +69,8 @@ private:
 	COLORREF clBackground;
 	HBRUSH hbsBackground;
 	HBITMAP hbmBackground;
+	AnimatedGifPoller* pAnimatedGifPoller;
+	bool isAnimatedBackground;
 	HFONT hftInfo;
 	bool initialized;
 	bool attached;

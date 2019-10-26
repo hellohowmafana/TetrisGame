@@ -84,6 +84,7 @@ private:
 	const tstring keyDropDelay = _T("DropDelay");
 	const tstring keyRemoveBlinkTimespan = _T("RemoveBlinkTimespan");
 	const tstring keyRemoveBlinkTimes = _T("RemoveBlinkTimes");
+	const tstring keyRollTimespan = _T("RollTimespan");
 
 	const tstring keyMusic = _T("Music");
 	const tstring keyMusicRotate = _T("MusicRotate");
@@ -133,6 +134,7 @@ public:
 	int dropDelay;
 	int removeBlinkTimespan;
 	int removeBlinkTimes;
+	int rollTimespan;
 
 	// music
 	tstring musicRotate;
