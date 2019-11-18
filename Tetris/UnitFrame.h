@@ -15,5 +15,8 @@ public:
 	bool ValidateX(int x);
 	bool ValidateY(int y);
 	bool ValidateXY(int x, int y);
+
+	virtual int GetWidth();
+	virtual int GetHeight();
 };
 

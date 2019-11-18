@@ -28,6 +28,9 @@
     <Filter Include="inis\icons">
       <UniqueIdentifier>{17de7b85-bad1-46aa-b772-2a8241296f71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="inis\sound">
+      <UniqueIdentifier>{c71fd096-284c-4716-9b0e-d1ef5c665a8a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -69,9 +72,6 @@
     <ClInclude Include="Archive.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="tcharstd.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="ISerializable.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -97,6 +97,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="AnimatedGifPoller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Music.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Musician.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -155,6 +161,15 @@
     <ClCompile Include="AnimatedGifPoller.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Source.cpp">
+      <Filter>Header Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Music.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Musician.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tetris.rc">
@@ -189,6 +204,15 @@
     <Image Include="inis\bitmaps\information color.bmp">
       <Filter>inis\bitmaps</Filter>
     </Image>
+    <Image Include="inis\bitmaps\game over.png">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\icons\pause.png">
+      <Filter>inis\icons</Filter>
+    </Image>
+    <Image Include="inis\icons\resume.png">
+      <Filter>inis\icons</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="inis\shapes\B.txt">
@@ -211,14 +235,23 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="inis\icons\game over.emf">
-      <Filter>inis\icons</Filter>
-    </None>
-    <None Include="inis\icons\pause.emf">
-      <Filter>inis\icons</Filter>
-    </None>
-    <None Include="inis\icons\resume.emf">
-      <Filter>inis\icons</Filter>
-    </None>
+    <Media Include="inis\sound\dropped.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
+    <Media Include="inis\sound\game over.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
+    <Media Include="inis\sound\remove.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
+    <Media Include="inis\sound\rotate.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
+    <Media Include="inis\sound\step down.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
+    <Media Include="inis\sound\step horizontal.mp3">
+      <Filter>inis\sound</Filter>
+    </Media>
   </ItemGroup>
 </Project>

@@ -8,5 +8,10 @@ public:
 	int sizeY;
 
 	virtual ~Frame() = default;
+
+	virtual int GetLeft();
+	virtual int GetTop();
+	virtual int GetWidth();
+	virtual int GetHeight();
 };
 

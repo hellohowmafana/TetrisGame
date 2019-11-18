@@ -1,10 +1,12 @@
 #pragma once
 #include "GameFrame.h"
-#include "Drawer.h"
+#include "Musician.h"
+
+class Drawer;
 
 enum class GameState
 {
-	None, Start, Pause, End
+	None, Start, Pause, End, ResumeDelay, BlinkLight, BlinkNormal, RollUp, RollDown
 };
 
 class Controller
@@ -14,9 +16,15 @@ public:
 	void Initialize(Configuration* pConfiguration);
 	void SetHWnd(HWND hWnd);
 	void SetGameFrame(GameFrame* pGameFrame);
+
 	void SetDrawer(Drawer* pDrawer);
+	Drawer* GetDrawer();
+	void SetMusician(Musician* pMusician);
+	Musician* GetMusician();
+
 	bool IsInitialized();
 	GameState GetGameState();
+	bool IsStarted();
 
 	void KeyDownAction(WPARAM keyCode);
 	void KeyUpAction(WPARAM keyCode);
@@ -25,6 +33,7 @@ public:
 	void StepHorizontal(bool left);
 	void StepDown();
 	void Drop();
+	void EndDrop();
 
 	void Start();
 	void End();
@@ -32,8 +41,8 @@ public:
 	void Resume();
 	void Restart();
 
-	bool SaveGame(TCHAR* szArchive);
-	bool LoadGame(TCHAR* szArchive);
+	bool SaveGame(wchar_t* szArchive);
+	bool LoadGame(wchar_t* szArchive);
 
 public:
 	GameFrame* GetGameFrame();
@@ -43,22 +52,17 @@ public:
 
 private:
 	const UINT_PTR ST_STEPDOWN = 1;
-	const UINT_PTR ST_DROPDELAY = 2;
-	const UINT_PTR ST_REMOVEBLINK = 3;
-	const UINT_PTR ST_ROLL = 5;
+	const UINT_PTR ST_REMOVEBLINK = 2;
+	const UINT_PTR ST_ROLL = 3;
+	const UINT_PTR ST_RESUME = 4;
 
-	int removeBlinkTimes;
 	int removeBlinkCount;
+	int removeBlinkTimes;
 	
 	bool StartStepDown(bool isDropping);
 	bool EndStepDown();
 	static void CALLBACK StepDownTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
-
-	bool StartDropDelay();
-	bool EndDropDelay();
-	static void CALLBACK DropDelayTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
-	void DropDelayTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 
 	bool StartRemoveBlink();
 	bool EndRemoveBlink();
@@ -70,20 +74,35 @@ private:
 	static void CALLBACK RollTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 
+	bool StartResume();
+	bool EndResume();
+	static void CALLBACK ResumeTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void ResumeTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+
 private:
 	Controller() {};
 	void InvalidateDraw();
+	void PlayMusic(MusicType musicType);
+	static void CALLBACK MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent);
+	void MusicianCallback(Musician* pMusician, MusicianEvent musicianEvent);
+
 	HWND hWnd;
 	GameFrame* pGameFrame;
 	Drawer* pDrawer;
+	Musician* pMusician;
 	bool initialized;
 	GameState gameState;
+
+	bool dropImmediate;
 
 	UINT stepDownTimespan;
 	UINT dropTimespan;
 	UINT dropDelayTimespan;
-	UINT removeDelayTimespan;
 	UINT removeBlinkTimespan;
 	UINT rollTimespan;
+	UINT resumeDelayTimespan;
+
+	bool soundOn;
+	bool bgmOn;
 };
 

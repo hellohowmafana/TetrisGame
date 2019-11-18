@@ -1,7 +1,6 @@
 #pragma once
-#include <tchar.h>
+#include <Windows.h>
 #include <string>
-#include "tcharstd.h"
 using namespace std;
 
 class Controller;
@@ -9,15 +8,15 @@ class Controller;
 class Archive
 {
 public:
-	static bool Save(TCHAR* szArchive, Controller* pController);
-	static bool Load(TCHAR* szArchive, Controller* pController);
+	static bool Save(wchar_t* szArchive, Controller* pController);
+	static bool Load(wchar_t* szArchive, Controller* pController);
 
 public:
-	static const tstring labelFrame;
-	static const tstring labelNext;
-	static const tstring labelCurrent;
-	static const tstring labelMass;
-	static const tstring labelScore;
-	static const tstring labelMark;
+	static const wstring labelFrame;
+	static const wstring labelNext;
+	static const wstring labelCurrent;
+	static const wstring labelMass;
+	static const wstring labelScore;
+	static const wstring labelMark;
 };
 

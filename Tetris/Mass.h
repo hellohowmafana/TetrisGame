@@ -33,6 +33,7 @@ public:
 	bool Union(TetrisShape* pTetrisShape);
 	bool IsLineFull(int line);
 	bool IsLineFull(MassLine* pMassLine);
+	bool HasFullLine();
 	void RemoveLine(int line);
 	int RemoveFullLines(int from, int to);
 	bool GenerateLine(int line, double blankRate);
@@ -74,6 +75,6 @@ private:
 	GameFrame* pGameFrame;
 
 public:
-	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
-	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
+	virtual bool Save(const wchar_t* szSection, wchar_t** pszString);
+	virtual bool Load(const wchar_t* szSection, wchar_t* szString);
 };

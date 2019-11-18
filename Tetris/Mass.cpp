@@ -2,6 +2,7 @@
 #include "TetrisShape.h"
 #include "GameFrame.h"
 #include "Utility.h"
+#include <sstream>
 
 bool Mass::Initialize()
 {
@@ -138,6 +139,16 @@ bool Mass::IsLineFull(MassLine* pMassLine)
 			return false;
 	}
 	return true;
+}
+
+bool Mass::HasFullLine()
+{
+	for (MassBlock::iterator it = massBlock.begin(); it != massBlock.end(); it++)
+	{
+		if (IsLineFull(*it))
+			return true;
+	}
+	return false;
 }
 
 void Mass::RemoveLine(int line)
@@ -393,25 +404,25 @@ void Mass::ClearLines()
 	massBlock.clear();
 }
 
-bool Mass::Save(const TCHAR* szSection, TCHAR** pszString)
+bool Mass::Save(const wchar_t* szSection, wchar_t** pszString)
 {
 	if (Archive::labelMass == szSection)
 	{
-		tstring strMass;
+		wstring strMass;
 		for (MassBlock::iterator itb = massBlock.begin(); itb != massBlock.end(); itb++)
 		{
 			MassLine* pMassLine = *itb;
 			for (MassLine::iterator itl = pMassLine->begin(); itl != pMassLine->end() ; itl++)
 			{
-				strMass.append(itl->isSolid ? _T("1") : _T("0"));
-				strMass.append(_T(","));
-				strMass.append(to_tstring(itl->color));
-				strMass.append(_T(" "));
+				strMass.append(itl->isSolid ? L"1" : L"0");
+				strMass.append(L",");
+				strMass.append(to_wstring(itl->color));
+				strMass.append(L" ");
 			}
 			strMass.erase(strMass.end() - 1);
-			strMass.append(_T("\n"));
+			strMass.append(L"\n");
 		}
-		*pszString = (TCHAR*)strMass.c_str();
+		*pszString = (wchar_t*)strMass.c_str();
 	}
 	else
 	{
@@ -421,10 +432,10 @@ bool Mass::Save(const TCHAR* szSection, TCHAR** pszString)
 	return true;
 }
 
-bool Mass::Load(const TCHAR* szSection, TCHAR* szString)
+bool Mass::Load(const wchar_t* szSection, wchar_t* szString)
 {
-	tstring str;
-	tistringstream stringstream(szString);
+	wstring str;
+	wistringstream stringstream(szString);
 	if (Archive::labelMass == szSection)
 	{
 		ClearLines();
@@ -432,11 +443,11 @@ bool Mass::Load(const TCHAR* szSection, TCHAR* szString)
 		{
 			getline(stringstream, str);
 			MassLine* pMassLine = CreateLine();
-			TCHAR** szUnits = new TCHAR * [pGameFrame->sizeX];
-			Utility::SplitString((TCHAR*)(str.c_str()), _T(' '), szUnits, pGameFrame->sizeX);
+			wchar_t** szUnits = new wchar_t * [pGameFrame->sizeX];
+			Utility::Spliwstring((wchar_t*)(str.c_str()), L' ', szUnits, pGameFrame->sizeX);
 			for (int i = 0; i < pGameFrame->sizeX; i++)
 			{
-				pMassLine->at(i).isSolid = szUnits[i][0] == _T('1');
+				pMassLine->at(i).isSolid = szUnits[i][0] == L'1';
 				pMassLine->at(i).color = stoi(szUnits[i] + 2);
 			}
 			delete[] szUnits;

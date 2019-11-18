@@ -197,9 +197,10 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Drawer.h" />
     <ClInclude Include="framework.h" />
     <ClInclude Include="GameFrame.h" />
+    <ClInclude Include="Music.h" />
+    <ClInclude Include="Musician.h" />
     <ClInclude Include="PromptFrame.h" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="tcharstd.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tetris.h" />
     <ClInclude Include="TetrisShape.h" />
@@ -220,7 +221,10 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="Controller.cpp" />
     <ClCompile Include="Drawer.cpp" />
     <ClCompile Include="GameFrame.cpp" />
+    <ClCompile Include="Music.cpp" />
+    <ClCompile Include="Musician.cpp" />
     <ClCompile Include="PromptFrame.cpp" />
+    <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tetris.cpp" />
     <ClCompile Include="TetrisShape.cpp" />
     <ClCompile Include="TetrisType.cpp" />
@@ -233,6 +237,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
   <ItemGroup>
     <Image Include="inis\bitmaps\background color.bmp" />
     <Image Include="inis\bitmaps\background.jpeg" />
+    <Image Include="inis\bitmaps\game over.png" />
     <Image Include="inis\bitmaps\information color.bmp" />
     <Image Include="inis\bitmaps\mass color.bmp" />
     <Image Include="inis\bitmaps\separator color.bmp" />
@@ -240,6 +245,8 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
       <DeploymentContent>true</DeploymentContent>
     </Image>
     <Image Include="inis\bitmaps\border color.bmp" />
+    <Image Include="inis\icons\pause.png" />
+    <Image Include="inis\icons\resume.png" />
     <Image Include="small.ico" />
     <Image Include="Tetris.ico" />
   </ItemGroup>
@@ -256,9 +263,12 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="inis\icons\game over.emf" />
-    <None Include="inis\icons\pause.emf" />
-    <None Include="inis\icons\resume.emf" />
+    <Media Include="inis\sound\dropped.mp3" />
+    <Media Include="inis\sound\game over.mp3" />
+    <Media Include="inis\sound\remove.mp3" />
+    <Media Include="inis\sound\rotate.mp3" />
+    <Media Include="inis\sound\step down.mp3" />
+    <Media Include="inis\sound\step horizontal.mp3" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

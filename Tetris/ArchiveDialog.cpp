@@ -9,7 +9,7 @@ INT_PTR ArchiveDialog::ArchiveDialogProc(HWND hDlg, UINT message, WPARAM wParam,
 	{
 	case WM_INITDIALOG:
 		{
-			tstring pathArchives(Configuration::singleton.pathArchives);
+			wstring pathArchives(Configuration::singleton.pathArchives);
 			DlgDirList(hDlg, (LPWSTR)pathArchives.c_str(), IDC_ARCHIVELIST, 0, 0);
 			SetFocus(GetDlgItem(hDlg, IDC_ARCHIVELIST));
 			return (INT_PTR)TRUE;
@@ -32,7 +32,7 @@ INT_PTR ArchiveDialog::ArchiveDialogProc(HWND hDlg, UINT message, WPARAM wParam,
 	return (INT_PTR)FALSE;
 }
 
-TCHAR* ArchiveDialog::GetSelectedArchive()
+wchar_t* ArchiveDialog::GetSelectedArchive()
 {
 	return szArchive;
 }

@@ -1,6 +1,4 @@
 #pragma once
-#include <tchar.h>
-#include "tcharstd.h"
 #include <string>
 #include <Windows.h>
 using namespace std;
@@ -16,7 +14,7 @@ public:
 	void Initialize(Configuration* pConfiguration);
 	static Background singleton;
 
-	tstring pathBackground;
+	wstring pathBackground;
 	COLORREF colorBackground;
 	BackgroundMode backgroundMode;
 

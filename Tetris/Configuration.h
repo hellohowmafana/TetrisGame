@@ -2,8 +2,6 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
-#include <tchar.h>
-#include "tcharstd.h"
 using namespace std;
 
 class Background;
@@ -14,90 +12,121 @@ class Configuration
 {
 private:
 	// path
-	const tstring INIS_PATH =  _T("inis");
-	const tstring BITMAPS_PATH = INIS_PATH + _T("\\bitmaps");
-	const tstring SHAPES_PATH = INIS_PATH + _T("\\shapes");
+	const wstring INIS_PATH =  L"inis";
+	const wstring BITMAPS_PATH = INIS_PATH + L"\\bitmaps";
+	const wstring ICONS_PATH = INIS_PATH + L"\\icons";
+	const wstring SHAPES_PATH = INIS_PATH + L"\\shapes";
+	const wstring SOUND_PATH = INIS_PATH + L"\\sound";
+	const wstring BGM_PATH = INIS_PATH + L"\\bgm";
+	const wstring ARCHIVES_PATH = L"archives";
 
-	const tstring CONFIGURATION_PATH = INIS_PATH + _T("\\configuration.txt");
-	const tstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\tetris color.bmp");
-	const tstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\mass color.bmp");
-	const tstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\border color.bmp");
-	const tstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\separator color.bmp");
-	const tstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\information color.bmp");
-	const tstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + _T("\\background color.bmp");
-	const tstring BACKGROUND_FILE_PATH = BITMAPS_PATH + _T("\\background.*");
-	const tstring CLASSIC_SHAPES_PATH = SHAPES_PATH + _T("\\classic.txt");
+	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
 
-	const tstring ARCHIVES_PATH = _T("archives");
+	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.bmp";
+	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.bmp";
+	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.bmp";
+	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.bmp";
+	const wstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.bmp";
+	const wstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.bmp";
+	const wstring BACKGROUND_FILE_PATH = BITMAPS_PATH + L"\\background.*";
+	const wstring GAMEOVER_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
+
+	const wstring PAUSE_ICON_FILE_PATH = ICONS_PATH + L"\\pause.*";
+	const wstring RESUME_ICON_FILE_PATH = ICONS_PATH + L"\\resume.*";
+
+	const wstring CLASSIC_SHAPES_PATH = SHAPES_PATH + L"\\classic.txt";
+
+	const wstring STEPDOWN_SOUND_FILE_PATH = SOUND_PATH + L"\\step down.mp3";
+	const wstring STEPHORIZONTAL_SOUND_FILE_PATH = SOUND_PATH + L"\\step horizontal.mp3";
+	const wstring ROTATE_SOUND_FILE_PATH = SOUND_PATH + L"\\rotate.mp3";
+	const wstring DROPPED_SOUND_FILE_PATH = SOUND_PATH + L"\\dropped.mp3";
+	const wstring REMOVE_SOUND_FILE_PATH = SOUND_PATH + L"\\remove.mp3";
+	const wstring GAMEOVER_SOUND_FILE_PATH = SOUND_PATH + L"\\game over.mp3";
 
 public:
 	// path for use
-	tstring pathInis;
-	tstring pathBitmaps;
-	tstring pathShapes;
-	tstring pathArchives;
+	wstring pathInis;
+	wstring pathBitmaps;
+	wstring pathIcons;
+	wstring pathShapes;
+	wstring pathSound;
+	wstring pathBgm;
+	wstring pathArchives;
 
-	tstring pathConfiguration;
-	tstring pathTetrisColorFile;
-	tstring pathMassColorFile;
-	tstring	pathBorderColorFile;
-	tstring pathSeparatorColorFile;
-	tstring pathInformationColor;
-	tstring pathBackgroundColor;
-	tstring pathBackground;
-	tstring pathClassicShapes;
+	wstring pathConfiguration;
+	wstring pathTetrisColorFile;
+	wstring pathMassColorFile;
+	wstring	pathBorderColorFile;
+	wstring pathSeparatorColorFile;
+	wstring pathInformationColor;
+	wstring pathBackgroundColor;
+	wstring pathBackground;
+	wstring pathGameOver;
+
+	wstring pathPauseIcon;
+	wstring pathResumeIcon;
+
+	wstring pathClassicShapes;
+
+	wstring pathStepDownSound;
+	wstring pathStepHorizontalSound;
+	wstring pathRotateSound;
+	wstring pathDroppedSound;
+	wstring pathRemoveSound;
+	wstring pathGameOverSound;
 
 private:
 	// keys name
-	const tstring keyWindow = _T("Window");
-	const tstring keyWindowSize = _T("WindowSize");
-	const tstring keyWindowPostion = _T("WindowPostion");
-	const tstring keyWindowCenter = _T("WindowCenter");
+	const wstring keyWindow = L"Window";
+	const wstring keyWindowSize = L"WindowSize";
+	const wstring keyWindowPostion = L"WindowPostion";
+	const wstring keyWindowCenter = L"WindowCenter";
 	
-	const tstring keyDisplay = _T("Display");
-	const tstring keyFramePostion = _T("FramePostion");
-	const tstring keyFrameSize = _T("FrameSize");
-	const tstring keyPromptFramePostion = _T("PromptFramePostion");
-	const tstring keyPromptFrameSize = _T("PromptFrameSize");
-	const tstring keyInfoFramePosition = _T("InfoFramePosition");
-	const tstring keyInfoFrameSize = _T("InfoFrameSize");
-	const tstring keyBorderThickness = _T("BorderThickness");
-	const tstring keySeparatorThickness = _T("SeparatorThickness");
-	const tstring keyUnitWidth = _T("UnitWidth");
-	const tstring keyInfoFontFace = _T("InfoFontFace");
-	const tstring keyInfoFontHeight = _T("InfoFontHeight");
-	const tstring keyInfoFontWidth = _T("InfoFontWidth"); 
-	const tstring keyInfoFontWeight = _T("InfoFontWeight");
-	
-	const tstring keyGame = _T("Game");
-	const tstring keyStartLevel = _T("StartLevel");
-	const tstring keyStartLine = _T("StartLine");
-	const tstring keyStartLineBlankRate = _T("StartLineBlankRate");
-	const tstring keyRemoveScores = _T("RemoveScores");
-	const tstring keyDroppedScore = _T("DroppedScore");
-	const tstring keyMaxLevel = _T("MaxLevel");
-	const tstring keyScoreGainRate = _T("ScoreGainRate");
-	const tstring keyLevelScore = _T("LevelScore");
-	const tstring keyStepDownTimespan = _T("StepDownTimespan");
-	const tstring keyDropTimespan = _T("DropTimespan");
-	const tstring keyDropImmediate = _T("DropImmediate");
-	const tstring keyDropDelay = _T("DropDelay");
-	const tstring keyRemoveBlinkTimespan = _T("RemoveBlinkTimespan");
-	const tstring keyRemoveBlinkTimes = _T("RemoveBlinkTimes");
-	const tstring keyRollTimespan = _T("RollTimespan");
+	const wstring keyDisplay = L"Display";
+	const wstring keyFramePostion = L"FramePostion";
+	const wstring keyFrameSize = L"FrameSize";
+	const wstring keyPromptFramePostion = L"PromptFramePostion";
+	const wstring keyPromptFrameSize = L"PromptFrameSize";
+	const wstring keyInfoFramePosition = L"InfoFramePosition";
+	const wstring keyInfoFrameSize = L"InfoFrameSize";
+	const wstring keyBorderThickness = L"BorderThickness";
+	const wstring keySeparatorThickness = L"SeparatorThickness";
+	const wstring keyUnitWidth = L"UnitWidth";
+	const wstring keyInfoFontFace = L"InfoFontFace";
+	const wstring keyInfoFontHeight = L"InfoFontHeight";
+	const wstring keyInfoFontWidth = L"InfoFontWidth"; 
+	const wstring keyInfoFontWeight = L"InfoFontWeight";
+	const wstring keyIconScaleRatio = L"IconScaleRatio";
+	const wstring keyMaskTransparency = L"MaskTransparency";
 
-	const tstring keyMusic = _T("Music");
-	const tstring keyMusicRotate = _T("MusicRotate");
-	const tstring keyMusicDrop = _T("MusicDrop");
-	const tstring keyMusicDropped = _T("MusicDropped");
-	const tstring keyMusicBgm = _T("MusicBgm");
+	const wstring keyGame = L"Game";
+	const wstring keyStartLevel = L"StartLevel";
+	const wstring keyStartLine = L"StartLine";
+	const wstring keyStartLineBlankRate = L"StartLineBlankRate";
+	const wstring keyRemoveScores = L"RemoveScores";
+	const wstring keyDroppedScore = L"DroppedScore";
+	const wstring keyMaxLevel = L"MaxLevel";
+	const wstring keyScoreGainRate = L"ScoreGainRate";
+	const wstring keyLevelScore = L"LevelScore";
+	const wstring keyStepDownTimespan = L"StepDownTimespan";
+	const wstring keyDropTimespan = L"DropTimespan";
+	const wstring keyDropImmediate = L"DropImmediate";
+	const wstring keyRemoveBlinkTimespan = L"RemoveBlinkTimespan";
+	const wstring keyRemoveBlinkCount = L"RemoveBlinkCount";
+	const wstring keyRollTimespan = L"RollTimespan";
+	const wstring keyResumeDelayTimespan = L"ResumeDelayTimespan";
 
-	const tstring keyBitmap = _T("Bitmap");
-	const tstring keyUseColor = _T("UseColor");
-	const tstring keyUseColorRandom = _T("UseColorRandom");
-	const tstring keyUnitBitmap = _T("UnitBitmap");
-	const tstring keyUseMassColor = _T("UseMassColor");
-	const tstring keyBackgroundMode = _T("BackgroundMode");
+	const wstring keyMusic = L"Music";
+	const wstring keySoundOn = L"SoundOn";
+	const wstring keyBgmOn = L"BgmOn";
+	const wstring keyRandomBgm = L"RandomBgm";
+
+	const wstring keyBitmap = L"Bitmap";
+	const wstring keyUseColor = L"UseColor";
+	const wstring keyUseColorRandom = L"UseColorRandom";
+	const wstring keyUnitBitmap = L"UnitBitmap";
+	const wstring keyUseMassColor = L"UseMassColor";
+	const wstring keyBackgroundMode = L"BackgroundMode";
 
 public:
 	// window
@@ -114,10 +143,12 @@ public:
 	int borderThickness;
 	int separatorThickness;
 	int unitWidth;
-	tstring infoFontFace;
+	wstring infoFontFace;
 	int infoFontHeight;
 	int infoFontWidth;
 	int infoFontWeight;
+	double iconScaleRatio;
+	double maskTransparency;
 
 	// game
 	int startLevel;
@@ -131,21 +162,21 @@ public:
 	vector<int> vecStepDownTimespan;
 	int dropTimespan;
 	bool dropImmediate;
-	int dropDelay;
 	int removeBlinkTimespan;
-	int removeBlinkTimes;
+	int removeBlinkCount;
 	int rollTimespan;
+	int resumeDelayTimespan;
 
 	// music
-	tstring musicRotate;
-	tstring musicDrop;
-	tstring musicDropped;
-	tstring musicBgm;
+	bool soundOn;
+	bool bgmOn;
+	vector<wstring> vecBgms;
+	bool randomBgm;
 
 	// bitmaps
 	bool useColor;
 	bool useColorRandom;
-	tstring unitBitmap;
+	wstring unitBitmap;
 	bool useMassColor;
 	BackgroundMode backgroundMode;
 
@@ -170,18 +201,18 @@ private:
 	bool LoadLevels();
 	bool LoadShapes();
 	bool LoadColors();
-	bool GetColorFromFile(const TCHAR* file, COLORREF* pColor);
-	bool GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors);
-	tstring& FindFile(tstring& path);
-	void FindFiles(tstring& path, vector<tstring>* pvecFiles);
+	bool GetColorFromFile(const wchar_t* file, COLORREF* pColor);
+	bool GetColorsFromFile(const wchar_t* file, vector<COLORREF>* pvecColors);
+	wstring& FindFile(wstring& path);
+	void FindFiles(wstring path, vector<wstring>* pvecFiles);
 
 	bool SaveWindowPostion(int w, int h, int l, int t, bool c);
 
 private:
-	bool SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2);
-	bool SplitStringToInts(TCHAR* szStr, TCHAR ch, vector<int>& vecInts);
-	bool SplitStringToDoubles(TCHAR* szStr, TCHAR ch, vector<double>& vecDoubles);
-	bool ParseTetrisTypeDeclaration(TCHAR* szStr, TCHAR* name,
+	bool SplitStringToInts(wchar_t* szStr, wchar_t ch, int* v1, int* v2);
+	bool SplitStringToInts(wchar_t* szStr, wchar_t ch, vector<int>& vecInts);
+	bool SplitStringToDoubles(wchar_t* szStr, wchar_t ch, vector<double>& vecDoubles);
+	bool ParseTetrisTypeDeclaration(wchar_t* szStr, wchar_t* name,
 		bool* pPenetrable, bool* pClockwiseRotation, bool* pTwoRotation, int* pHorizontalCenterOffset);
 };
 

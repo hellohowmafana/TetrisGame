@@ -1,23 +1,23 @@
 #include "Configuration.h"
-#include <tchar.h>
 #include <fstream> 
 #include "TetrisShape.h"
 #include "Level.h"
 #include <gdiplus.h>
 #include "Background.h"
+#include "Musician.h"
 using namespace Gdiplus;
 
 #define BUFFER_CHARS 256
-#define ClaimStringBuffer TCHAR buffer[BUFFER_CHARS] = _T("");
+#define ClaimStringBuffer wchar_t buffer[BUFFER_CHARS] = L"";
 #define GetStringBuffer (buffer)
 #define GetConfigurationString(keySection, keyKey) GetPrivateProfileString((keySection).c_str(),\
-													 (keyKey).c_str(), _T(""),\
+													 (keyKey).c_str(), L"",\
 													 buffer, BUFFER_CHARS, pathConfiguration.c_str())
 #define GetConfigurationStringEx(keySection, keyKey, buffer) GetPrivateProfileString((keySection).c_str(),\
-															  (keyKey).c_str(), _T(""),\
+															  (keyKey).c_str(), L"",\
 															  (buffer), BUFFER_CHARS, pathConfiguration.c_str())
 #define GetConfigurationStr(keySection, keyKey, str) GetPrivateProfileString((keySection).c_str(),\
-														(keyKey).c_str(), _T(""),\
+														(keyKey).c_str(), L"",\
 														buffer, BUFFER_CHARS, pathConfiguration.c_str()),\
 														(str) = GetStringBuffer
 #define GetConfigurationInt(keySection, keyKey) GetPrivateProfileInt((keySection).c_str(),\
@@ -52,13 +52,17 @@ bool Configuration::Initialize()
 
 bool Configuration::InitializeIniPaths()
 {
-	TCHAR path[MAX_PATH];
+	wchar_t path[MAX_PATH];
 	GetModuleFileName(nullptr, path, MAX_PATH);
-	*(_tcsrchr(path, _T('\\')) + 1) = _T('\0');
+	*(wcsrchr(path, L'\\') + 1) = L'\0';
 
 	pathInis = path + INIS_PATH;
 	pathBitmaps = path + BITMAPS_PATH;
+	pathIcons = path + ICONS_PATH;
 	pathShapes = path + SHAPES_PATH;
+	pathSound = path + SOUND_PATH;
+	pathBgm = path + BGM_PATH;
+	pathArchives = path + ARCHIVES_PATH;
 
 	pathConfiguration = path + CONFIGURATION_PATH;
 	pathTetrisColorFile = path + TETRIS_COLOR_FILE_PATH;
@@ -69,10 +73,24 @@ bool Configuration::InitializeIniPaths()
 	pathBackgroundColor = path + BACKGROUND_COLOR_FILE_PATH;
 	pathBackground = path + BACKGROUND_FILE_PATH;
 	FindFile(pathBackground);
+	pathGameOver = path + GAMEOVER_FILE_PATH;
+	FindFile(pathGameOver);
+
+	pathPauseIcon = path + PAUSE_ICON_FILE_PATH;
+	FindFile(pathPauseIcon);
+	pathResumeIcon = path + RESUME_ICON_FILE_PATH;
+	FindFile(pathResumeIcon);
 
 	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
 
-	pathArchives = path + ARCHIVES_PATH;
+	pathStepDownSound = path + STEPDOWN_SOUND_FILE_PATH;
+	pathStepHorizontalSound = path + STEPHORIZONTAL_SOUND_FILE_PATH;
+	pathRotateSound = path + ROTATE_SOUND_FILE_PATH;
+	pathDroppedSound = path + DROPPED_SOUND_FILE_PATH;
+	pathRemoveSound = path + REMOVE_SOUND_FILE_PATH;
+	pathGameOverSound = path + GAMEOVER_SOUND_FILE_PATH;
+
+	FindFiles(pathBgm + L"\\*", &vecBgms);
 
 	return true;
 }
@@ -83,24 +101,24 @@ bool Configuration::LoadParameters()
 	
 	// window
 	GetConfigurationString(keyWindow, keyWindowSize);
-	SplitStringToInts(GetStringBuffer, _T('x'), &windowWidth, &windowHeight);
+	SplitStringToInts(GetStringBuffer, L'x', &windowWidth, &windowHeight);
 	GetConfigurationString(keyWindow, keyWindowPostion);
-	SplitStringToInts(GetStringBuffer, _T(','), &windowLeft, &windowTop);
+	SplitStringToInts(GetStringBuffer, L',', &windowLeft, &windowTop);
 	windowCenter = GetConfigurationBool(keyWindow, keyWindowCenter);
 
 	// display
 	GetConfigurationString(keyDisplay, keyFramePostion);
-	SplitStringToInts(GetStringBuffer, _T(','), &frameLeft, &frameTop);
+	SplitStringToInts(GetStringBuffer, L',', &frameLeft, &frameTop);
 	GetConfigurationString(keyDisplay, keyFrameSize);
-	SplitStringToInts(GetStringBuffer, _T(','), &frameSizeX, &frameSizeY);
+	SplitStringToInts(GetStringBuffer, L',', &frameSizeX, &frameSizeY);
 	GetConfigurationString(keyDisplay, keyPromptFramePostion);
-	SplitStringToInts(GetStringBuffer, _T(','), &promptFrameLeft, &promptFrameTop);
+	SplitStringToInts(GetStringBuffer, L',', &promptFrameLeft, &promptFrameTop);
 	GetConfigurationString(keyDisplay, keyPromptFrameSize);
-	SplitStringToInts(GetStringBuffer, _T(','), &promptFrameSizeX, &promptFrameSizeY);
+	SplitStringToInts(GetStringBuffer, L',', &promptFrameSizeX, &promptFrameSizeY);
 	GetConfigurationString(keyDisplay, keyInfoFramePosition);
-	SplitStringToInts(GetStringBuffer, _T(','), &infoFrameLeft, &infoFrameTop);
+	SplitStringToInts(GetStringBuffer, L',', &infoFrameLeft, &infoFrameTop);
 	GetConfigurationString(keyDisplay, keyInfoFrameSize);
-	SplitStringToInts(GetStringBuffer, _T(','), &infoFrameSizeX, &infoFrameSizeY);
+	SplitStringToInts(GetStringBuffer, L',', &infoFrameSizeX, &infoFrameSizeY);
 	borderThickness = GetConfigurationInt(keyDisplay, keyBorderThickness);
 	separatorThickness = GetConfigurationInt(keyDisplay, keySeparatorThickness);
 	unitWidth = GetConfigurationInt(keyDisplay, keyUnitWidth);
@@ -108,33 +126,34 @@ bool Configuration::LoadParameters()
 	infoFontHeight = GetConfigurationInt(keyDisplay, keyInfoFontHeight);
 	infoFontWidth = GetConfigurationInt(keyDisplay, keyInfoFontWidth);
 	infoFontWeight = GetConfigurationInt(keyDisplay, keyInfoFontWeight);
+	iconScaleRatio = GetConfigurationDouble(keyDisplay, keyIconScaleRatio);
+	maskTransparency = GetConfigurationDouble(keyDisplay, keyMaskTransparency);
 
 	// game
 	startLevel = GetConfigurationInt(keyGame, keyStartLevel);
 	startLine = GetConfigurationInt(keyGame, keyStartLine);
 	startLineBlankRate = GetConfigurationDouble(keyGame, keyStartLineBlankRate);
 	GetConfigurationString(keyGame, keyRemoveScores);
-	SplitStringToInts(GetStringBuffer, _T(','), vecRemoveScores);
+	SplitStringToInts(GetStringBuffer, L',', vecRemoveScores);
 	droppedScore = GetConfigurationInt(keyGame, keyDroppedScore);
 	maxLevel = GetConfigurationInt(keyGame, keyMaxLevel);
 	GetConfigurationString(keyGame, keyScoreGainRate);
-	SplitStringToDoubles(GetStringBuffer, _T(','), vecScoreGainRate);
+	SplitStringToDoubles(GetStringBuffer, L',', vecScoreGainRate);
 	GetConfigurationString(keyGame, keyLevelScore);
-	SplitStringToInts(GetStringBuffer, _T(','), vecLevelScore);
+	SplitStringToInts(GetStringBuffer, L',', vecLevelScore);
 	GetConfigurationString(keyGame, keyStepDownTimespan);
-	SplitStringToInts(GetStringBuffer, _T(','), vecStepDownTimespan);
+	SplitStringToInts(GetStringBuffer, L',', vecStepDownTimespan);
 	dropTimespan = GetConfigurationInt(keyGame, keyDropTimespan);
-	dropDelay = GetConfigurationInt(keyGame, keyDropDelay);
 	dropImmediate = GetConfigurationBool(keyGame, keyDropImmediate);
 	removeBlinkTimespan = GetConfigurationInt(keyGame, keyRemoveBlinkTimespan);
-	removeBlinkTimes = GetConfigurationInt(keyGame, keyRemoveBlinkTimes);
+	removeBlinkCount = GetConfigurationInt(keyGame, keyRemoveBlinkCount);
 	rollTimespan = GetConfigurationInt(keyGame, keyRollTimespan);
+	resumeDelayTimespan = GetConfigurationInt(keyGame, keyResumeDelayTimespan);
 
 	// music
-	GetConfigurationStr(keyMusic, keyMusicRotate, musicRotate);
-	GetConfigurationStr(keyMusic, keyMusicDrop, musicDrop);
-	GetConfigurationStr(keyMusic, keyMusicDropped, musicDropped);
-	GetConfigurationStr(keyMusic, keyMusicBgm, musicBgm);
+	soundOn = GetConfigurationBool(keyMusic, keySoundOn);
+	bgmOn = GetConfigurationBool(keyMusic, keyBgmOn);
+	randomBgm = GetConfigurationBool(keyMusic, keyRandomBgm);
 
 	// bitmap
 	useColor = GetConfigurationBool(keyBitmap, keyUseColor);
@@ -169,15 +188,15 @@ bool Configuration::LoadLevels()
 
 bool Configuration::LoadShapes()
 {
-	tfstream fs;
+	wfstream fs;
 	try {
-		fs.open(pathClassicShapes, tfstream::in);
+		fs.open(pathClassicShapes, wfstream::in);
 
 		ClaimStringBuffer;
 		
-		TCHAR group[BUFFER_CHARS] = _T("");
-		_tsplitpath(pathClassicShapes.c_str(), NULL, NULL, group, NULL);
-		TCHAR name[BUFFER_CHARS] = _T("");
+		wchar_t group[BUFFER_CHARS] = L"";
+		_wsplitpath(pathClassicShapes.c_str(), NULL, NULL, group, NULL);
+		wchar_t name[BUFFER_CHARS] = L"";
 		bool penetrable = false;
 		bool twoRotation;
 		bool clockwiseRotation;
@@ -189,10 +208,10 @@ bool Configuration::LoadShapes()
 		while (true)
 		{
 			fs.getline(GetStringBuffer, BUFFER_CHARS);
-			TCHAR* psz = GetStringBuffer +_tcsspn(GetStringBuffer, _T(" \t"));
-			if (_tcschr(psz, _T(':'))) // type declare
+			wchar_t* psz = GetStringBuffer + wcsspn(GetStringBuffer, L" \t");
+			if (wcschr(psz, L':')) // type declare
 			{
-				if (_T("") != name && row != 0 && col != 0)
+				if (L"" != name && row != 0 && col != 0)
 				{
 					TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
 						horizontalCenterOffset,
@@ -205,19 +224,19 @@ bool Configuration::LoadShapes()
 			}
 			else if (fs.rdstate() & wfstream::eofbit) // end of file
 			{
-				if (*psz == _T('\0')) // blank line
+				if (*psz == L'\0') // blank line
 				{
 					break;
 				}
 				else
 				{
 					// type data
-					col = (int)_tcslen(psz);
+					col = (int)wcslen(psz);
 					row++;
 					for (int i = 0; i < col; i++)
 						vecData.push_back((char)psz[i]);
 					// last type
-					if (_T("") != name && row != 0 && col != 0)
+					if (L"" != name && row != 0 && col != 0)
 					{
 						TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
 							horizontalCenterOffset,
@@ -226,13 +245,13 @@ bool Configuration::LoadShapes()
 					break;
 				}
 			}
-			else if (_T('\0') == *psz) // blank line
+			else if (L'\0' == *psz) // blank line
 			{
 				continue;
 			}
 			else // type data
 			{
-				col = (int)_tcslen(psz);
+				col = (int)wcslen(psz);
 				row++;
 				for (int i = 0; i < col; i++)
 					vecData.push_back((char)psz[i]);
@@ -266,7 +285,7 @@ bool Configuration::LoadColors()
 	return true;
 }
 
-bool Configuration::GetColorFromFile(const TCHAR* file, COLORREF* pColor)
+bool Configuration::GetColorFromFile(const wchar_t* file, COLORREF* pColor)
 {
 	try {
 		Bitmap* pbmp;
@@ -282,7 +301,7 @@ bool Configuration::GetColorFromFile(const TCHAR* file, COLORREF* pColor)
 	}
 }
 
-bool Configuration::GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecColors)
+bool Configuration::GetColorsFromFile(const wchar_t* file, vector<COLORREF>* pvecColors)
 {
 	try {
 		pvecColors->clear();
@@ -310,9 +329,9 @@ bool Configuration::GetColorsFromFile(const TCHAR* file, vector<COLORREF>* pvecC
 	}
 }
 
-tstring& Configuration::FindFile(tstring& path)
+wstring& Configuration::FindFile(wstring& path)
 {
-	tstring dir = path.substr(0, path.find_last_of(_T('\\')) + 1);
+	wstring dir = path.substr(0, path.find_last_of(L'\\') + 1);
 	WIN32_FIND_DATA findData;
 	HANDLE hFindFile = FindFirstFile(path.c_str(), &findData);
 	if (hFindFile)
@@ -324,9 +343,9 @@ tstring& Configuration::FindFile(tstring& path)
 	return path;
 }
 
-void Configuration::FindFiles(tstring& path, vector<tstring>* pvecFiles)
+void Configuration::FindFiles(wstring path, vector<wstring>* pvecFiles)
 {
-	tstring dir = path.substr(0, path.find_last_of(_T('\\')) + 1);
+	wstring dir = path.substr(0, path.find_last_of(L'\\') + 1);
 	WIN32_FIND_DATA findData;
 	HANDLE hFindFile = FindFirstFile(path.c_str(), &findData);
 	if (hFindFile)
@@ -345,14 +364,14 @@ bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)
 	return false;
 }
 
-bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2)
+bool Configuration::SplitStringToInts(wchar_t* szStr, wchar_t ch, int* v1, int* v2)
 {
 	try {
-		tstring strBuffer(szStr);
+		wstring strBuffer(szStr);
 		size_t pos = strBuffer.find(ch);
 		if (string::npos == pos)
 		return false;
-		tstring strVal = strBuffer.substr(0, pos);
+		wstring strVal = strBuffer.substr(0, pos);
 		*v1 = stoi(strVal);
 		strVal = strBuffer.substr(pos + 1);
 		*v2 = stoi(strVal);
@@ -364,12 +383,12 @@ bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, int* v1, int* v2)
 	}
 }
 
-bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, vector<int>& vecInts)
+bool Configuration::SplitStringToInts(wchar_t* szStr, wchar_t ch, vector<int>& vecInts)
 {
 	try {
-		vector<TCHAR*> tokens; // token pointers
-		tokens.resize(Utility::SplitString(szStr, _T(','), nullptr, 0));
-		Utility::SplitString(szStr, _T(','), tokens.data(), 0);
+		vector<wchar_t*> tokens; // token pointers
+		tokens.resize(Utility::Spliwstring(szStr, L',', nullptr, 0));
+		Utility::Spliwstring(szStr, L',', tokens.data(), 0);
 		vecInts.clear();
 		for (size_t i = 0; i < tokens.size(); i++)
 		{
@@ -383,12 +402,12 @@ bool Configuration::SplitStringToInts(TCHAR* szStr, TCHAR ch, vector<int>& vecIn
 	}
 }
 
-bool Configuration::SplitStringToDoubles(TCHAR* szStr, TCHAR ch, vector<double>& vecDoubles)
+bool Configuration::SplitStringToDoubles(wchar_t* szStr, wchar_t ch, vector<double>& vecDoubles)
 {
 	try {
-		vector<TCHAR*> tokens; // token pointers
-		tokens.resize(Utility::SplitString(szStr, _T(','), nullptr, 0));
-		Utility::SplitString(szStr, _T(','), tokens.data(), 0);
+		vector<wchar_t*> tokens; // token pointers
+		tokens.resize(Utility::Spliwstring(szStr, L',', nullptr, 0));
+		Utility::Spliwstring(szStr, L',', tokens.data(), 0);
 		vecDoubles.clear();
 		for (size_t i = 0; i < tokens.size(); i++)
 		{
@@ -402,25 +421,25 @@ bool Configuration::SplitStringToDoubles(TCHAR* szStr, TCHAR ch, vector<double>&
 	}
 }
 
-bool Configuration::ParseTetrisTypeDeclaration(TCHAR* szStr, TCHAR* name, bool* pPenetrable,
+bool Configuration::ParseTetrisTypeDeclaration(wchar_t* szStr, wchar_t* name, bool* pPenetrable,
 	bool* pTwoRotation, bool* pClockwiseRotation, int* pHorizontalCenterOffset)
 {
 	try {
-		tstring strBuffer(szStr);
-		size_t pos = strBuffer.find(_T(':'));
+		wstring strBuffer(szStr);
+		size_t pos = strBuffer.find(L':');
 		if (string::npos == pos)
 			return false;
-		tstring strVal = strBuffer.substr(0, pos);
+		wstring strVal = strBuffer.substr(0, pos);
 		copy(strVal.begin(), strVal.end(), name);
 		strVal = strBuffer.substr(pos + 1);
-		pos = strVal.find(_T(','));
-		*pPenetrable = _T("1") == strVal.substr(0, pos);
+		pos = strVal.find(L',');
+		*pPenetrable = L"1" == strVal.substr(0, pos);
 		strVal = strVal.substr(pos + 1);
-		pos = strVal.find(_T(','));
-		*pTwoRotation = _T("1") == strVal.substr(0, pos);
+		pos = strVal.find(L',');
+		*pTwoRotation = L"1" == strVal.substr(0, pos);
 		strVal = strVal.substr(pos + 1);
-		pos = strVal.find(_T(','));
-		*pClockwiseRotation = _T("1") == strVal.substr(0, pos);
+		pos = strVal.find(L',');
+		*pClockwiseRotation = L"1" == strVal.substr(0, pos);
 		strVal = strVal.substr(pos + 1);
 		*pHorizontalCenterOffset = stoi(strVal);
 		return true;

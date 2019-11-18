@@ -1,7 +1,7 @@
 #include "TetrisType.h"
 #include "Utility.h"
 
-void TetrisType::Create(TCHAR const* group, TCHAR const* name,
+void TetrisType::Create(wchar_t const* group, wchar_t const* name,
 	bool penetrable, bool twoRotation, bool clockwiseRotation,
 	int horizontalCenterOffset,
 	int row, int col, char* pData, size_t dataCount, int color)
@@ -31,7 +31,7 @@ void TetrisType::Clear()
 	tetrisTypeLibrary.clear();
 }
 
-TetrisTypeGroup* TetrisType::CreateGroup(TCHAR const* group)
+TetrisTypeGroup* TetrisType::CreateGroup(wchar_t const* group)
 {
 	if (ExsitGroup(group))
 		return nullptr;
@@ -40,19 +40,19 @@ TetrisTypeGroup* TetrisType::CreateGroup(TCHAR const* group)
 	return pTetrisTypeGroup;
 }
 
-void TetrisType::DeleteGroup(TCHAR const* group)
+void TetrisType::DeleteGroup(wchar_t const* group)
 {
 	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
 	delete pTetrisTypeGroup;
 	tetrisTypeLibrary.erase(group);
 }
 
-bool TetrisType::ExsitGroup(TCHAR const* group)
+bool TetrisType::ExsitGroup(wchar_t const* group)
 {
 	return nullptr != GetGroup(group);
 }
 
-TetrisTypeGroup* TetrisType::GetGroup(TCHAR const* group)
+TetrisTypeGroup* TetrisType::GetGroup(wchar_t const* group)
 {
 	if (tetrisTypeLibrary.end() == tetrisTypeLibrary.find(group))
 		return nullptr;
@@ -70,14 +70,14 @@ int TetrisType::GetTetrisTypesCount()
 	return count;
 }
 
-int TetrisType::GetTetrisTypesCount(TCHAR const* group)
+int TetrisType::GetTetrisTypesCount(wchar_t const* group)
 {
 	if(!ExsitGroup(group))
 		return 0;
 	return tetrisTypeLibrary[group]->size();
 }
 
-int TetrisType::GetRandomColor(TCHAR const* group)
+int TetrisType::GetRandomColor(wchar_t const* group)
 {
 	return Utility::Random(0, GetTetrisTypesCount(group) - 1);
 }
@@ -89,7 +89,7 @@ TetrisType* TetrisType::Random()
 	return pTetrisType;
 }
 
-TetrisType* TetrisType::GetTetrisType(TCHAR const* group, TCHAR const* name)
+TetrisType* TetrisType::GetTetrisType(wchar_t const* group, wchar_t const* name)
 {
 	TetrisTypeGroup* pTetrisTypeGroup = GetGroup(group);
 	if (!pTetrisTypeGroup)
@@ -97,13 +97,13 @@ TetrisType* TetrisType::GetTetrisType(TCHAR const* group, TCHAR const* name)
 
 	for (TetrisTypeGroup::iterator it = pTetrisTypeGroup->begin(); it != pTetrisTypeGroup->end(); it++)
 	{
-		if (0 == _tcscmp(name, (*it)->name))
+		if (0 == wcscmp(name, (*it)->name))
 			return *it;
 	}
 	return nullptr;
 }
 
-TetrisType::TetrisType(TCHAR const* const group, TCHAR const* const name,
+TetrisType::TetrisType(wchar_t const* const group, wchar_t const* const name,
 	bool penetrable, bool twoRotation, bool clockwiseRotation,
 	int horizontalCenterOffset,
 	int row, int col, char* pData, size_t dataCount, int color)
@@ -119,20 +119,20 @@ TetrisType::~TetrisType()
 	delete[] pData;
 }
 
-bool TetrisType::Initialize(TCHAR const* group, TCHAR const* name,
+bool TetrisType::Initialize(wchar_t const* group, wchar_t const* name,
 	bool penetrable, bool twoRotation, bool clockwiseRotation,
 	int horizontalCenterOffset,
 	int row, int col, char* pData, size_t dataCount, int color)
 {
 	size_t len;
 	
-	len = _tcslen(group);
-	this->group = new TCHAR[len];
-	_tcscpy(this->group, group);
+	len = wcslen(group);
+	this->group = new wchar_t[len];
+	wcscpy(this->group, group);
 	
-	len = _tcslen(name);
-	this->name = new TCHAR[len];
-	_tcscpy(this->name, name);
+	len = wcslen(name);
+	this->name = new wchar_t[len];
+	wcscpy(this->name, name);
 
 	this->penetrable = penetrable;
 	this->twoRotation = twoRotation;
@@ -173,6 +173,6 @@ void TetrisType::GetXY(int pos, int* px, int* py)
 	*py = pos / col;
 }
 
-const TCHAR* TetrisType::classic = _T("classic");
+const wchar_t* TetrisType::classic = L"classic";
 
 TetrisTypeLibrary TetrisType::tetrisTypeLibrary;

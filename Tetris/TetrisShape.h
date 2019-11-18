@@ -1,7 +1,6 @@
 #pragma once
 #include "TetrisType.h"
 #include <vector>
-#include <tchar.h>
 #include "ISerializable.h"
 using namespace std;
 
@@ -66,8 +65,8 @@ private:
 	UnitFrame* pUnitFrame;
 
 public:
-	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
-	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
+	virtual bool Save(const wchar_t* szSection, wchar_t** pszString);
+	virtual bool Load(const wchar_t* szSection, wchar_t* szString);
 	TetrisRotation IntToTetrisRotation(int irotation);
 	int TetrisRotationToInt(TetrisRotation rotation);
 };

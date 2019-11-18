@@ -9,8 +9,6 @@
 class PromptFrame;
 class InfoFrame;
 
-enum class GameFrameState { None, Normal, BlinkLight, BlinkNormal, RollUp, RollDown };
-
 class GameFrame : public UnitFrame, public ISerializable
 {
 public:
@@ -27,9 +25,14 @@ public:
 
 	vector<COLORREF>* pTetrisColors;
 	COLORREF* pMassColor;
+	wstring pathPauseIcon;
+	wstring pathResumeIcon;
+	wstring pathGameOver;
+
+	double iconScaleRatio;
+	double maskTransparency;
 
 public:
-	GameFrameState state;
 	vector<MassLine*> vecLastFullLines;
 	int rolledRows;
 
@@ -57,20 +60,20 @@ public:
 	bool StepDown();
 	void Drop();
 	int Union();
+	bool HasFullLine();
 	void RemoveFullLines();
 	void Rotate();
 	void RebornTetrisShape();
 	bool IsFull();
 
-	bool IsBlinkingLight();
-	bool IsBlinkingLine(MassLine* pMassLine);
+	bool IsLastFullLine(const MassLine* pMassLine);
 
 	Mass* GetMass();
 	TetrisShape* GetShape();
 	TetrisShape* GetNextShape();
 
 public:
-	virtual bool Save(const TCHAR* szSection, TCHAR** pszString);
-	virtual bool Load(const TCHAR* szSection, TCHAR* szString);
+	virtual bool Save(const wchar_t* szSection, wchar_t** pszString);
+	virtual bool Load(const wchar_t* szSection, wchar_t* szString);
 };
 

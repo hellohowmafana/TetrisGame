@@ -1,40 +1,39 @@
 #pragma once
-#include <tchar.h>
 #include <list>
 #include <map>
-#include "tcharstd.h"
+#include <string>
 using namespace std;
 
 class TetrisType;
 typedef list<TetrisType*> TetrisTypeGroup;
-typedef map<tstring, TetrisTypeGroup*> TetrisTypeLibrary;
+typedef map<wstring, TetrisTypeGroup*> TetrisTypeLibrary;
 
 class TetrisType
 {
 public:
-	static void Create(TCHAR const* group, TCHAR const* name,
+	static void Create(wchar_t const* group, wchar_t const* name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
 	static void Delete(TetrisType* pTetrisType);
 	static void Clear();
-	static TetrisTypeGroup* CreateGroup(TCHAR const* group);
-	static void DeleteGroup(TCHAR const* group);
-	static bool ExsitGroup(TCHAR const* group);
-	static TetrisType* GetTetrisType(TCHAR const* group, TCHAR const* name);
-	static TetrisTypeGroup* GetGroup(TCHAR const* group);
+	static TetrisTypeGroup* CreateGroup(wchar_t const* group);
+	static void DeleteGroup(wchar_t const* group);
+	static bool ExsitGroup(wchar_t const* group);
+	static TetrisType* GetTetrisType(wchar_t const* group, wchar_t const* name);
+	static TetrisTypeGroup* GetGroup(wchar_t const* group);
 	static int GetTetrisTypesCount();
-	static int GetTetrisTypesCount(TCHAR const* group);
-	static int GetRandomColor(TCHAR const* group);
+	static int GetTetrisTypesCount(wchar_t const* group);
+	static int GetRandomColor(wchar_t const* group);
 	static TetrisType* Random();
 
 private:
-	TetrisType(TCHAR const* group, TCHAR const* name,
+	TetrisType(wchar_t const* group, wchar_t const* name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
 	~TetrisType();
-	bool Initialize(TCHAR const* group, TCHAR const* name,
+	bool Initialize(wchar_t const* group, wchar_t const* name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
@@ -43,9 +42,9 @@ private:
 	void GetXY(int pos, int* px, int* py);
 
 public:
-	static const TCHAR* classic;
-	TCHAR* group;
-	TCHAR* name;
+	static const wchar_t* classic;
+	wchar_t* group;
+	wchar_t* name;
 	bool penetrable;
 	bool twoRotation;
 	bool clockwiseRotation;

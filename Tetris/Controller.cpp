@@ -1,20 +1,26 @@
 #include "Controller.h"
 #include "Configuration.h"
-#include "GameFrame.h"
 #include "Level.h"
 #include "Archive.h"
+#include "Drawer.h"
+#include "Musician.h"
 
 Controller Controller::singleton;
 
 void Controller::Initialize(Configuration* pConfiguration)
 {
+	this->dropImmediate = pConfiguration->dropImmediate;
+
 	this->stepDownTimespan = Level::GetLevel(pConfiguration->startLevel)->stepDownTimeSpan;
 	this->dropTimespan = pConfiguration->dropTimespan;
-	this->dropDelayTimespan = pConfiguration->dropDelay;
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
-	this->removeBlinkTimes = pConfiguration->removeBlinkTimes;
-	removeBlinkCount = 0;
+	this->removeBlinkCount = pConfiguration->removeBlinkCount;
+	removeBlinkTimes = 0;
 	this->rollTimespan = pConfiguration->rollTimespan;
+	this->resumeDelayTimespan = pConfiguration->resumeDelayTimespan;
+
+	soundOn = pConfiguration->soundOn;
+	bgmOn = pConfiguration->bgmOn;
 
 	initialized = true;
 	gameState = GameState::End;
@@ -35,6 +41,22 @@ void Controller::SetDrawer(Drawer* pDrawer)
 	this->pDrawer = pDrawer;
 }
 
+Drawer* Controller::GetDrawer()
+{
+	return pDrawer;
+}
+
+void Controller::SetMusician(Musician* pMusician)
+{
+	this->pMusician = pMusician;
+	pMusician->SetCallback(MusicianCallbackStatic);
+}
+
+Musician* Controller::GetMusician()
+{
+	return pMusician;
+}
+
 bool Controller::IsInitialized()
 {
 	return initialized;
@@ -43,6 +65,12 @@ bool Controller::IsInitialized()
 GameState Controller::GetGameState()
 {
 	return gameState;
+}
+
+bool Controller::IsStarted()
+{
+	return GameState::None != gameState &&
+		GameState::End != gameState;
 }
 
 void Controller::KeyDownAction(WPARAM keyCode)
@@ -62,10 +90,16 @@ void Controller::KeyDownAction(WPARAM keyCode)
 		Rotate();
 		break;
 	case VK_SPACE:
-		Drop();
+		dropImmediate ? Drop() : StepDown();
 		break;
 	case VK_RETURN:
 		Restart();
+		break;
+	case 'P':
+		if (GameState::Pause == gameState)
+			StartResume();
+		else if(GameState::Start == gameState)
+			Pause();
 		break;
 	default:
 		break;
@@ -82,6 +116,7 @@ void Controller::Rotate()
 	if (GameState::Start != gameState)
 		return;
 	pGameFrame->Rotate();
+	PlayMusic(MusicType::Rotate);
 }
 
 void Controller::StepHorizontal(bool left)
@@ -96,6 +131,7 @@ void Controller::StepHorizontal(bool left)
 	{
 		pGameFrame->StepRight();
 	}
+	PlayMusic(MusicType::StepHorizontal);
 }
 
 void Controller::StepDown()
@@ -104,8 +140,14 @@ void Controller::StepDown()
 		return;
 	if (pGameFrame->StepDown())
 	{
+		// dropped
 		EndStepDown();
-		StartDropDelay();
+		EndDrop();
+	}
+	else
+	{
+		// not dropped
+		PlayMusic(MusicType::StepDown);
 	}
 }
 
@@ -115,13 +157,33 @@ void Controller::Drop()
 		return;
 	pGameFrame->Drop();
 	EndStepDown();
-	StartDropDelay();
+	EndDrop();
+}
+
+void Controller::EndDrop()
+{
+	PlayMusic(MusicType::Dropped);
+	if (pGameFrame->Union() > 0)
+	{
+		InvalidateDraw();
+		PlayMusic(MusicType::Remove);
+		StartRemoveBlink();
+		return;
+	}
+	if (pGameFrame->IsFull())
+	{
+		End();
+		return;
+	}
+	pGameFrame->RebornTetrisShape();
+	InvalidateDraw();
+	StartStepDown(false);
 }
 
 void Controller::Start()
 {
 	gameState = GameState::Start;
-	pGameFrame->state = GameFrameState::Normal;
+	PlayMusic(MusicType::Bgm);
 	StartStepDown(false);
 }
 
@@ -129,7 +191,6 @@ void Controller::End()
 {
 	gameState = GameState::End;
 	EndStepDown();
-	EndDropDelay();
 	EndRemoveBlink();
 	StartRoll();
 }
@@ -137,15 +198,22 @@ void Controller::End()
 void Controller::Pause()
 {
 	EndStepDown();
-	EndDropDelay();
 	EndRemoveBlink();
 	gameState = GameState::Pause;
 }
 
 void Controller::Resume()
 {
-	gameState = GameState::Start;
-	StartStepDown(false);
+	if (pGameFrame->HasFullLine())
+	{
+		PlayMusic(MusicType::Remove);
+		StartRemoveBlink();
+	}
+	else
+	{
+		gameState = GameState::Start;
+		StartStepDown(false);
+	}
 }
 
 void Controller::Restart()
@@ -154,14 +222,14 @@ void Controller::Restart()
 	Start();
 }
 
-bool Controller::SaveGame(TCHAR* szArchive)
+bool Controller::SaveGame(wchar_t* szArchive)
 {
 	return false;
 }
 
-bool Controller::LoadGame(TCHAR* szArchive)
+bool Controller::LoadGame(wchar_t* szArchive)
 {
-	if (0 == _tcslen(szArchive))
+	if (0 == wcslen(szArchive))
 		return false;
 	End();
 	Archive::Load(szArchive, this);
@@ -212,50 +280,17 @@ void Controller::StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD milli
 	InvalidateDraw();
 }
 
-bool Controller::StartDropDelay()
-{
-	return SetTimer(hWnd, ST_DROPDELAY, dropDelayTimespan, DropDelayTimerProcStatic);
-}
-
-bool Controller::EndDropDelay()
-{
-	return KillTimer(hWnd, ST_DROPDELAY);
-}
-
-void Controller::DropDelayTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
-{
-	Controller::singleton.DropDelayTimerProc(hWnd, msg, id, millisecond);
-}
-
-void Controller::DropDelayTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
-{
-	EndDropDelay();
-
-	if (pGameFrame->Union() > 0)
-	{
-		InvalidateDraw();
-		StartRemoveBlink();
-		return;
-	}
-  	if (pGameFrame->IsFull())
-	{
-		End();
-		return;
-	}
-	pGameFrame->RebornTetrisShape();
-	InvalidateDraw();
-	StartStepDown(false);
-}
-
 bool Controller::StartRemoveBlink()
 {
-	removeBlinkCount = 0;
+	gameState = GameState::BlinkNormal;
+   	removeBlinkTimes = 0;
 	return SetTimer(hWnd, ST_REMOVEBLINK, removeBlinkTimespan, RemoveBlinkTimerProcStatic);
 }
 
 bool Controller::EndRemoveBlink()
 {
-	removeBlinkCount = 0;
+	gameState = GameState::Start;
+	removeBlinkTimes = 0;
 	return KillTimer(hWnd, ST_REMOVEBLINK);
 }
 
@@ -266,10 +301,9 @@ void Controller::RemoveBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DW
 
 void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
-	if (removeBlinkTimes == removeBlinkCount)
+	if (removeBlinkCount == removeBlinkTimes)
 	{
 		EndRemoveBlink();
-		pGameFrame->state = GameFrameState::Normal;
 
 		pGameFrame->RemoveFullLines();
 		pGameFrame->RebornTetrisShape();
@@ -280,12 +314,10 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 	}
 	else
 	{
-		removeBlinkCount++;
+		removeBlinkTimes++;
 
-		GameFrameState state = pGameFrame->state;
-		pGameFrame->state = 
-			GameFrameState::Normal == state || GameFrameState::BlinkNormal == state ?
-			GameFrameState::BlinkLight : GameFrameState::BlinkNormal;
+		gameState = GameState::BlinkNormal == gameState ?
+			GameState::BlinkLight : GameState::BlinkNormal;
 		
 		InvalidateDraw();
 	}
@@ -293,14 +325,14 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 
 bool Controller::StartRoll()
 {
-	pGameFrame->state = GameFrameState::RollUp;
+	gameState = GameState::RollUp;
 	pGameFrame->rolledRows = 0;
 	return SetTimer(hWnd, ST_ROLL, rollTimespan, RollTimerProcStatic);
 }
 
 bool Controller::EndRoll()
 {
-	pGameFrame->state = GameFrameState::None;
+	gameState = GameState::End;
 	pGameFrame->rolledRows = 0;
 	return KillTimer(hWnd, ST_ROLL);
 }
@@ -312,11 +344,11 @@ void Controller::RollTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD mil
 
 void Controller::RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
-	if (GameFrameState::RollUp == pGameFrame->state)
+	if (GameState::RollUp == gameState)
 	{
 		if (pGameFrame->sizeY == pGameFrame->rolledRows)
 		{
-			pGameFrame->state = GameFrameState::RollDown;
+			gameState = GameState::RollDown;
 			pGameFrame->rolledRows--;
 		}
 		else
@@ -324,7 +356,7 @@ void Controller::RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD milliseco
 			pGameFrame->rolledRows++;
 		}
 	}
-	else if (GameFrameState::RollDown == pGameFrame->state)
+	else if (GameState::RollDown == gameState)
 	{
 		if (0 == pGameFrame->rolledRows)
 		{
@@ -340,7 +372,58 @@ void Controller::RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD milliseco
 	InvalidateDraw();
 }
 
+bool Controller::StartResume()
+{
+	gameState = GameState::ResumeDelay;
+	gameState = GameState::ResumeDelay;
+	InvalidateDraw();
+	return SetTimer(hWnd, ST_RESUME, resumeDelayTimespan, ResumeTimerProcStatic);
+}
+
+bool Controller::EndResume()
+{
+	return KillTimer(hWnd, ST_RESUME);
+}
+
+void Controller::ResumeTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.ResumeTimerProc(hWnd, msg, id, millisecond);
+}
+
+void Controller::ResumeTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	EndResume();
+	Resume();
+	InvalidateDraw();
+}
+
 void Controller::InvalidateDraw()
 {
 	pDrawer->Invalidate();
+}
+
+void Controller::PlayMusic(MusicType musicType)
+{
+	if (MusicType::Bgm == musicType)
+	{
+		if (bgmOn)
+			pMusician->PostPlay(musicType);
+	}
+	else
+	{
+		if (soundOn)
+			pMusician->PostPlay(musicType);
+	}
+}
+
+void CALLBACK Controller::MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent)
+{
+	Controller::singleton.MusicianCallback(pMusician, musicianEvent);
+}
+
+void Controller::MusicianCallback(Musician* pMusician, MusicianEvent musicianEvent)
+{
+	if (pMusician == GetMusician())
+		if (MusicianEvent::Initialize == musicianEvent)
+			Start();
 }

@@ -1,6 +1,5 @@
 // Tetris.cpp : Defines the entry point for the application.
 //
-
 #include "framework.h"
 #include "Tetris.h"
 #include "Configuration.h"
@@ -12,6 +11,8 @@
 #include "GameFrame.h"
 #include "Controller.h"
 #include "ArchiveDialog.h"
+#include "Utility.h"
+#include "Musician.h"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
@@ -19,8 +20,8 @@ using namespace Gdiplus;
 
 // Global Variables:
 HINSTANCE hInst;                                // current instance
-WCHAR szTitle[MAX_LOADSTRING];                  // The title bar text
-WCHAR szWindowClass[MAX_LOADSTRING];            // the main window class name
+wchar_t szTitle[MAX_LOADSTRING];                  // The title bar text
+wchar_t szWindowClass[MAX_LOADSTRING];            // the main window class name
 
 // Forward declarations of functions included in this code module:
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -132,12 +133,21 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    ShowWindow(hWnd, nCmdShow);
 
+   Utility::DisableIMM(hWnd);
+
    Configuration* pConfiguration = &Configuration::singleton;
    if (!pConfiguration->Initialize())
    {
-	   MessageBox(hWnd, _T("Load configuration failed."), NULL, MB_OK);
+	   MessageBox(hWnd, L"Load configuration failed.", NULL, MB_OK);
 	   PostQuitMessage(0);
    }
+   
+   Utility::ResizeWindow(hWnd, pConfiguration->windowWidth, pConfiguration->windowHeight);
+   Utility::ResizableWindow(hWnd, false);
+   if (pConfiguration->windowCenter)
+	   Utility::CenterWindow(hWnd);
+   else
+	   Utility::MoveWindow(hWnd, pConfiguration->windowLeft, pConfiguration->windowTop);
 
    GameFrame* pGameFrame = &GameFrame::singleton;
    pGameFrame->Initialize(pConfiguration);
@@ -151,17 +161,22 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    Background* pBackground = &Background::singleton;
    pBackground->Initialize(pConfiguration);
+   
+   Controller* pController = &Controller::singleton;
 
    Drawer* pDrawer = &Drawer::singleton;
    pDrawer->SetHWnd(hWnd);
-   pDrawer->Initialize(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
+   pDrawer->Initialize(pController, pGameFrame, pPromptFrame, pInfoFrame, pBackground);
 
-   Controller* pController = &Controller::singleton;
+   Musician* pMusician = &Musician::singleton;
+   pMusician->InitializeAsync(pConfiguration);
+
    pController->Initialize(pConfiguration);
    pController->SetHWnd(hWnd);
    pController->SetGameFrame(pGameFrame);
    pController->SetDrawer(pDrawer);
-   pController->Start();
+   pController->SetMusician(pMusician);
+   //pController->Start();
 
    InvalidateRect(hWnd, NULL, FALSE);
 

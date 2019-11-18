@@ -10,13 +10,16 @@
 using namespace std;
 using namespace Gdiplus;
 
+class Controller;
+
 class Drawer
 {
 public:
 	static Drawer singleton;
 
 public:
-	bool Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFrame* pInfoFrame, Background* pBackground);
+	bool Initialize(Controller* pController, GameFrame* pGameFrame,
+		PromptFrame* pPromptFrame, InfoFrame* pInfoFrame, Background* pBackground);
 	bool Deinitialize();
 	void SetHWnd(HWND hWnd);
 	void AttachDC(HDC hdc);
@@ -39,9 +42,14 @@ private:
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
 	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush);
 	void DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush);
+	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HBRUSH brush);
+	void DrawFill(UnitFrame* pUnitFrame, double blankRate);
 	void DrawRollingLines(GameFrame* pGameFrame);
 
 	void DrawInfo(InfoFrame* pInfoFrame);
+
+	void DrawIcon(GameFrame* pGameFrame);
+	void DrawMask(GameFrame* pGameFrame);
 
 	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
 	void GetDCResolution(HDC hdc, int* px, int* py);
@@ -54,6 +62,7 @@ private:
 	void BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame);
 
 private:
+	Controller* pController;
 	GameFrame* pGameFrame;
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
@@ -72,6 +81,11 @@ private:
 	AnimatedGifPoller* pAnimatedGifPoller;
 	bool isAnimatedBackground;
 	HFONT hftInfo;
+	Bitmap* pBitmapGameOver;
+	Bitmap* pBitmapPause;
+	Bitmap* pBitmapResume;
+	Brush* pBrushMask;
+	
 	bool initialized;
 	bool attached;
 

@@ -1,5 +1,7 @@
 #include "Drawer.h"
 #include "Utility.h"
+#include "Controller.h"
+#include <bitset>
 
 #define CreateSolidPen(width, color) CreatePen(PS_SOLID, (width), (color))
 
@@ -27,9 +29,11 @@ Drawer::~Drawer()
 	}
 }
 
-bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFrame*pInfoFrame, Background* pBackground)
+bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
+	PromptFrame* pPromptFrame, InfoFrame*pInfoFrame, Background* pBackground)
 {
 	try {
+		this->pController = pController;
 		this->pGameFrame = pGameFrame;
 		this->pPromptFrame = pPromptFrame;
 		this->pInfoFrame = pInfoFrame;
@@ -47,6 +51,8 @@ bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFr
 		hbsMassLight = CreateSolidBrush(Utility::LightColor(*pGameFrame->pMassColor, 0.5));
 
 		pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
+		if (Status::Ok != pBitmapBackground->GetLastStatus())
+			return false;
 		SetBitmapDCResolution(pBitmapBackground, NULL);
 		pBitmapBackground->GetHBITMAP(Color(), &hbmBackground);
 		hbsBackground = BackgroundMode::Tile == pBackground->backgroundMode ?
@@ -64,6 +70,19 @@ bool Drawer::Initialize(GameFrame* pGameFrame, PromptFrame* pPromptFrame, InfoFr
 			pInfoFrame->fontWeight*100, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, FF_DONTCARE, pInfoFrame->fontFace.c_str());
+
+		pBitmapGameOver = new Bitmap(pGameFrame->pathGameOver.c_str());
+		if (Status::Ok != pBitmapGameOver->GetLastStatus())
+			return false;
+
+		pBitmapPause = new Bitmap(pGameFrame->pathPauseIcon.c_str());
+		if (Status::Ok != pBitmapPause->GetLastStatus())
+			return false;
+		pBitmapResume = new Bitmap(pGameFrame->pathResumeIcon.c_str());
+		if (Status::Ok != pBitmapResume->GetLastStatus())
+			return false;
+
+		pBrushMask = new SolidBrush(Color((BYTE)(255 * pGameFrame->maskTransparency), 255, 255, 255));
 	}
 	catch (...){
 		return false;
@@ -110,6 +129,17 @@ bool Drawer::Deinitialize()
 	DeleteObject(hftInfo);
 	hftInfo = NULL;
 
+	delete pBitmapGameOver;
+	pBitmapGameOver = nullptr;
+
+	delete pBitmapPause;
+	pBitmapPause = nullptr;
+	delete pBitmapResume;
+	pBitmapResume = nullptr;
+
+	delete pBrushMask;
+	pBrushMask = nullptr;
+
 	initialized = false;
 
 	return true;
@@ -147,15 +177,24 @@ void Drawer::DrawElements()
 	{
 		DrawBackground();
 		DrawFrame(pGameFrame);
-		DrawShape(pGameFrame, pGameFrame->GetShape());
-		DrawMass(pGameFrame, pGameFrame->GetMass());
-		DrawRollingLines(pGameFrame);
-
 		DrawFrame(pPromptFrame);
-		DrawShape(pPromptFrame, pPromptFrame->GetTerisShape());
-
 		DrawFrame(pInfoFrame);
 		DrawInfo(pInfoFrame);
+
+		if (pController->IsStarted())
+		{
+			DrawShape(pGameFrame, pGameFrame->GetShape());
+			DrawMass(pGameFrame, pGameFrame->GetMass());
+			DrawRollingLines(pGameFrame);
+			DrawMask(pGameFrame);
+			DrawIcon(pGameFrame);
+		
+			DrawShape(pPromptFrame, pPromptFrame->GetTerisShape());
+		}
+		else
+		{
+			DrawFill(pGameFrame, 0);
+		}
 
 		BitBlt(hdc, 0, 0, dcWidth, dcHeight, hdcCmp, 0, 0, SRCCOPY);
 	}
@@ -255,13 +294,13 @@ void Drawer::DrawFrame(Frame* pFrame)
 {
 	if (!IsValid()) return;
 
-	if (dynamic_cast<UnitFrame*>(pFrame) != nullptr)
+	if (dynamic_cast<const UnitFrame*>(pFrame) != nullptr)
 	{
 		UnitFrame* pUnitFrame = (UnitFrame*)pFrame;
 		DrawBorder(pUnitFrame);
 		DrawSeparators(pUnitFrame);
 	}
-	if (dynamic_cast<InfoFrame*>(pFrame) != nullptr)
+	if (dynamic_cast<const InfoFrame*>(pFrame) != nullptr)
 	{
 	}
 }
@@ -326,8 +365,8 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 
 void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 {
-	if (GameFrameState::None == pGameFrame->state ||
-		GameFrameState::RollDown == pGameFrame->state)
+	if (GameState::None == pController->GetGameState() ||
+		GameState::RollDown == pController->GetGameState())
 		return;
 
 	if (!IsValid()) return;
@@ -346,8 +385,8 @@ void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 
 void Drawer::DrawMass(GameFrame* pGameFrame, Mass* pMass)
 {
-	if (GameFrameState::None == pGameFrame->state ||
-		GameFrameState::RollDown == pGameFrame->state)
+	if (GameState::None == pController->GetGameState() ||
+		GameState::RollDown == pController->GetGameState())
 		return;
 
 	if (!IsValid()) return;
@@ -367,10 +406,10 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 	if (!IsValid()) return;
 
 	int x = 0;
-	for (MassLine::iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
+	for (MassLine::const_iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
 	{
 		HBRUSH hbs;
-		if (pGameFrame->IsBlinkingLight() && pGameFrame->IsBlinkingLine(pMassLine))
+		if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
 			hbs = hbsMassLight;
 		else
 			hbs = pGameFrame->useMassColor ? hbsMass : vecTetrisBrushes[it->color];
@@ -408,10 +447,57 @@ void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush)
 	}
 }
 
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HBRUSH brush)
+{
+	if (1 == blankRate)
+		return;
+
+	if (0 == blankRate)
+	{
+		for (int i = 0; i < pUnitFrame->GetWidth(); i++)
+		{
+			for (int j = 0; j < pUnitFrame->GetHeight(); j++)
+			{
+				DrawUnit(pUnitFrame, i, j, brush);
+			}
+		}
+	}
+	else
+	{
+		int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
+		int blankCount;
+		if (leanBlank)
+			blankCount = (int)floor(count * blankRate);
+		else
+			blankCount = (int)ceil(count * blankRate);
+		vector<bool> vecSolids(count, false);
+		for (size_t i = 0; i < (size_t)(count - blankCount); i++)
+		{
+			vecSolids[i] = true;
+		}
+		random_shuffle(vecSolids.begin(), vecSolids.end());
+
+		for (int i = 0; i < count; i++)
+		{
+			if (vecSolids[i])
+			{
+				int x = i % pUnitFrame->GetWidth();
+				int y = i / pUnitFrame->GetWidth();
+				DrawUnit(pUnitFrame, x, y, brush);
+			}
+		}
+	}
+}
+
+void Drawer::DrawFill(UnitFrame* pUnitFrame, double blankRate)
+{
+	DrawUnits(pUnitFrame, blankRate, false, hbsMass);
+}
+
 void Drawer::DrawRollingLines(GameFrame* pGameFrame)
 {
-	if (GameFrameState::RollUp == pGameFrame->state ||
-		GameFrameState::RollDown == pGameFrame->state)
+	if (GameState::RollUp == pController->GetGameState() ||
+		GameState::RollDown == pController->GetGameState())
 	{
 		for (int i = pGameFrame->sizeY - pGameFrame->rolledRows;
 			i < pGameFrame->sizeY; i++)
@@ -423,14 +509,16 @@ void Drawer::DrawRollingLines(GameFrame* pGameFrame)
 
 void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 {
-	tstring labels;
-	labels.append(_T("Level\n\n"));
-	labels.append(_T("Score\n\n"));
-	labels.append(_T("StartLine\n\n"));
-	tstring infos;
-	infos.append(to_tstring(*pInfoFrame->pLevel)).append(_T("\n\n"));
-	infos.append(to_tstring(*pInfoFrame->pScore)).append(_T("\n\n"));
-	infos.append(to_tstring(*pInfoFrame->pStartLine));
+	if (!IsValid()) return;
+
+	wstring labels;
+	labels.append(L"Level\n\n");
+	labels.append(L"Score\n\n");
+	labels.append(L"StartLine\n\n");
+	wstring infos;
+	infos.append(to_wstring(*pInfoFrame->pLevel)).append(L"\n\n");
+	infos.append(to_wstring(*pInfoFrame->pScore)).append(L"\n\n");
+	infos.append(to_wstring(*pInfoFrame->pStartLine));
 	RECT rcInfo = { pInfoFrame->left, pInfoFrame->top,
 		pInfoFrame->left + pInfoFrame->sizeX, pInfoFrame->top + pInfoFrame->sizeY };
 	SetBkMode(hdcCmp, TRANSPARENT);
@@ -438,6 +526,55 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 	SelectObject(hdcCmp, hftInfo);
 	DrawText(hdcCmp, labels.c_str(), labels.size(), &rcInfo, DT_LEFT);
 	DrawText(hdcCmp, infos.c_str(), infos.size(), &rcInfo, DT_RIGHT);
+}
+
+void Drawer::DrawIcon(GameFrame* pGameFrame)
+{
+	if (!IsValid()) return;
+
+	if (GameState::Pause != pController->GetGameState() && GameState::ResumeDelay != pController->GetGameState())
+		return;
+
+	Image* pIcon = GameState::Pause == pController->GetGameState() ? pBitmapPause : pBitmapResume;
+
+	REAL rate = pIcon->GetWidth() * pIcon->GetHeight() /
+		(pGameFrame->GetWidth() * pGameFrame->GetHeight() * (REAL)pGameFrame->iconScaleRatio);
+	rate = sqrt(rate);
+
+	REAL width = pIcon->GetWidth() / rate;
+	REAL height = pIcon->GetHeight() / rate;
+	// ensure icon not out of game frame
+	if (width > pGameFrame->GetWidth() || height > pGameFrame->GetHeight())
+	{
+		if (width / pGameFrame->GetWidth() >= height / pGameFrame->GetHeight())
+		{
+			rate = pIcon->GetWidth() * 1.0f / pGameFrame->GetWidth();
+		}
+		else
+		{
+			rate = pIcon->GetHeight() * 1.0f / pGameFrame->GetHeight();
+		}
+		width = pIcon->GetWidth() / rate;
+		height = pIcon->GetHeight() / rate;
+	}
+
+	REAL left = (pGameFrame->GetWidth() - width) / 2 + pGameFrame->GetLeft();
+	REAL top = (pGameFrame->GetHeight() - height) / 2 + pGameFrame->GetTop();
+
+	Graphics graphics(hdcCmp);
+	graphics.DrawImage(pIcon, left, top, width, height);
+}
+
+void Drawer::DrawMask(GameFrame* pGameFrame)
+{
+	if (!IsValid()) return;
+
+	if (GameState::Pause != pController->GetGameState() && GameState::ResumeDelay != pController->GetGameState())
+		return;
+	
+	Graphics graphics(hdcCmp);
+	graphics.FillRectangle(pBrushMask, pGameFrame->GetLeft(), pGameFrame->GetTop(),
+		pGameFrame->GetWidth(), pGameFrame->GetHeight());
 }
 
 void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)

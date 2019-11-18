@@ -21,11 +21,17 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	useColor = pConfiguration->useColor;
 	useColorRandom = pConfiguration->useColorRandom;
 	useMassColor = pConfiguration->useMassColor;
+	iconScaleRatio = pConfiguration->iconScaleRatio;
+	maskTransparency = pConfiguration->maskTransparency;
 
 	pBorderColor = &pConfiguration->colorBorder;
 	pSeparatorColor = &pConfiguration->colorSeparator;
 	pTetrisColors = &pConfiguration->vecTetrisColors;
 	pMassColor = &pConfiguration->colorMass;
+
+	pathPauseIcon = pConfiguration->pathPauseIcon;
+	pathResumeIcon = pConfiguration->pathResumeIcon;
+	pathGameOver = pConfiguration->pathGameOver;
 }
 
 void GameFrame::SetPromptFrame(PromptFrame* pPromptFrame)
@@ -144,6 +150,11 @@ int GameFrame::Union()
 	return vecLastFullLines.size();
 }
 
+bool GameFrame::HasFullLine()
+{
+	return mass.HasFullLine();
+}
+
 void GameFrame::RemoveFullLines()
 {
 	int removeLinesCount = mass.RemoveFullLines(tetrisShape.GetTop(), tetrisShape.GetBottom());
@@ -173,12 +184,7 @@ bool GameFrame::IsFull()
 	return mass.IsFull();
 }
 
-bool GameFrame::IsBlinkingLight()
-{
-	return GameFrameState::BlinkLight == state;
-}
-
-bool GameFrame::IsBlinkingLine(MassLine* pMassLine)
+bool GameFrame::IsLastFullLine(const MassLine* pMassLine)
 {
 	return vecLastFullLines.end() != find(vecLastFullLines.begin(), vecLastFullLines.end(), pMassLine);
 }
@@ -198,18 +204,18 @@ TetrisShape* GameFrame::GetNextShape()
 	return &nextTetrisShape;
 }
 
-bool GameFrame::Save(const TCHAR* szSection, TCHAR** pszString)
+bool GameFrame::Save(const wchar_t* szSection, wchar_t** pszString)
 {
 	return false;
 }
 
-bool GameFrame::Load(const TCHAR* szSection, TCHAR* szString)
+bool GameFrame::Load(const wchar_t* szSection, wchar_t* szString)
 {
-	tstring str(szString);
+	wstring str(szString);
 	if (Archive::labelFrame == szSection)
 	{
-		TCHAR* szs[2];
-		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 2);
+		wchar_t* szs[2];
+		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 2);
 		sizeX = stoi(szs[0]);
 		sizeY = stoi(szs[1]);
 		return false;

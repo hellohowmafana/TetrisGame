@@ -503,25 +503,25 @@ UnitFrame* TetrisShape::GetFrame()
 	return pUnitFrame;
 }
 
-bool TetrisShape::Save(const TCHAR* szSection, TCHAR** pszString)
+bool TetrisShape::Save(const wchar_t* szSection, wchar_t** pszString)
 {
 	if (Archive::labelNext == szSection)
 	{
-		tstring str;
-		str.append(pTetrisType->group).append(_T(","))
-			.append(pTetrisType->name).append(_T(","))
-			.append(to_tstring(TetrisRotationToInt(rotation)));
-		*pszString = (TCHAR*)str.c_str();
+		wstring str;
+		str.append(pTetrisType->group).append(L",")
+			.append(pTetrisType->name).append(L",")
+			.append(to_wstring(TetrisRotationToInt(rotation)));
+		*pszString = (wchar_t*)str.c_str();
 	}
 	else if(Archive::labelCurrent == szSection)
 	{
-		tstring str;
-		str.append(pTetrisType->group).append(_T(","))
-			.append(pTetrisType->name).append(_T(","))
-			.append(to_tstring(TetrisRotationToInt(rotation))).append(_T(","))
-			.append(to_tstring(posX)).append(_T(","))
-			.append(to_tstring(posY));
-		*pszString = (TCHAR*)str.c_str();
+		wstring str;
+		str.append(pTetrisType->group).append(L",")
+			.append(pTetrisType->name).append(L",")
+			.append(to_wstring(TetrisRotationToInt(rotation))).append(L",")
+			.append(to_wstring(posX)).append(L",")
+			.append(to_wstring(posY));
+		*pszString = (wchar_t*)str.c_str();
 	}
 	else
 	{
@@ -530,24 +530,24 @@ bool TetrisShape::Save(const TCHAR* szSection, TCHAR** pszString)
 	return true;
 }
 
-bool TetrisShape::Load(const TCHAR* szSection, TCHAR* szString)
+bool TetrisShape::Load(const wchar_t* szSection, wchar_t* szString)
 {
 	GameFrame* pGameFrame = dynamic_cast<GameFrame*>(pUnitFrame);
 	if (nullptr == pGameFrame)
 		return false;
 
-	tstring str(szString);
+	wstring str(szString);
 	if (Archive::labelCurrent == szSection)
 	{
-		TCHAR* szs[5];
-		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 5);
+		wchar_t* szs[5];
+		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 5);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
 		SetPostion(stoi(szs[3]), stoi(szs[4]));
 	}
 	else if (Archive::labelNext == szSection)
 	{
-		TCHAR* szs[3];
-		Utility::SplitString((TCHAR*)(str.c_str()), _T(','), szs, 3);
+		wchar_t* szs[3];
+		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 3);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
 	}
 	else
