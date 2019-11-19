@@ -46,7 +46,7 @@ private:
 	InfoFrame* pInfoFrame;
 
 private:
-	GameFrame() {};
+	GameFrame();
 
 public:
 	void Initialize(Configuration* pConfiguration);

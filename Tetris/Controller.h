@@ -23,6 +23,7 @@ public:
 	Musician* GetMusician();
 
 	bool IsInitialized();
+	bool IsResourceInitialized();
 	GameState GetGameState();
 	bool IsStarted();
 
@@ -35,7 +36,7 @@ public:
 	void Drop();
 	void EndDrop();
 
-	void Start();
+	bool Start();
 	void End();
 	void Pause();
 	void Resume();
@@ -46,9 +47,13 @@ public:
 
 public:
 	GameFrame* GetGameFrame();
-	TetrisShape* GetTetrisShape();
-	TetrisShape* GetNextTetrisShape();
-	Mass* GetMass();
+	void SetBgmOn(bool on);
+	bool GetBgmOn();
+	void SetSoundOn(bool on);
+	bool GetSoundOn();
+
+	void PlayBgm();
+	void StopBgm();
 
 private:
 	const UINT_PTR ST_STEPDOWN = 1;
@@ -83,6 +88,7 @@ private:
 	Controller() {};
 	void InvalidateDraw();
 	void PlayMusic(MusicType musicType);
+	void StopMusic(MusicType musicType);
 	static void CALLBACK MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent);
 	void MusicianCallback(Musician* pMusician, MusicianEvent musicianEvent);
 

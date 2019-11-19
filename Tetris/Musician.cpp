@@ -226,7 +226,7 @@ bool Musician::Play(MusicType musicType)
 bool Musician::Stop(MusicType musicType)
 {
 	if (MusicType::Bgm == musicType)
-		return bgm.Play(true);
+		return bgm.Stop();
 	else
 		return StopSound(musicType);
 }
@@ -373,12 +373,12 @@ Music* Musician::ShiftBgm(bool random, bool open)
 		if (random)
 		{
 			if (-1 == currentBgm)
-				currentBgm = Utility::Random(0, vecBgms.size() - 1);
+				currentBgm = Utility::Random(0, (int)vecBgms.size() - 1);
 			else
 			{
-				int random = Utility::Random(0, vecBgms.size() - 2);
+				int random = Utility::Random(0, (int)vecBgms.size() - 2);
 				if (random == currentBgm)
-					random = vecBgms.size() - 1;
+					random = (int)vecBgms.size() - 1;
 				currentBgm = random;
 			}
 		}

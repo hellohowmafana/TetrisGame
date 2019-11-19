@@ -65,7 +65,7 @@ int TetrisType::GetTetrisTypesCount()
 	int count = 0;
 	for (TetrisTypeLibrary::iterator it = tetrisTypeLibrary.begin(); it != tetrisTypeLibrary.end(); it++)
 	{
-		count += it->second->size();
+		count += (int)it->second->size();
 	}
 	return count;
 }
@@ -74,7 +74,7 @@ int TetrisType::GetTetrisTypesCount(wchar_t const* group)
 {
 	if(!ExsitGroup(group))
 		return 0;
-	return tetrisTypeLibrary[group]->size();
+	return (int)tetrisTypeLibrary[group]->size();
 }
 
 int TetrisType::GetRandomColor(wchar_t const* group)
@@ -84,8 +84,8 @@ int TetrisType::GetRandomColor(wchar_t const* group)
 
 TetrisType* TetrisType::Random()
 {
-	TetrisTypeGroup* pTetrisTypeGroup = next(tetrisTypeLibrary.begin(), Utility::Random(0, tetrisTypeLibrary.size() - 1))->second;
-	TetrisType* pTetrisType = *next(pTetrisTypeGroup->begin(), Utility::Random(0, pTetrisTypeGroup->size() - 1));
+	TetrisTypeGroup* pTetrisTypeGroup = next(tetrisTypeLibrary.begin(), Utility::Random(0, (int)tetrisTypeLibrary.size() - 1))->second;
+	TetrisType* pTetrisType = *next(pTetrisTypeGroup->begin(), Utility::Random(0, (int)pTetrisTypeGroup->size() - 1));
 	return pTetrisType;
 }
 

@@ -51,6 +51,11 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit",                       IDM_EXIT
     END
+    POPUP "&Music"
+    BEGIN
+        MENUITEM "&Bgm",                        ID_MUSIC_BGM
+        MENUITEM "&Sound",                      ID_MUSIC_SOUND
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About ...",                  IDM_ABOUT

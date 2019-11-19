@@ -4,6 +4,10 @@
 #include "Level.h"
 GameFrame GameFrame::singleton;
 
+GameFrame::GameFrame()
+{
+}
+
 void GameFrame::Initialize(Configuration* pConfiguration)
 {
 	left = pConfiguration->frameLeft;
@@ -147,7 +151,7 @@ int GameFrame::Union()
 			vecLastFullLines.push_back(mass.GetLine(i));
 		}
 	}
-	return vecLastFullLines.size();
+	return (int)vecLastFullLines.size();
 }
 
 bool GameFrame::HasFullLine()
@@ -218,7 +222,18 @@ bool GameFrame::Load(const wchar_t* szSection, wchar_t* szString)
 		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 2);
 		sizeX = stoi(szs[0]);
 		sizeY = stoi(szs[1]);
-		return false;
+	}
+	else if (Archive::labelNext == szSection)
+	{
+		nextTetrisShape.Load(szSection,	szString);
+	}
+	else if (Archive::labelCurrent == szSection)
+	{
+		tetrisShape.Load(szSection, szString);
+	}
+	else if (Archive::labelMass == szSection)
+	{
+		mass.Load(szSection, szString);
 	}
 	else if (Archive::labelScore == szSection)
 	{

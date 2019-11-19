@@ -56,12 +56,12 @@ bool Archive::Load(wchar_t* szArchive, Controller* pController)
 			}
 			else if (0 == str.find(labelNext + labelMark))
 			{
-				pController->GetNextTetrisShape()->Load(labelNext.c_str(),
+				pController->GetGameFrame()->Load(labelNext.c_str(),
 					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
 			}
 			else if(0 == str.find(labelCurrent + labelMark))
 			{
-				pController->GetTetrisShape()->Load(labelCurrent.c_str(),
+				pController->GetGameFrame()->Load(labelCurrent.c_str(),
 					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
 			}
 			else if (0 == str.find(labelScore + labelMark))
@@ -79,7 +79,7 @@ bool Archive::Load(wchar_t* szArchive, Controller* pController)
 				{
 					massData = false;
 					strMassData.erase(strMassData.end() - 1);
-					pController->GetMass()->Load(labelMass.c_str(),
+					pController->GetGameFrame()->Load(labelMass.c_str(),
 						(wchar_t*)strMassData.c_str());
 				}
 			}

@@ -176,7 +176,10 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pController->SetGameFrame(pGameFrame);
    pController->SetDrawer(pDrawer);
    pController->SetMusician(pMusician);
-   //pController->Start();
+
+   HMENU hMenu = GetMenu(hWnd);
+   CheckMenuItem(hMenu, ID_MUSIC_BGM, pController->GetBgmOn() ? MF_CHECKED : MF_UNCHECKED);
+   CheckMenuItem(hMenu, ID_MUSIC_SOUND, pController->GetSoundOn() ? MF_CHECKED : MF_UNCHECKED);
 
    InvalidateRect(hWnd, NULL, FALSE);
 
@@ -217,7 +220,29 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_EXIT:
                 DestroyWindow(hWnd);
                 break;
-            default:
+			case ID_MUSIC_BGM:
+				{
+					Controller* pController = &Controller::singleton;
+					bool bgmOn = !pController->GetBgmOn();
+					pController->SetBgmOn(bgmOn);
+					HMENU hMenu = GetMenu(hWnd);
+					CheckMenuItem(hMenu, ID_MUSIC_BGM, bgmOn ? MF_CHECKED : MF_UNCHECKED);
+					if (bgmOn)
+						pController->PlayBgm();
+					else
+						pController->StopBgm();
+				}
+			break;
+			case ID_MUSIC_SOUND:
+				{
+					Controller* pController = &Controller::singleton;
+					bool soundOn = !pController->GetSoundOn();
+					pController->SetSoundOn(soundOn);
+					HMENU hMenu = GetMenu(hWnd);
+					CheckMenuItem(hMenu, ID_MUSIC_SOUND, soundOn ? MF_CHECKED : MF_UNCHECKED);
+				}
+				break;
+			default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
@@ -245,7 +270,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			pController->KeyDownAction(wParam);
 		}
 		break;
-    case WM_DESTROY:
+	case WM_DESTROY:
 		Drawer::singleton.Deinitialize();
         PostQuitMessage(0);
         break;

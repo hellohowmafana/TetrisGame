@@ -24,6 +24,7 @@ public:
 	void SetHWnd(HWND hWnd);
 	void AttachDC(HDC hdc);
 	void DetachDC();
+	bool IsInitialized();
 	void DrawElements();
 	void Invalidate();
 

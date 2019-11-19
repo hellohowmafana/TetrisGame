@@ -169,7 +169,7 @@ bool Configuration::LoadLevels()
 {
 	vector<Level>* pvecLevels = &Level::vecLevels;
 	pvecLevels->resize(maxLevel);
-	for (size_t i = 0; i < (size_t)maxLevel; i++)
+	for (int i = 0; i < maxLevel; i++)
 	{
 		pvecLevels->at(i).level = i + 1;
 		pvecLevels->at(i).minScore =

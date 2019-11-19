@@ -62,6 +62,11 @@ bool Controller::IsInitialized()
 	return initialized;
 }
 
+bool Controller::IsResourceInitialized()
+{
+	return pDrawer->IsInitialized() && pMusician->IsInitialized();
+}
+
 GameState Controller::GetGameState()
 {
 	return gameState;
@@ -180,11 +185,14 @@ void Controller::EndDrop()
 	StartStepDown(false);
 }
 
-void Controller::Start()
+bool Controller::Start()
 {
+	if (!IsResourceInitialized())
+		return false;
 	gameState = GameState::Start;
 	PlayMusic(MusicType::Bgm);
 	StartStepDown(false);
+	return true;
 }
 
 void Controller::End()
@@ -242,19 +250,34 @@ GameFrame* Controller::GetGameFrame()
 	return pGameFrame;
 }
 
-TetrisShape* Controller::GetTetrisShape()
+void Controller::SetBgmOn(bool on)
 {
-	return pGameFrame->GetShape();
+	bgmOn = on;
 }
 
-TetrisShape* Controller::GetNextTetrisShape()
+bool Controller::GetBgmOn()
 {
-	return pGameFrame->GetNextShape();
+	return bgmOn;
 }
 
-Mass* Controller::GetMass()
+void Controller::SetSoundOn(bool on)
 {
-	return pGameFrame->GetMass();
+	soundOn = on;
+}
+
+bool Controller::GetSoundOn()
+{
+	return soundOn;
+}
+
+void Controller::PlayBgm()
+{
+	PlayMusic(MusicType::Bgm);
+}
+
+void Controller::StopBgm()
+{
+	StopMusic(MusicType::Bgm);
 }
 
 bool Controller::StartStepDown(bool isDropping)
@@ -414,6 +437,12 @@ void Controller::PlayMusic(MusicType musicType)
 		if (soundOn)
 			pMusician->PostPlay(musicType);
 	}
+}
+
+void Controller::StopMusic(MusicType musicType)
+{
+	if (MusicType::Bgm == musicType)
+		pMusician->PostStop(musicType);
 }
 
 void CALLBACK Controller::MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent)

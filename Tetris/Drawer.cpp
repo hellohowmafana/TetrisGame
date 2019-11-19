@@ -171,6 +171,11 @@ void Drawer::DetachDC()
 	attached = false;
 }
 
+bool Drawer::IsInitialized()
+{
+	return initialized;
+}
+
 void Drawer::DrawElements()
 {
 	if (IsValid())
@@ -524,8 +529,8 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 	SetBkMode(hdcCmp, TRANSPARENT);
 	SetTextColor(hdcCmp, pInfoFrame->colorInfo);
 	SelectObject(hdcCmp, hftInfo);
-	DrawText(hdcCmp, labels.c_str(), labels.size(), &rcInfo, DT_LEFT);
-	DrawText(hdcCmp, infos.c_str(), infos.size(), &rcInfo, DT_RIGHT);
+	DrawText(hdcCmp, labels.c_str(), (int)labels.size(), &rcInfo, DT_LEFT);
+	DrawText(hdcCmp, infos.c_str(), (int)infos.size(), &rcInfo, DT_RIGHT);
 }
 
 void Drawer::DrawIcon(GameFrame* pGameFrame)
@@ -610,7 +615,7 @@ void Drawer::SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc)
 
 HBRUSH Drawer::GetRandomTetrisBrush()
 {
-	return vecTetrisBrushes[Utility::Random(0, vecTetrisBrushes.size() - 1)];
+	return vecTetrisBrushes[Utility::Random(0, (int)vecTetrisBrushes.size() - 1)];
 }
 
 bool Drawer::IsValid()

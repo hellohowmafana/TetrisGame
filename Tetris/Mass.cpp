@@ -451,9 +451,9 @@ bool Mass::Load(const wchar_t* szSection, wchar_t* szString)
 				pMassLine->at(i).color = stoi(szUnits[i] + 2);
 			}
 			delete[] szUnits;
-			InsertLine(massBlock.size(), pMassLine);
+			InsertLine((int)massBlock.size(), pMassLine);
 		}
-		top = pGameFrame->sizeY - massBlock.size();
+		top = pGameFrame->sizeY - (int)massBlock.size();
 	}
 	else
 	{
