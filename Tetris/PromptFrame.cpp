@@ -26,4 +26,14 @@ TetrisShape* PromptFrame::GetTerisShape()
 	return pTetrisShape;
 }
 
+void PromptFrame::SetGameFrame(GameFrame* pGameFrame)
+{
+	this->pGameFrame = pGameFrame;
+}
+
+GameFrame* PromptFrame::GetGameFrame()
+{
+	return pGameFrame;
+}
+
 PromptFrame PromptFrame::singleton;

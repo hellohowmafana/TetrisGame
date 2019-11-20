@@ -1,8 +1,8 @@
-#include "ArchiveDialog.h"
+#include "LoadDialog.h"
 #include "resource.h"
 #include "Configuration.h"
 
-INT_PTR ArchiveDialog::ArchiveDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
@@ -11,7 +11,6 @@ INT_PTR ArchiveDialog::ArchiveDialogProc(HWND hDlg, UINT message, WPARAM wParam,
 		{
 			wstring pathArchives(Configuration::singleton.pathArchives);
 			DlgDirList(hDlg, (LPWSTR)pathArchives.c_str(), IDC_ARCHIVELIST, 0, 0);
-			SetFocus(GetDlgItem(hDlg, IDC_ARCHIVELIST));
 			return (INT_PTR)TRUE;
 		}
 	case WM_COMMAND:
@@ -32,9 +31,9 @@ INT_PTR ArchiveDialog::ArchiveDialogProc(HWND hDlg, UINT message, WPARAM wParam,
 	return (INT_PTR)FALSE;
 }
 
-wchar_t* ArchiveDialog::GetSelectedArchive()
+wchar_t* LoadDialog::GetSelectedArchive()
 {
 	return szArchive;
 }
 
-ArchiveDialog ArchiveDialog::singleton;
+LoadDialog LoadDialog::singleton;

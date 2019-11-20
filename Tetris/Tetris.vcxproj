@@ -185,7 +185,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
   <ItemGroup>
     <ClInclude Include="AnimatedGifPoller.h" />
     <ClInclude Include="Archive.h" />
-    <ClInclude Include="ArchiveDialog.h" />
+    <ClInclude Include="LoadDialog.h" />
     <ClInclude Include="Background.h" />
     <ClInclude Include="Frame.h" />
     <ClInclude Include="InfoFrame.h" />
@@ -201,6 +201,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Musician.h" />
     <ClInclude Include="PromptFrame.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="SaveDialog.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tetris.h" />
     <ClInclude Include="TetrisShape.h" />
@@ -211,7 +212,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
   <ItemGroup>
     <ClCompile Include="AnimatedGifPoller.cpp" />
     <ClCompile Include="Archive.cpp" />
-    <ClCompile Include="ArchiveDialog.cpp" />
+    <ClCompile Include="LoadDialog.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Frame.cpp" />
     <ClCompile Include="InfoFrame.cpp" />
@@ -224,6 +225,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Musician.cpp" />
     <ClCompile Include="PromptFrame.cpp" />
+    <ClCompile Include="SaveDialog.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tetris.cpp" />
     <ClCompile Include="TetrisShape.cpp" />

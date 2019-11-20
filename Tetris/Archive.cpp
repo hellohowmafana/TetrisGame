@@ -3,26 +3,58 @@
 #include "Utility.h"
 #include "Controller.h"
 
-bool Archive::Save(wchar_t* szArchive, Controller* pController)
+bool Archive::Exist(wstring archive)
+{
+	wstring strFile = Configuration::singleton.pathArchives;
+	strFile.append(L"\\").append(archive); 
+	return (bool)wifstream(strFile);
+}
+
+bool Archive::Save(wstring archive, Controller* pController)
 {
 	wfstream fs;
 	try
 	{
 		wstring strFile = Configuration::singleton.pathArchives;
-		strFile.append(L"\\").append(szArchive);
+		strFile.append(L"\\").append(archive);
 		fs.open(strFile.c_str(), wfstream::out);
-		wchar_t* szStr;
+		wstring str;
 		GameFrame* pGameFrame = pController->GetGameFrame();
-		if (pGameFrame->Save((wchar_t*)Archive::labelFrame.c_str(), &szStr))
-			fs.write(szStr, wcslen(szStr));
-		if (pGameFrame->GetShape()->Save((wchar_t*)Archive::labelCurrent.c_str(), &szStr))
-			fs.write(szStr, wcslen(szStr));
-		if (pGameFrame->GetNextShape()->Save((wchar_t*)Archive::labelNext.c_str(), &szStr))
-			fs.write(szStr, wcslen(szStr));
-		if (pGameFrame->GetMass()->Save((wchar_t*)Archive::labelMass.c_str(), &szStr))
-			fs.write(szStr, wcslen(szStr));
-		if (pGameFrame->Save((wchar_t*)Archive::labelScore.c_str(), &szStr))
-			fs.write(szStr, wcslen(szStr));
+		if (pGameFrame->Save(labelFrame, str))
+		{
+			str = labelFrame + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelNext, str))
+		{
+			str = labelNext + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelCurrent, str))
+		{
+			str = labelCurrent + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelMass, str))
+		{
+			str = labelMass + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelScore, str))
+		{
+			str = labelScore + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelStartLevel, str))
+		{
+			str = labelStartLevel + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
+		if (pGameFrame->Save(labelStartLine, str))
+		{
+			str = labelStartLine + labelMark + str + L"\n";
+			fs.write(str.c_str(), str.length());
+		}
 	}
 	catch (const std::exception&)
 	{
@@ -36,12 +68,12 @@ bool Archive::Save(wchar_t* szArchive, Controller* pController)
 	return true;
 }
 
-bool Archive::Load(wchar_t* szArchive, Controller* pController)
+bool Archive::Load(wstring archive, Controller* pController)
 {
 	wfstream fs;
 	try {
 		wstring strFile = Configuration::singleton.pathArchives;
-		strFile.append(L"\\").append(szArchive);
+		strFile.append(L"\\").append(archive);
 		fs.open(strFile.c_str(), wfstream::in);
 		wstring str;
 		bool massData = false;
@@ -51,23 +83,33 @@ bool Archive::Load(wchar_t* szArchive, Controller* pController)
 			getline(fs, str);
 			if (0 == str.find(labelFrame + labelMark))
 			{
-				pController->GetGameFrame()->Load(labelFrame.c_str(),
-					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
+				pController->GetGameFrame()->Load(labelFrame,
+					str.substr(str.find(labelMark) + 1));
 			}
 			else if (0 == str.find(labelNext + labelMark))
 			{
-				pController->GetGameFrame()->Load(labelNext.c_str(),
-					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
+				pController->GetGameFrame()->Load(labelNext,
+					str.substr(str.find(labelMark) + 1));
 			}
 			else if(0 == str.find(labelCurrent + labelMark))
 			{
-				pController->GetGameFrame()->Load(labelCurrent.c_str(),
-					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
+				pController->GetGameFrame()->Load(labelCurrent,
+					str.substr(str.find(labelMark) + 1));
 			}
 			else if (0 == str.find(labelScore + labelMark))
 			{
-				pController->GetGameFrame()->Load(labelScore.c_str(),
-					(wchar_t*)str.substr(str.find(labelMark) + 1).c_str());
+				pController->GetGameFrame()->Load(labelScore,
+					str.substr(str.find(labelMark) + 1));
+			}
+			else if (0 == str.find(labelStartLevel + labelMark))
+			{
+				pController->GetGameFrame()->Load(labelStartLevel,
+					str.substr(str.find(labelMark) + 1));
+			}
+			else if (0 == str.find(labelStartLine + labelMark))
+			{
+				pController->GetGameFrame()->Load(labelStartLine,
+					str.substr(str.find(labelMark) + 1));
 			}
 			else if (0 == str.find(labelMass + labelMark))
 			{
@@ -79,8 +121,8 @@ bool Archive::Load(wchar_t* szArchive, Controller* pController)
 				{
 					massData = false;
 					strMassData.erase(strMassData.end() - 1);
-					pController->GetGameFrame()->Load(labelMass.c_str(),
-						(wchar_t*)strMassData.c_str());
+					pController->GetGameFrame()->Load(labelMass,
+						strMassData);
 				}
 			}
 			else if (massData)
@@ -107,4 +149,6 @@ const wstring Archive::labelNext = L"next";
 const wstring Archive::labelCurrent = L"current";
 const wstring Archive::labelMass = L"mass";
 const wstring Archive::labelScore = L"score";
+const wstring Archive::labelStartLevel = L"start level";
+const wstring Archive::labelStartLine = L"start line";
 const wstring Archive::labelMark = L":";

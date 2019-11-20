@@ -230,17 +230,22 @@ void Controller::Restart()
 	Start();
 }
 
-bool Controller::SaveGame(wchar_t* szArchive)
+bool Controller::SaveGame(wstring archive)
 {
-	return false;
+	if (archive.empty())
+		return false;
+
+	Archive::Save(archive, this);
+
+	return true;
 }
 
-bool Controller::LoadGame(wchar_t* szArchive)
+bool Controller::LoadGame(wstring archive)
 {
-	if (0 == wcslen(szArchive))
+	if (archive.empty())
 		return false;
 	End();
-	Archive::Load(szArchive, this);
+	Archive::Load(archive, this);
 	Start();
 	return true;
 }

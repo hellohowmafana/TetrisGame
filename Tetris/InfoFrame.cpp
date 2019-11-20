@@ -1,4 +1,5 @@
 #include "InfoFrame.h"
+#include"GameFrame.h"
 
 void InfoFrame::Initialize(Configuration* pConfiguration)
 {
@@ -13,11 +14,29 @@ void InfoFrame::Initialize(Configuration* pConfiguration)
 	fontWeight = pConfiguration->infoFontWeight;
 }
 
-void InfoFrame::SetInfomations(int* pLevel, int* pScore, int* pStartLine)
+void InfoFrame::SetGameFrame(GameFrame* pGameFrame)
 {
-	this->pLevel = pLevel;
-	this->pScore = pScore;
-	this->pStartLine = pStartLine;
+	this->pGameFrame = pGameFrame;
+}
+
+GameFrame* InfoFrame::GetGameFrame()
+{
+	return pGameFrame;
+}
+
+int InfoFrame::GetLevel()
+{
+	return pGameFrame->level;
+}
+
+int InfoFrame::GetScore()
+{
+	return pGameFrame->score;
+}
+
+int InfoFrame::GetStartLine()
+{
+	return pGameFrame->startLine;
 }
 
 InfoFrame InfoFrame::singleton;

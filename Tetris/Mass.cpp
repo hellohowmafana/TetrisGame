@@ -404,11 +404,12 @@ void Mass::ClearLines()
 	massBlock.clear();
 }
 
-bool Mass::Save(const wchar_t* szSection, wchar_t** pszString)
+bool Mass::Save(const wstring label, wstring& value)
 {
-	if (Archive::labelMass == szSection)
+	if (Archive::labelMass == label)
 	{
 		wstring strMass;
+		strMass = L"\n";
 		for (MassBlock::iterator itb = massBlock.begin(); itb != massBlock.end(); itb++)
 		{
 			MassLine* pMassLine = *itb;
@@ -422,7 +423,8 @@ bool Mass::Save(const wchar_t* szSection, wchar_t** pszString)
 			strMass.erase(strMass.end() - 1);
 			strMass.append(L"\n");
 		}
-		*pszString = (wchar_t*)strMass.c_str();
+		strMass.erase(strMass.end() - 1);
+		value = strMass;
 	}
 	else
 	{
@@ -432,11 +434,11 @@ bool Mass::Save(const wchar_t* szSection, wchar_t** pszString)
 	return true;
 }
 
-bool Mass::Load(const wchar_t* szSection, wchar_t* szString)
+bool Mass::Load(const wstring label, wstring value)
 {
 	wstring str;
-	wistringstream stringstream(szString);
-	if (Archive::labelMass == szSection)
+	wistringstream stringstream(value);
+	if (Archive::labelMass == label)
 	{
 		ClearLines();
 		while (!stringstream.eof())

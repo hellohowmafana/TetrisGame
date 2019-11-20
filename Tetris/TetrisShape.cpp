@@ -1,5 +1,5 @@
 #include "TetrisShape.h"
-#include "UnitFrame.h"
+#include "PromptFrame.h"
 #include "GameFrame.h"
 #include "Utility.h"
 
@@ -7,6 +7,7 @@ TetrisShape::TetrisShape() :
 	posX(0),
 	posY(0),
 	rotation(TetrisRotation::Rotation0),
+	current(false),
 	pUnitFrame(nullptr),
 	pTetrisType(nullptr)
 {
@@ -493,6 +494,11 @@ int TetrisShape::GetBottommostSolidY(int x, bool frameCoordinate)
 	return -1;
 }
 
+void TetrisShape::SetCurrent(bool current)
+{
+	this->current = current;
+}
+
 void TetrisShape::SetFrame(UnitFrame* pUnitFrame)
 {
 	this->pUnitFrame = pUnitFrame;
@@ -503,17 +509,17 @@ UnitFrame* TetrisShape::GetFrame()
 	return pUnitFrame;
 }
 
-bool TetrisShape::Save(const wchar_t* szSection, wchar_t** pszString)
+bool TetrisShape::Save(const wstring label, wstring& value)
 {
-	if (Archive::labelNext == szSection)
+	if (Archive::labelNext == label)
 	{
 		wstring str;
 		str.append(pTetrisType->group).append(L",")
 			.append(pTetrisType->name).append(L",")
 			.append(to_wstring(TetrisRotationToInt(rotation)));
-		*pszString = (wchar_t*)str.c_str();
+		value = str;
 	}
-	else if(Archive::labelCurrent == szSection)
+	else if(Archive::labelCurrent == label)
 	{
 		wstring str;
 		str.append(pTetrisType->group).append(L",")
@@ -521,7 +527,7 @@ bool TetrisShape::Save(const wchar_t* szSection, wchar_t** pszString)
 			.append(to_wstring(TetrisRotationToInt(rotation))).append(L",")
 			.append(to_wstring(posX)).append(L",")
 			.append(to_wstring(posY));
-		*pszString = (wchar_t*)str.c_str();
+		value = str;
 	}
 	else
 	{
@@ -530,25 +536,23 @@ bool TetrisShape::Save(const wchar_t* szSection, wchar_t** pszString)
 	return true;
 }
 
-bool TetrisShape::Load(const wchar_t* szSection, wchar_t* szString)
+bool TetrisShape::Load(const wstring label, wstring value)
 {
-	GameFrame* pGameFrame = dynamic_cast<GameFrame*>(pUnitFrame);
-	if (nullptr == pGameFrame)
-		return false;
-
-	wstring str(szString);
-	if (Archive::labelCurrent == szSection)
+	if (Archive::labelNext == label)
 	{
-		wchar_t* szs[5];
-		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 5);
-		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
-		SetPostion(stoi(szs[3]), stoi(szs[4]));
-	}
-	else if (Archive::labelNext == szSection)
-	{
+		GameFrame* pGameFrame = ((PromptFrame*)pUnitFrame)->GetGameFrame();
 		wchar_t* szs[3];
-		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 3);
-		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), pGameFrame->useColorRandom);
+		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 3);
+		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), TetrisType::GetRandomColor(pTetrisType->group));
+		CenterPostion(false, false);
+	}
+	else if (Archive::labelCurrent == label)
+	{
+		GameFrame* pGameFrame = (GameFrame*)pUnitFrame;
+		wchar_t* szs[5];
+		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 5);
+		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), TetrisType::GetRandomColor(pTetrisType->group));
+		SetPostion(stoi(szs[3]), stoi(szs[4]));
 	}
 	else
 	{

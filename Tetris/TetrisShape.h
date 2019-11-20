@@ -53,6 +53,7 @@ public:
 	bool IsOnBottom();
 	int GetBottommostSolidY(int x, bool frameCoordinate);
 
+	void SetCurrent(bool current);
 	void SetFrame(UnitFrame* pUnitFrame);
 	UnitFrame* GetFrame();
 
@@ -62,11 +63,12 @@ private:
 	TetrisRotation rotation;
 	bool useRandomColor;
 	int randomColor;
+	bool current;
 	UnitFrame* pUnitFrame;
 
 public:
-	virtual bool Save(const wchar_t* szSection, wchar_t** pszString);
-	virtual bool Load(const wchar_t* szSection, wchar_t* szString);
+	virtual bool Save(const wstring label, wstring& value);
+	virtual bool Load(const wstring label, wstring value);
 	TetrisRotation IntToTetrisRotation(int irotation);
 	int TetrisRotationToInt(TetrisRotation rotation);
 };

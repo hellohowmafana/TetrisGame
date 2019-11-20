@@ -7,6 +7,6 @@
 class ISerializable
 {
 public:
-	virtual bool Save(const wchar_t* szSection, wchar_t** pszString) = 0;
-	virtual bool Load(const wchar_t* szSection, wchar_t* szString) = 0;
+	virtual bool Save(const wstring label, wstring& value) = 0;
+	virtual bool Load(const wstring label, wstring value) = 0;
 };

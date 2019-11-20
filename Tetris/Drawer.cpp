@@ -521,9 +521,9 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 	labels.append(L"Score\n\n");
 	labels.append(L"StartLine\n\n");
 	wstring infos;
-	infos.append(to_wstring(*pInfoFrame->pLevel)).append(L"\n\n");
-	infos.append(to_wstring(*pInfoFrame->pScore)).append(L"\n\n");
-	infos.append(to_wstring(*pInfoFrame->pStartLine));
+	infos.append(to_wstring(pInfoFrame->GetLevel())).append(L"\n\n");
+	infos.append(to_wstring(pInfoFrame->GetScore())).append(L"\n\n");
+	infos.append(to_wstring(pInfoFrame->GetStartLine()));
 	RECT rcInfo = { pInfoFrame->left, pInfoFrame->top,
 		pInfoFrame->left + pInfoFrame->sizeX, pInfoFrame->top + pInfoFrame->sizeY };
 	SetBkMode(hdcCmp, TRANSPARENT);

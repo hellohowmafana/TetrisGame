@@ -84,9 +84,6 @@
     <ClInclude Include="PromptFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ArchiveDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="InfoFrame.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -103,6 +100,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Musician.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadDialog.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SaveDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -146,9 +149,6 @@
     <ClCompile Include="PromptFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ArchiveDialog.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="InfoFrame.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -168,6 +168,12 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Musician.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SaveDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

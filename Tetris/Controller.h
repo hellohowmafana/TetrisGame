@@ -42,8 +42,8 @@ public:
 	void Resume();
 	void Restart();
 
-	bool SaveGame(wchar_t* szArchive);
-	bool LoadGame(wchar_t* szArchive);
+	bool SaveGame(wstring archive);
+	bool LoadGame(wstring archive);
 
 public:
 	GameFrame* GetGameFrame();

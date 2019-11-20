@@ -50,6 +50,7 @@ void GameFrame::SetInfoFrame(InfoFrame* pInfoFrame)
 
 void GameFrame::InitializeGame()
 {
+	tetrisShape.SetCurrent(true);
 	tetrisShape.SetFrame(this);
 	tetrisShape.InitializeRandom();
 	tetrisShape.SetUseRandomColor(useColorRandom);
@@ -64,7 +65,6 @@ void GameFrame::InitializeGame()
 	pPromptFrame->SetTetrisShape(&nextTetrisShape);
 	score = 0;
 	level = startLevel;
-	pInfoFrame->SetInfomations(&level, &score, &startLine);
 }
 
 void GameFrame::Reborn()
@@ -208,36 +208,71 @@ TetrisShape* GameFrame::GetNextShape()
 	return &nextTetrisShape;
 }
 
-bool GameFrame::Save(const wchar_t* szSection, wchar_t** pszString)
+bool GameFrame::Save(const wstring label, wstring& value)
 {
-	return false;
+	if (Archive::labelFrame == label)
+	{
+		value = to_wstring(sizeX) + L"," + to_wstring(sizeY);
+	}
+	else if (Archive::labelNext == label)
+	{
+		nextTetrisShape.Save(label, value);
+	}
+	else if (Archive::labelCurrent == label)
+	{
+		tetrisShape.Save(label, value);
+	}
+	else if (Archive::labelMass == label)
+	{
+		mass.Save(label, value);
+	}
+	else if (Archive::labelScore == label)
+	{
+		value = to_wstring(score);
+	}
+	else if (Archive::labelStartLevel == label)
+	{
+		value = to_wstring(startLevel);
+	}
+	else if (Archive::labelStartLine == label)
+	{
+		value = to_wstring(startLine);
+	}
+	return true;
 }
 
-bool GameFrame::Load(const wchar_t* szSection, wchar_t* szString)
+bool GameFrame::Load(const wstring label, wstring value)
 {
-	wstring str(szString);
-	if (Archive::labelFrame == szSection)
+	if (Archive::labelFrame == label)
 	{
 		wchar_t* szs[2];
-		Utility::Spliwstring((wchar_t*)(str.c_str()), L',', szs, 2);
+		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 2);
 		sizeX = stoi(szs[0]);
 		sizeY = stoi(szs[1]);
 	}
-	else if (Archive::labelNext == szSection)
+	else if (Archive::labelNext == label)
 	{
-		nextTetrisShape.Load(szSection,	szString);
+		nextTetrisShape.Load(label,	value);
 	}
-	else if (Archive::labelCurrent == szSection)
+	else if (Archive::labelCurrent == label)
 	{
-		tetrisShape.Load(szSection, szString);
+		tetrisShape.Load(label, value);
 	}
-	else if (Archive::labelMass == szSection)
+	else if (Archive::labelMass == label)
 	{
-		mass.Load(szSection, szString);
+		mass.Load(label, value);
 	}
-	else if (Archive::labelScore == szSection)
+	else if (Archive::labelScore == label)
 	{
-		score = stoi(str);
+		score = stoi(value);
+	}
+	else if (Archive::labelStartLevel == label)
+	{
+		startLevel = stoi(value);
+	}
+	else if (Archive::labelStartLine == label)
+	{
+		startLine = stoi(value);
 	}
 	return true;
 }

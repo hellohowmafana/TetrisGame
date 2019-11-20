@@ -2,12 +2,18 @@
 #include "Frame.h"
 #include "Configuration.h"
 
+class GameFrame;
+
 class InfoFrame :
 	public Frame
 {
 public:
 	void Initialize(Configuration* pConfiguration);
-	void SetInfomations(int* pLevel, int* pScore, int* pStartLine);
+	void SetGameFrame(GameFrame* pGameFrame);
+	GameFrame* GetGameFrame();
+	int GetLevel();
+	int GetScore();
+	int GetStartLine();
 
 	static InfoFrame singleton;
 
@@ -17,8 +23,6 @@ public:
 	int fontWidth;
 	int fontWeight;
 
-	int* pLevel;
-	int* pScore;
-	int* pStartLine;
+	GameFrame* pGameFrame;
 };
 

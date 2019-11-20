@@ -10,7 +10,8 @@
 #include <gdiplus.h>
 #include "GameFrame.h"
 #include "Controller.h"
-#include "ArchiveDialog.h"
+#include "SaveDialog.h"
+#include "LoadDialog.h"
 #include "Utility.h"
 #include "Musician.h"
 using namespace Gdiplus;
@@ -149,14 +150,16 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    else
 	   Utility::MoveWindow(hWnd, pConfiguration->windowLeft, pConfiguration->windowTop);
 
-   GameFrame* pGameFrame = &GameFrame::singleton;
-   pGameFrame->Initialize(pConfiguration);
    PromptFrame* pPromptFrame = &PromptFrame::singleton;
-   pPromptFrame->Initialize(pConfiguration);
-   pGameFrame->SetPromptFrame(pPromptFrame);
    InfoFrame* pInfoFrame = &InfoFrame::singleton;
+   GameFrame* pGameFrame = &GameFrame::singleton;
+   pPromptFrame->SetGameFrame(pGameFrame);
+   pPromptFrame->Initialize(pConfiguration);
+   pInfoFrame->SetGameFrame(pGameFrame);
    pInfoFrame->Initialize(pConfiguration);
+   pGameFrame->SetPromptFrame(pPromptFrame);
    pGameFrame->SetInfoFrame(pInfoFrame);
+   pGameFrame->Initialize(pConfiguration);
    pGameFrame->InitializeGame();
 
    Background* pBackground = &Background::singleton;
@@ -207,12 +210,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             switch (wmId)
             {
 			case ID_SAVE:
-				//Controller::singleton.SaveGame();
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SAVE), hWnd, SaveDialog::SaveDialogProc))
+				{
+					wstring archive = SaveDialog::singleton.GetArchiveName();
+					if (Archive::Exist(archive))
+						if (IDNO == MessageBox(hWnd, L"File exists, overwrite it?", L"Save", MB_YESNO))
+							break;
+					Controller::singleton.SaveGame(archive);
+				}
 				break;
 			case ID_LOAD:
-				DialogBox(hInst, MAKEINTRESOURCE(IDD_ARCHIVEDIALOG), hWnd, ArchiveDialog::ArchiveDialogProc);
-				Controller::singleton.LoadGame(ArchiveDialog::singleton.GetSelectedArchive());
-				InvalidateRect(hWnd, NULL, FALSE);
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_LOAD), hWnd, LoadDialog::LoadDialogProc))
+				{
+					Controller::singleton.LoadGame(LoadDialog::singleton.GetSelectedArchive());
+					InvalidateRect(hWnd, NULL, FALSE);
+				}
 				break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);

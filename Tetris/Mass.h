@@ -75,6 +75,6 @@ private:
 	GameFrame* pGameFrame;
 
 public:
-	virtual bool Save(const wchar_t* szSection, wchar_t** pszString);
-	virtual bool Load(const wchar_t* szSection, wchar_t* szString);
+	virtual bool Save(const wstring label, wstring& value);
+	virtual bool Load(const wstring label, wstring value);
 };
