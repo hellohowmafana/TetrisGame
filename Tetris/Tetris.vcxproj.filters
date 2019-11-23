@@ -219,6 +219,9 @@
     <Image Include="inis\icons\resume.png">
       <Filter>inis\icons</Filter>
     </Image>
+    <Image Include="inis\bitmaps\unit.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Text Include="inis\shapes\B.txt">

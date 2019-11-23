@@ -45,14 +45,6 @@ int Utility::Spliwstring(wchar_t* szString, wchar_t delimiter, wchar_t** tokens,
 	return count - leftCount;
 }
 
-COLORREF Utility::LightColor(COLORREF color, double percent)
-{
-	int r = (int)(GetRValue(color) + (0xFF - GetRValue(color)) * percent);
-	int g = (int)(GetGValue(color) + (0xFF - GetGValue(color)) * percent);
-	int b = (int)(GetBValue(color) + (0xFF - GetBValue(color)) * percent);
-	return RGB(r, g, b);
-}
-
 void Utility::CenterWindow(HWND hWnd)
 {
 	int screenX = GetSystemMetrics(SM_CXSCREEN);

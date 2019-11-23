@@ -2,7 +2,6 @@
 #include "Utility.h"
 #include "Controller.h"
 #include <bitset>
-
 #define CreateSolidPen(width, color) CreatePen(PS_SOLID, (width), (color))
 
 Drawer Drawer::singleton;
@@ -32,6 +31,8 @@ Drawer::~Drawer()
 bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 	PromptFrame* pPromptFrame, InfoFrame*pInfoFrame, Background* pBackground)
 {
+	if (NULL == hWnd)
+		return false;
 	try {
 		this->pController = pController;
 		this->pGameFrame = pGameFrame;
@@ -39,22 +40,35 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 		this->pInfoFrame = pInfoFrame;
 		this->pBackground = pBackground;
 
+		HDC hdcRef = GetDC(hWnd);
+
 		hpnBorder = CreateSolidPen(pGameFrame->borderThickness, *pGameFrame->pBorderColor);
 		hpnSeparator = CreateSolidPen(pGameFrame->separatorThickness, *pGameFrame->pSeparatorColor);
 
-		for (size_t i = 0; i < pGameFrame->pTetrisColors->size(); i++)
+		if (pGameFrame->useColor)
 		{
-			vecTetrisBrushes.push_back(CreateSolidBrush(pGameFrame->pTetrisColors->at(i)));
-		}
+			for (size_t i = 0; i < pGameFrame->pTetrisColors->size(); i++)
+			{
+				vecTetrisBrushes.push_back(CreateSolidBrush(pGameFrame->pTetrisColors->at(i)));
+			}
 
-		hbsMass = CreateSolidBrush(*pGameFrame->pMassColor);
-		hbsMassLight = CreateSolidBrush(Utility::LightColor(*pGameFrame->pMassColor, 0.5));
+			hbsMass = CreateSolidBrush(*pGameFrame->pMassColor);
+			hbsMassLight = CreateSolidBrush(LightColor(*pGameFrame->pMassColor, 0.5));
+		}
+		else
+		{
+			Bitmap bitmapUnit(pGameFrame->pathUnitBitmap.c_str());
+			HBITMAP hbmUnitBitmap = CreateHBITMAP(&bitmapUnit);
+			hbmUnit = StretchBitmap(hdcRef, hbmUnitBitmap, pGameFrame->unitWidth, pGameFrame->unitWidth);
+			hbmUnitLight = LightBitmap(hdcRef, hbmUnit, 0.5);
+			DeleteObject(hbmUnitBitmap);
+		}
 
 		pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
 		if (Status::Ok != pBitmapBackground->GetLastStatus())
 			return false;
-		SetBitmapDCResolution(pBitmapBackground, NULL);
-		pBitmapBackground->GetHBITMAP(Color(), &hbmBackground);
+		SetBitmapDCResolution(pBitmapBackground, hdcRef);
+		hbmBackground = CreateHBITMAP(pBitmapBackground);
 		hbsBackground = BackgroundMode::Tile == pBackground->backgroundMode ?
 			CreatePatternBrush(hbmBackground) :
 			CreateSolidBrush(pBackground->colorBackground);
@@ -83,6 +97,8 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 			return false;
 
 		pBrushMask = new SolidBrush(Color((BYTE)(255 * pGameFrame->maskTransparency), 255, 255, 255));
+
+		ReleaseDC(hWnd, hdcRef);
 	}
 	catch (...){
 		return false;
@@ -106,13 +122,23 @@ bool Drawer::Deinitialize()
 	hpnBorder = NULL;
 	DeleteObject(hpnSeparator);
 	hpnSeparator = NULL;
-	for (size_t i = 0; i < vecTetrisBrushes.size(); i++)
+	if (pGameFrame->useColor)
 	{
-		DeleteObject(vecTetrisBrushes.at(i));
+		for (size_t i = 0; i < vecTetrisBrushes.size(); i++)
+		{
+			DeleteObject(vecTetrisBrushes.at(i));
+		}
+		vecTetrisBrushes.clear();
+		DeleteObject(hbsMass);
+		hbsMass = NULL;
 	}
-	vecTetrisBrushes.clear();
-	DeleteObject(hbsMass);
-	hbsMass = NULL;
+	else
+	{
+		DeleteObject(hbmUnit);
+		hbmUnit = NULL;
+		DeleteObject(hbmUnitLight);
+		hbmUnitLight = NULL;
+	}
 
 	delete pBitmapBackground;
 	pBitmapBackground = nullptr;
@@ -153,10 +179,14 @@ void Drawer::SetHWnd(HWND hWnd)
 void Drawer::AttachDC(HDC hdc)
 {
 	this->hdc = hdc;
-	hdcCmp = CreateCompatibleDC(hdc);
 	GetDCSize(hdc, &dcWidth, &dcHeight);
+	
+	hdcCmp = CreateCompatibleDC(hdc);
+	SaveDC(hdcCmp);
+	
 	hbmCmp = CreateCompatibleBitmap(hdc, dcWidth, dcHeight);
 	SelectObject(hdcCmp, hbmCmp);
+	
 	attached = true;
 }
 
@@ -164,10 +194,14 @@ void Drawer::DetachDC()
 {
 	this->hdc = NULL;
 	dcWidth = dcHeight = 0;
-	DeleteObject(hbmCmp);
-	hbmCmp = NULL;
+	
+	RestoreDC(hdcCmp, 1);
 	DeleteDC(hdcCmp);
 	hdcCmp = NULL;
+
+	DeleteObject(hbmCmp);
+	hbmCmp = NULL;
+	
 	attached = false;
 }
 
@@ -368,6 +402,83 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 	}
 }
 
+void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, HGDIOBJ gdiObj, bool isBitmap)
+{
+	if (!IsValid()) return;
+
+	if (x < 0 || x >= pUnitFrame->sizeX
+		|| y < 0 || y >= pUnitFrame->sizeY)
+		return;
+
+	LONG left = pUnitFrame->left + pUnitFrame->borderThickness
+		+ pUnitFrame->separatorThickness * (x + 1) + pUnitFrame->unitWidth * x;
+	LONG right = left + pUnitFrame->unitWidth;
+	LONG top = pUnitFrame->top + pUnitFrame->borderThickness
+		+ pUnitFrame->separatorThickness * (y + 1) + pUnitFrame->unitWidth * y;
+	LONG bottom = top + pUnitFrame->unitWidth;
+	RECT rect = { left, top, right, bottom };
+	if (isBitmap)
+	{
+		Bitmap bitmap((HBITMAP)gdiObj, NULL);
+		Graphics graphics(hdcCmp);
+		graphics.DrawImage(&bitmap, rect.left, rect.top);
+	}
+	else
+	{
+		FillRect(hdcCmp, &rect, (HBRUSH)gdiObj);
+	}
+}
+
+void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, HGDIOBJ gdiObj, bool isBitmap)
+{
+	for (int i = 0; i < pUnitFrame->sizeX; i++)
+	{
+		DrawUnit(pUnitFrame, i, y, gdiObj, isBitmap);
+	}
+}
+
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HGDIOBJ gdiObj, bool isBitmap)
+{
+	if (1 == blankRate)
+		return;
+
+	if (0 == blankRate)
+	{
+		for (int i = 0; i < pUnitFrame->GetWidth(); i++)
+		{
+			for (int j = 0; j < pUnitFrame->GetHeight(); j++)
+			{
+				DrawUnit(pUnitFrame, i, j, gdiObj, isBitmap);
+			}
+		}
+	}
+	else
+	{
+		int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
+		int blankCount;
+		if (leanBlank)
+			blankCount = (int)floor(count * blankRate);
+		else
+			blankCount = (int)ceil(count * blankRate);
+		vector<bool> vecSolids(count, false);
+		for (size_t i = 0; i < (size_t)(count - blankCount); i++)
+		{
+			vecSolids[i] = true;
+		}
+		random_shuffle(vecSolids.begin(), vecSolids.end());
+
+		for (int i = 0; i < count; i++)
+		{
+			if (vecSolids[i])
+			{
+				int x = i % pUnitFrame->GetWidth();
+				int y = i / pUnitFrame->GetWidth();
+				DrawUnit(pUnitFrame, x, y, gdiObj, isBitmap);
+			}
+		}
+	}
+}
+
 void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 {
 	if (GameState::None == pController->GetGameState() ||
@@ -383,7 +494,9 @@ void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 		for (int j = pTetrisShape->GetTop(); j <= pTetrisShape->GetBottom(); j++)
 		{
 			if(pTetrisShape->IsSolid(i, j, true))
-				DrawUnit(pUnitFrame, i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
+				DrawUnit(pUnitFrame, i, j,
+					pGameFrame->useColor ? (HGDIOBJ)vecTetrisBrushes[pTetrisShape->GetColor()]: (HGDIOBJ)hbmUnit,
+					!pGameFrame->useColor);
 		}
 	}
 }
@@ -413,90 +526,37 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 	int x = 0;
 	for (MassLine::const_iterator it = pMassLine->begin(); it != pMassLine->end(); it++)
 	{
-		HBRUSH hbs;
-		if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
-			hbs = hbsMassLight;
-		else
-			hbs = pGameFrame->useMassColor ? hbsMass : vecTetrisBrushes[it->color];
 		if (it->isSolid)
 		{
-			DrawUnit(pGameFrame, x, y, hbs);
+			bool useColor = pGameFrame->useColor;
+			if (useColor)
+			{
+				HBRUSH hbs;
+				if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
+					hbs = hbsMassLight;
+				else
+					hbs = pGameFrame->useMassColor ? hbsMass : vecTetrisBrushes[it->color];
+				DrawUnit(pGameFrame, x, y, (HGDIOBJ)hbs, false);
+			}
+			else
+			{
+				HBITMAP hbm;
+				if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
+					hbm = hbmUnitLight;
+				else
+					hbm = hbmUnit;
+				DrawUnit(pGameFrame, x, y, (HGDIOBJ)hbm, true);
+			}
 		}
 		x++;
 	}
 }
 
-void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush)
-{
-	if (!IsValid()) return;
-
-	if (x < 0 || x >= pUnitFrame->sizeX
-		|| y < 0 || y >= pUnitFrame->sizeY)
-		return;
-
-	LONG left = pUnitFrame->left + pUnitFrame->borderThickness
-		+ pUnitFrame->separatorThickness * (x + 1) + pUnitFrame->unitWidth * x;
-	LONG right = left + pUnitFrame->unitWidth;
-	LONG top = pUnitFrame->top + pUnitFrame->borderThickness
-		+ pUnitFrame->separatorThickness * (y + 1) + pUnitFrame->unitWidth * y;
-	LONG bottom = top + pUnitFrame->unitWidth;
-	RECT rect = { left, top, right, bottom };
-	FillRect(hdcCmp, &rect, brush);
-}
-
-void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush)
-{
-	for (int i = 0; i < pUnitFrame->sizeX; i++)
-	{
-		DrawUnit(pUnitFrame, i, y, brush);
-	}
-}
-
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HBRUSH brush)
-{
-	if (1 == blankRate)
-		return;
-
-	if (0 == blankRate)
-	{
-		for (int i = 0; i < pUnitFrame->GetWidth(); i++)
-		{
-			for (int j = 0; j < pUnitFrame->GetHeight(); j++)
-			{
-				DrawUnit(pUnitFrame, i, j, brush);
-			}
-		}
-	}
-	else
-	{
-		int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
-		int blankCount;
-		if (leanBlank)
-			blankCount = (int)floor(count * blankRate);
-		else
-			blankCount = (int)ceil(count * blankRate);
-		vector<bool> vecSolids(count, false);
-		for (size_t i = 0; i < (size_t)(count - blankCount); i++)
-		{
-			vecSolids[i] = true;
-		}
-		random_shuffle(vecSolids.begin(), vecSolids.end());
-
-		for (int i = 0; i < count; i++)
-		{
-			if (vecSolids[i])
-			{
-				int x = i % pUnitFrame->GetWidth();
-				int y = i / pUnitFrame->GetWidth();
-				DrawUnit(pUnitFrame, x, y, brush);
-			}
-		}
-	}
-}
-
 void Drawer::DrawFill(UnitFrame* pUnitFrame, double blankRate)
 {
-	DrawUnits(pUnitFrame, blankRate, false, hbsMass);
+	DrawUnits(pUnitFrame, blankRate, false,
+		pGameFrame->useColor ? (HGDIOBJ)hbsMass : (HGDIOBJ)hbmUnit,
+		!pGameFrame->useColor);
 }
 
 void Drawer::DrawRollingLines(GameFrame* pGameFrame)
@@ -507,7 +567,9 @@ void Drawer::DrawRollingLines(GameFrame* pGameFrame)
 		for (int i = pGameFrame->sizeY - pGameFrame->rolledRows;
 			i < pGameFrame->sizeY; i++)
 		{
-			DrawLine(pGameFrame, i, hbsMass);
+			DrawLine(pGameFrame, i,
+				pGameFrame->useColor ? (HGDIOBJ)hbsMass : (HGDIOBJ)hbmUnit,
+				!pGameFrame->useColor);
 		}
 	}
 }
@@ -600,17 +662,152 @@ void Drawer::GetDCResolution(HDC hdc, int* px, int* py)
 
 void Drawer::SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc)
 {
-	int resX, resY;
-	bool useScreenDC;
 	if (NULL == hdc)
-	{
-		useScreenDC = true;
-		hdc = GetDC(NULL);
-	}
+		return;
+
+	int resX, resY;
 	GetDCResolution(hdc, &resX, &resY);
-	if (useScreenDC)
-		DeleteDC(hdc);
 	pBitmap->SetResolution((REAL)resX, (REAL)resY);
+}
+
+COLORREF Drawer::LightColor(COLORREF color, double ratio)
+{
+	int r = (int)(GetRValue(color) * ratio + (0xFF) * (1 - ratio));
+	int g = (int)(GetGValue(color) * ratio + (0xFF) * (1 - ratio));
+	int b = (int)(GetBValue(color) * ratio + (0xFF) * (1 - ratio));
+	return RGB(r, g, b);
+}
+
+HBITMAP Drawer::StretchBitmap(HDC hdcRef, HBITMAP hbm, int dstWidth, int dstHeight)
+{
+	Bitmap bitmap(hbm, NULL);
+	int srcWidth = bitmap.GetWidth();
+	int srcHeight = bitmap.GetHeight();
+
+	// create compatible dcs
+	HDC hdcDst = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, dstWidth, dstHeight);
+	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
+
+	HDC hdcSrc = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, srcWidth, srcHeight);
+	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
+
+	// stretch bitmap
+	Graphics graphics(hdcSrc);
+	graphics.DrawImage(&bitmap, 0, 0, srcWidth, srcHeight);
+
+	SetStretchBltMode(hdcDst, COLORONCOLOR);
+	StretchBlt(hdcDst, 0, 0, dstWidth, dstHeight,
+		hdcSrc, 0, 0, srcWidth, srcHeight,
+		SRCCOPY);
+
+	// delete compatible dcs
+	SelectObject(hdcDst, hbmDstOrignal);
+	DeleteDC(hdcDst);
+
+	SelectObject(hdcSrc, hbmSrcOrignal);
+	DeleteDC(hdcSrc);
+	DeleteObject(hbmSrc);
+
+	return hbmDst;
+}
+
+HBITMAP Drawer::LightBitmap(HDC hdcRef, HBITMAP hbm, double ratio)
+{
+	Bitmap bitmap(hbm, NULL);
+	UINT width = bitmap.GetWidth();
+	UINT height = bitmap.GetHeight();
+
+	// create compatible dcs
+	HDC hdcDst = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, width, height);
+	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
+
+	HDC hdcSrc = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, width, height);
+	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
+
+	// alpha blend bitmap
+	FloodFill(hdcSrc, 0, 0, RGB(255, 255, 255));
+
+	Graphics graphics(hdcDst);
+	graphics.DrawImage(&bitmap, 0, 0, width, height);
+
+	BLENDFUNCTION bf;
+	bf.BlendOp = AC_SRC_OVER;
+	bf.BlendFlags = 0;
+	bf.AlphaFormat = 0;
+	bf.SourceConstantAlpha = (BYTE)(0xFF * ratio);
+	AlphaBlend(hdcDst, 0, 0, width, height,
+		hdcSrc, 0, 0, width, height,
+		bf);
+
+	// delete compatible dcs
+	SelectObject(hdcDst, hbmDstOrignal);
+	DeleteDC(hdcDst);
+
+	SelectObject(hdcSrc, hbmSrcOrignal);
+	DeleteDC(hdcSrc);
+	DeleteObject(hbmSrc);
+
+	return hbmDst;
+}
+
+HBITMAP Drawer::TranslateBitmap(HDC hdcRef, HBITMAP hbm, int offsetX, int offsetY)
+{
+	Bitmap bitmap(hbm, NULL);
+	UINT width = bitmap.GetWidth();
+	UINT height = bitmap.GetHeight();
+	offsetX %= width;
+	offsetY %= height;
+	if (offsetX < 0)
+		offsetX += width;
+	if (offsetY < 0)
+		offsetY += height;
+
+	// create compatible dcs
+	HDC hdcDst = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, width, height);
+	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
+
+	HDC hdcSrc = CreateCompatibleDC(hdcRef);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, width, height);
+	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
+
+	// translate bitmap
+	Graphics graphics(hdcSrc);
+	graphics.DrawImage(&bitmap, 0, 0, width, height);
+	BitBlt(hdcDst, 0, 0, offsetX, offsetY,
+		hdcSrc, width - offsetX, height - offsetY,
+		SRCCOPY);
+	BitBlt(hdcDst, offsetX, 0, width - offsetX, offsetY,
+		hdcSrc, 0, height - offsetY,
+		SRCCOPY);
+	BitBlt(hdcDst, offsetX, offsetY, width - offsetX, height - offsetY,
+		hdcSrc, 0, 0,
+		SRCCOPY);
+	BitBlt(hdcDst, 0, offsetY, offsetX, height - offsetY,
+		hdcSrc, width - offsetX, 0,
+		SRCCOPY);
+
+	// delete compatible dcs
+	SelectObject(hdcDst, hbmDstOrignal);
+	DeleteDC(hdcDst);
+
+	SelectObject(hdcSrc, hbmSrcOrignal);
+	DeleteDC(hdcSrc);
+	DeleteObject(hbmSrc);
+
+	return hbmDst;
+}
+
+HBITMAP Drawer::CreateHBITMAP(Bitmap* pBitmap)
+{
+	Color color;
+	HBITMAP hbm;
+	pBitmap->GetHBITMAP(color, &hbm);
+	return hbm;
 }
 
 HBRUSH Drawer::GetRandomTetrisBrush()
@@ -633,7 +830,7 @@ void Drawer::BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UIN
 	if (BackgroundMode::Tile == pBackground->backgroundMode)
 	{
 		DeleteObject(hbmBackground);
-		pBitmap->GetHBITMAP(Color(), &hbmBackground);
+		hbmBackground = CreateHBITMAP(pBitmap);
 		DeleteObject(hbsBackground);
 		hbsBackground = CreatePatternBrush(hbmBackground);
 	}

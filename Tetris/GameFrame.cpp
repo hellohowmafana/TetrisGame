@@ -32,6 +32,7 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	pSeparatorColor = &pConfiguration->colorSeparator;
 	pTetrisColors = &pConfiguration->vecTetrisColors;
 	pMassColor = &pConfiguration->colorMass;
+	pathUnitBitmap = pConfiguration->pathUnitBitmapFile;
 
 	pathPauseIcon = pConfiguration->pathPauseIcon;
 	pathResumeIcon = pConfiguration->pathResumeIcon;

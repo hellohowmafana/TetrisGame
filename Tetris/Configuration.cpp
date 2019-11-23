@@ -65,6 +65,7 @@ bool Configuration::InitializeIniPaths()
 	pathArchives = path + ARCHIVES_PATH;
 
 	pathConfiguration = path + CONFIGURATION_PATH;
+	pathUnitBitmapFile = path + UNIT_BITMAP_FILE_PATH;
 	pathTetrisColorFile = path + TETRIS_COLOR_FILE_PATH;
 	pathMassColorFile = path + MASS_COLOR_FILE_PATH;
 	pathBorderColorFile = path + BORDER_COLOR_FILE_PATH;

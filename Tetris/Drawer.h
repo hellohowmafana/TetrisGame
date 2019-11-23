@@ -1,4 +1,7 @@
 #pragma once
+#pragma comment(lib, "Msimg32.lib")
+#pragma comment(lib, "gdiplus.lib")
+
 #include <vector>
 #include "GameFrame.h"
 #include "PromptFrame.h"
@@ -7,6 +10,7 @@
 #include <Unknwn.h>
 #include <gdiplus.h>
 #include "AnimatedGifPoller.h"
+
 using namespace std;
 using namespace Gdiplus;
 
@@ -38,12 +42,12 @@ private:
 	void DrawBorder(UnitFrame* pUnitFrame);
 	void DrawSeparators(UnitFrame* pUnitFrame);
 
+	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, HGDIOBJ gdiObj, bool isBitmap);
+	void DrawLine(UnitFrame* pUnitFrame, int y, HGDIOBJ gdiObj, bool isBitmap);
+	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HGDIOBJ gdiObj, bool isBitmap);
 	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape);
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
-	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, HBRUSH brush);
-	void DrawLine(UnitFrame* pUnitFrame, int y, HBRUSH brush);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HBRUSH brush);
 	void DrawFill(UnitFrame* pUnitFrame, double blankRate);
 	void DrawRollingLines(GameFrame* pGameFrame);
 
@@ -55,6 +59,12 @@ private:
 	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
 	void GetDCResolution(HDC hdc, int* px, int* py);
 	void SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc);
+	COLORREF LightColor(COLORREF color, double ratio);
+	HBITMAP StretchBitmap(HDC hdcRef, HBITMAP hbm, int dstWidth, int dstHeight);
+	HBITMAP LightBitmap(HDC hdcRef, HBITMAP hbm, double ratio);
+	HBITMAP TranslateBitmap(HDC hdcRef, HBITMAP hbm, int offsetX, int offsetY);
+	HBITMAP CreateHBITMAP(Bitmap* pBitmap);
+
 	HBRUSH GetRandomTetrisBrush();
 	
 	bool IsValid();
@@ -72,9 +82,12 @@ private:
 	HWND hWnd;
 	HPEN hpnBorder;
 	HPEN hpnSeparator;
+	HBITMAP hbmUnit;
+	HBITMAP hbmUnitLight;
 	vector<HBRUSH> vecTetrisBrushes;
 	HBRUSH hbsMass;
 	HBRUSH hbsMassLight;
+	// background
 	Bitmap* pBitmapBackground;
 	COLORREF clBackground;
 	HBRUSH hbsBackground;

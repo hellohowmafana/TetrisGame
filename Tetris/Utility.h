@@ -11,7 +11,6 @@ public:
 	static bool RandomTrue(double rate);
 
 	static int Spliwstring(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count);
-	static COLORREF LightColor(COLORREF color, double percent);
 
 	static void CenterWindow(HWND hWnd);
 	static void MoveWindow(HWND hWnd, int x, int y);

@@ -25,6 +25,7 @@ public:
 
 	vector<COLORREF>* pTetrisColors;
 	COLORREF* pMassColor;
+	wstring pathUnitBitmap;
 	wstring pathPauseIcon;
 	wstring pathResumeIcon;
 	wstring pathGameOver;

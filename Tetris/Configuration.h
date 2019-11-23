@@ -22,6 +22,7 @@ private:
 
 	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
 
+	const wstring UNIT_BITMAP_FILE_PATH = BITMAPS_PATH + L"\\unit.bmp";
 	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.bmp";
 	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.bmp";
 	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.bmp";
@@ -54,6 +55,7 @@ public:
 	wstring pathArchives;
 
 	wstring pathConfiguration;
+	wstring pathUnitBitmapFile;
 	wstring pathTetrisColorFile;
 	wstring pathMassColorFile;
 	wstring	pathBorderColorFile;
