@@ -108,6 +108,9 @@
     <ClInclude Include="SaveDialog.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="RenderMode.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Tetris.cpp">
@@ -220,6 +223,9 @@
       <Filter>inis\icons</Filter>
     </Image>
     <Image Include="inis\bitmaps\unit.bmp">
+      <Filter>inis\bitmaps</Filter>
+    </Image>
+    <Image Include="inis\bitmaps\begin.png">
       <Filter>inis\bitmaps</Filter>
     </Image>
   </ItemGroup>

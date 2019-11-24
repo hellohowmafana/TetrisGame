@@ -2,11 +2,10 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include "RenderMode.h"
 using namespace std;
 
 class Background;
-
-enum class BackgroundMode;
 
 class Configuration
 {
@@ -30,7 +29,8 @@ private:
 	const wstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.bmp";
 	const wstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.bmp";
 	const wstring BACKGROUND_FILE_PATH = BITMAPS_PATH + L"\\background.*";
-	const wstring GAMEOVER_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
+	const wstring BEGIN_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\begin.*";
+	const wstring GAMEOVER_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
 
 	const wstring PAUSE_ICON_FILE_PATH = ICONS_PATH + L"\\pause.*";
 	const wstring RESUME_ICON_FILE_PATH = ICONS_PATH + L"\\resume.*";
@@ -63,7 +63,8 @@ public:
 	wstring pathInformationColor;
 	wstring pathBackgroundColor;
 	wstring pathBackground;
-	wstring pathGameOver;
+	wstring pathBeginSplash;
+	wstring pathGameOverSplash;
 
 	wstring pathPauseIcon;
 	wstring pathResumeIcon;
@@ -180,7 +181,7 @@ public:
 	bool useColorRandom;
 	wstring unitBitmap;
 	bool useMassColor;
-	BackgroundMode backgroundMode;
+	RenderMode backgroundMode;
 
 public:
 	COLORREF colorBorder;

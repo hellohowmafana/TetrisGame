@@ -233,55 +233,55 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 DestroyWindow(hWnd);
                 break;
 			case ID_MUSIC_BGM:
-				{
-					Controller* pController = &Controller::singleton;
-					bool bgmOn = !pController->GetBgmOn();
-					pController->SetBgmOn(bgmOn);
-					HMENU hMenu = GetMenu(hWnd);
-					CheckMenuItem(hMenu, ID_MUSIC_BGM, bgmOn ? MF_CHECKED : MF_UNCHECKED);
-					if (bgmOn)
-						pController->PlayBgm();
-					else
-						pController->StopBgm();
-				}
-			break;
-			case ID_MUSIC_SOUND:
-				{
-					Controller* pController = &Controller::singleton;
-					bool soundOn = !pController->GetSoundOn();
-					pController->SetSoundOn(soundOn);
-					HMENU hMenu = GetMenu(hWnd);
-					CheckMenuItem(hMenu, ID_MUSIC_SOUND, soundOn ? MF_CHECKED : MF_UNCHECKED);
-				}
+			{
+				Controller* pController = &Controller::singleton;
+				bool bgmOn = !pController->GetBgmOn();
+				pController->SetBgmOn(bgmOn);
+				HMENU hMenu = GetMenu(hWnd);
+				CheckMenuItem(hMenu, ID_MUSIC_BGM, bgmOn ? MF_CHECKED : MF_UNCHECKED);
+				if (bgmOn)
+					pController->PlayBgm();
+				else
+					pController->StopBgm();
 				break;
+			}
+			case ID_MUSIC_SOUND:
+			{
+				Controller* pController = &Controller::singleton;
+				bool soundOn = !pController->GetSoundOn();
+				pController->SetSoundOn(soundOn);
+				HMENU hMenu = GetMenu(hWnd);
+				CheckMenuItem(hMenu, ID_MUSIC_SOUND, soundOn ? MF_CHECKED : MF_UNCHECKED);
+				break;
+			}
 			default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
             }
         }
         break;
     case WM_PAINT:
-		{
-			if (!Controller::singleton.IsInitialized()) break;
+	{
+		if (!Controller::singleton.IsInitialized()) break;
 
-			PAINTSTRUCT ps;
-			HDC hdc = BeginPaint(hWnd, &ps);
+		PAINTSTRUCT ps;
+		HDC hdc = BeginPaint(hWnd, &ps);
 
-			Drawer* pDrawer = &Drawer::singleton;
-			pDrawer->AttachDC(hdc);
-			pDrawer->DrawElements();
-			pDrawer->DetachDC();
+		Drawer* pDrawer = &Drawer::singleton;
+		pDrawer->AttachDC(hdc);
+		pDrawer->DrawElements();
+		pDrawer->DetachDC();
 
-			EndPaint(hWnd, &ps);
-		}
+		EndPaint(hWnd, &ps);
 		break;
+	}
 	case WM_ERASEBKGND:
 		return 1;
 	case WM_KEYDOWN:
 		{
 			Controller* pController = &Controller::singleton;
 			pController->KeyDownAction(wParam);
-		}
 		break;
+		}
 	case WM_DESTROY:
 		Drawer::singleton.Deinitialize();
         PostQuitMessage(0);

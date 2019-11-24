@@ -36,7 +36,8 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 
 	pathPauseIcon = pConfiguration->pathPauseIcon;
 	pathResumeIcon = pConfiguration->pathResumeIcon;
-	pathGameOver = pConfiguration->pathGameOver;
+	pathBeginSplash = pConfiguration->pathBeginSplash;
+	pathGameOverSplash = pConfiguration->pathGameOverSplash;
 }
 
 void GameFrame::SetPromptFrame(PromptFrame* pPromptFrame)

@@ -23,7 +23,7 @@ void Controller::Initialize(Configuration* pConfiguration)
 	bgmOn = pConfiguration->bgmOn;
 
 	initialized = true;
-	gameState = GameState::End;
+	gameState = GameState::None;
 }
 
 void Controller::SetHWnd(HWND hWnd)
@@ -75,7 +75,9 @@ GameState Controller::GetGameState()
 bool Controller::IsStarted()
 {
 	return GameState::None != gameState &&
-		GameState::End != gameState;
+		GameState::End != gameState &&
+		GameState::RollUp != gameState &&
+		GameState::RollDown != gameState;
 }
 
 void Controller::KeyDownAction(WPARAM keyCode)

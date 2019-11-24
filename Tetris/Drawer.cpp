@@ -64,28 +64,32 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 			DeleteObject(hbmUnitBitmap);
 		}
 
-		pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
-		if (Status::Ok != pBitmapBackground->GetLastStatus())
-			return false;
-		SetBitmapDCResolution(pBitmapBackground, hdcRef);
-		hbmBackground = CreateHBITMAP(pBitmapBackground);
-		hbsBackground = BackgroundMode::Tile == pBackground->backgroundMode ?
-			CreatePatternBrush(hbmBackground) :
-			CreateSolidBrush(pBackground->colorBackground);
-		if (AnimatedGifPoller::IsAnimatedGif(pBitmapBackground))
+		if (RenderMode::Color != pBackground->renderMode)
 		{
-			pAnimatedGifPoller = new AnimatedGifPoller(pBitmapBackground, BackgroundFrameChangedProcStatic);
-			pAnimatedGifPoller->SetLoopInfinate(true);
-			pAnimatedGifPoller->Start();
+			pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
+			if (Status::Ok != pBitmapBackground->GetLastStatus())
+				return false;
+			SetBitmapDCResolution(pBitmapBackground, hdcRef);
+			hbmBackground = CreateHBITMAP(pBitmapBackground);
+			if (AnimatedGifPoller::IsAnimatedGif(pBitmapBackground))
+			{
+				pAnimatedGifPoller = new AnimatedGifPoller(pBitmapBackground, BackgroundFrameChangedProcStatic);
+				pAnimatedGifPoller->SetLoopInfinate(true);
+				pAnimatedGifPoller->Start();
+			}
+			isAnimatedBackground = AnimatedGifPoller::IsAnimatedGif(pBitmapBackground);
 		}
-		isAnimatedBackground = AnimatedGifPoller::IsAnimatedGif(pBitmapBackground);
 
 		hftInfo = CreateFont(pInfoFrame->fontHeight, pInfoFrame->fontWidth, 0, 0,
 			pInfoFrame->fontWeight*100, FALSE, FALSE, FALSE,
 			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
 			DEFAULT_QUALITY, FF_DONTCARE, pInfoFrame->fontFace.c_str());
 
-		pBitmapGameOver = new Bitmap(pGameFrame->pathGameOver.c_str());
+		pBitmapBegin = new Bitmap(pGameFrame->pathBeginSplash.c_str());
+		if (Status::Ok != pBitmapBegin->GetLastStatus())
+			return false;
+
+		pBitmapGameOver = new Bitmap(pGameFrame->pathGameOverSplash.c_str());
 		if (Status::Ok != pBitmapGameOver->GetLastStatus())
 			return false;
 
@@ -140,21 +144,24 @@ bool Drawer::Deinitialize()
 		hbmUnitLight = NULL;
 	}
 
-	delete pBitmapBackground;
-	pBitmapBackground = nullptr;
-	DeleteObject(hbmBackground);
-	hbmBackground = NULL;
-	DeleteObject(hbsBackground);
-	hbsBackground = NULL;
-	if (pAnimatedGifPoller)
+	if (RenderMode::Color != pBackground->renderMode)
 	{
-		delete pAnimatedGifPoller;
-		pAnimatedGifPoller = nullptr;
+		delete pBitmapBackground;
+		pBitmapBackground = nullptr;
+		DeleteObject(hbmBackground);
+		hbmBackground = NULL;
+		if (pAnimatedGifPoller)
+		{
+			delete pAnimatedGifPoller;
+			pAnimatedGifPoller = nullptr;
+		}
 	}
 
 	DeleteObject(hftInfo);
 	hftInfo = NULL;
 
+	delete pBitmapBegin;
+	pBitmapBegin = nullptr;
 	delete pBitmapGameOver;
 	pBitmapGameOver = nullptr;
 
@@ -224,7 +231,6 @@ void Drawer::DrawElements()
 		{
 			DrawShape(pGameFrame, pGameFrame->GetShape());
 			DrawMass(pGameFrame, pGameFrame->GetMass());
-			DrawRollingLines(pGameFrame);
 			DrawMask(pGameFrame);
 			DrawIcon(pGameFrame);
 		
@@ -232,7 +238,11 @@ void Drawer::DrawElements()
 		}
 		else
 		{
-			DrawFill(pGameFrame, 0);
+			if(GameState::None == pController->GetGameState())
+				DrawFill(pGameFrame, 0);
+			else
+				DrawRollingLines(pGameFrame);
+			DrawSplash(pGameFrame);
 		}
 
 		BitBlt(hdc, 0, 0, dcWidth, dcHeight, hdcCmp, 0, 0, SRCCOPY);
@@ -244,89 +254,104 @@ void Drawer::Invalidate()
 	InvalidateRgn(hWnd, NULL, FALSE);
 }
 
+void Drawer::DrawBitmap(HBITMAP hbmBitmap, RenderMode renderMode, RenderAlignment renderAlignment, RECT* pRect)
+{
+	if (!IsValid()) return;
+
+	if (RenderMode::Color == renderMode)
+		return;
+
+	switch (renderMode)
+	{
+	case RenderMode::General:
+	{
+		Graphics graphics(hdcCmp);
+		Bitmap bitmap(hbmBitmap, NULL);
+		graphics.DrawImage(&bitmap, pRect->left, pRect->top);
+		break;
+	}
+	case RenderMode::Strech:
+	{
+		Graphics graphics(hdcCmp);
+		Bitmap bitmap(hbmBitmap, NULL);
+		graphics.DrawImage(&bitmap, pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+		break;
+	}
+	case RenderMode::Tile:
+	{
+		HBRUSH hbs = CreatePatternBrush(hbmBitmap);
+		FillRect(hdcCmp, pRect, hbs);
+		DeleteObject(hbs);
+		break;
+	}
+	case RenderMode::UniformFill:
+	{
+		Bitmap bitmap(hbmBitmap, NULL);
+
+		int bitmapWidth = bitmap.GetWidth();
+		int bitmapHeight = bitmap.GetHeight();
+		int clientWidth = pRect->right - pRect->left;
+		int clientHeight = pRect->bottom - pRect->top;
+
+		REAL rateWidth = (REAL)bitmapWidth / clientWidth;
+		REAL rateHeight = (REAL)bitmapHeight / clientHeight;
+		REAL rate = rateWidth < rateHeight ? rateWidth : rateHeight;
+
+		bool fitWidth = rate == rateWidth;
+		REAL srcWidth = fitWidth ? bitmapWidth : clientWidth * rate;
+		REAL srcHeight = !fitWidth ? bitmapHeight : clientHeight * rate;
+		REAL srcX = fitWidth ? 0 : (bitmapWidth / rate - clientWidth) / 2;
+		REAL srcY = !fitWidth ? 0 : (bitmapHeight / rate - clientHeight) / 2;
+
+		Graphics graphics(hdcCmp);
+		graphics.DrawImage(&bitmap,
+			RectF((REAL)pRect->left, (REAL)pRect->top, (REAL)clientWidth, (REAL)clientHeight),
+			srcX, srcY, srcWidth, srcHeight, Unit::UnitPixel);
+
+		break;
+	}
+	case RenderMode::Uniform:
+	{
+		Bitmap bitmap(hbmBitmap, NULL);
+
+		int bitmapWidth = bitmap.GetWidth();
+		int bitmapHeight = bitmap.GetHeight();
+		int clientWidth = pRect->right - pRect->left;
+		int clientHeight = pRect->bottom - pRect->top;
+
+		REAL rateWidth = (REAL)bitmapWidth / clientWidth;
+		REAL rateHeight = (REAL)bitmapHeight / clientHeight;
+		REAL rate = rateWidth > rateHeight ? rateWidth : rateHeight;
+
+		bool fitWidth = rate == rateWidth;
+		REAL width = fitWidth ? clientWidth : (bitmapWidth / rate);
+		REAL height = !fitWidth ? clientHeight : (bitmapHeight / rate);
+		REAL x = (fitWidth ? 0 : (clientWidth - width) / 2) + pRect->left;
+		REAL y = (!fitWidth ? 0 : (clientHeight - height) / 2) + pRect->top;
+
+		Graphics graphics(hdcCmp);
+		graphics.DrawImage(&bitmap, x, y, width, height);
+
+		break;
+	}
+	}
+}
+
 void Drawer::DrawBackground()
 {
 	if (!IsValid()) return;
 
-	switch (pBackground->backgroundMode)
-	{
-		case BackgroundMode::Color:
-		{
-			HGDIOBJ hbsOld = SelectObject(hdcCmp, hbsBackground);
-			ExtFloodFill(hdcCmp, 0, 0, RGB(0, 0, 0), FLOODFILLSURFACE);
-			SelectObject(hdcCmp, hbsOld);
-		}
-		break;
-		case BackgroundMode::General:
-		{
-			Graphics graphics(hdcCmp);
-			graphics.DrawImage(pBitmapBackground, 0, 0);
-		}
-		break;
-		case BackgroundMode::Strech:
-		{
-			RECT rect;
-			GetClientRect(hWnd, &rect);
-			Graphics graphics(hdcCmp);
-			graphics.DrawImage(pBitmapBackground, 0, 0, rect.right - rect.left, rect.bottom - rect.top);
-		}
-		break;
-		case BackgroundMode::Tile:
-		{
-			SelectObject(hdcCmp, hbsBackground);
-			ExtFloodFill(hdcCmp, 0, 0, RGB(0, 0, 0), FLOODFILLSURFACE);
-		}
-		break;
-		case BackgroundMode::UniformFill:
-		{
-			RECT rect;
-			GetClientRect(hWnd, &rect);
-			int bitmapWidth = pBitmapBackground->GetWidth();
-			int bitmapHeight = pBitmapBackground->GetHeight();
-			int clientWidth = rect.right - rect.left;
-			int clientHeight = rect.bottom - rect.top;
+	// cover background with solid color
+	RECT rect;
+	GetClientRect(hWnd, &rect);
+	HBRUSH hbsBackgroundColor = CreateSolidBrush(pBackground->colorBackground);
+	FillRect(hdcCmp, &rect, hbsBackgroundColor);
+	DeleteObject(hbsBackgroundColor);
 
-			REAL rateWidth = (REAL)bitmapWidth / clientWidth;
-			REAL rateHeight = (REAL)bitmapHeight / clientHeight;
-			REAL rate = rateWidth < rateHeight ? rateWidth : rateHeight;
-
-			bool fitWidth = rate == rateWidth;
-			REAL srcWidth = fitWidth ? bitmapWidth : clientWidth * rate;
-			REAL srcHeight = !fitWidth ? bitmapHeight : clientHeight * rate;
-			REAL srcX = fitWidth ? 0 : (bitmapWidth / rate - clientWidth) / 2;
-			REAL srcY = !fitWidth ? 0 : (bitmapHeight / rate - clientHeight) / 2;
-
-			Graphics graphics(hdcCmp);
-			graphics.DrawImage(pBitmapBackground, RectF(0, 0, (REAL)clientWidth, (REAL)clientHeight),
-				srcX, srcY, srcWidth, srcHeight, Unit::UnitPixel);
-		}
-		break;
-		case BackgroundMode::Uniform:
-		{
-			RECT rect;
-			GetClientRect(hWnd, &rect);
-			int bitmapWidth = pBitmapBackground->GetWidth();
-			int bitmapHeight = pBitmapBackground->GetHeight();
-			int clientWidth = rect.right - rect.left;
-			int clientHeight = rect.bottom - rect.top;
-
-			REAL rateWidth = (REAL)bitmapWidth / clientWidth;
-			REAL rateHeight = (REAL)bitmapHeight / clientHeight;
-			REAL rate = rateWidth > rateHeight ? rateWidth : rateHeight;
-
-			bool fitWidth = rate == rateWidth;
-			REAL width = fitWidth ? clientWidth : (bitmapWidth / rate);
-			REAL height = !fitWidth ? clientHeight : (bitmapHeight / rate);
-			REAL x = fitWidth ? 0 : (clientWidth - width) / 2;
-			REAL y = !fitWidth ? 0 : (clientHeight - height) / 2;
-
-			SelectObject(hdcCmp, hbsBackground);
-			ExtFloodFill(hdcCmp, 0, 0, RGB(0, 0, 0), FLOODFILLSURFACE);
-			Graphics graphics(hdcCmp);
-			graphics.DrawImage(pBitmapBackground, x, y, width, height);
-		}
-		break;
-	}
+	// draw bitmap with mode
+	if(RenderMode::Color != pBackground->renderMode)
+		DrawBitmap(hbmBackground, pBackground->renderMode,
+			pBackground->renderAlignment, &rect);
 }
 
 void Drawer::DrawFrame(Frame* pFrame)
@@ -644,6 +669,27 @@ void Drawer::DrawMask(GameFrame* pGameFrame)
 		pGameFrame->GetWidth(), pGameFrame->GetHeight());
 }
 
+void Drawer::DrawSplash(GameFrame* pGameFrame)
+{
+	if (!IsValid()) return;
+
+	if (pController->IsStarted())
+		return;
+	
+	HBITMAP hbmSplash = CreateHBITMAP(
+		GameState::None == pController->GetGameState() ?
+		pBitmapBegin : pBitmapGameOver);
+	int left = pGameFrame->GetLeft() + pGameFrame->borderThickness;
+	int top = pGameFrame->GetTop() + pGameFrame->borderThickness;
+	int right = pGameFrame->GetLeft() + pGameFrame->GetWidth() - pGameFrame->borderThickness;
+	int bottom = pGameFrame->GetTop() + pGameFrame->GetHeight() - pGameFrame->borderThickness;
+	RECT rect = { left, top, right, bottom};
+	DrawBitmap(hbmSplash, RenderMode::Uniform,
+		RenderAlignment::HorizontalCenter | RenderAlignment::VerticalCenter,
+		&rect);
+	DeleteObject(hbmSplash);
+}
+
 void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)
 {
 	BITMAP bm;
@@ -827,12 +873,10 @@ void Drawer::BackgroundFrameChangedProcStatic(Bitmap* pBitmap, SHORT sLoopedCoun
 
 void Drawer::BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame)
 {
-	if (BackgroundMode::Tile == pBackground->backgroundMode)
+	if (RenderMode::Tile == pBackground->renderMode)
 	{
 		DeleteObject(hbmBackground);
 		hbmBackground = CreateHBITMAP(pBitmap);
-		DeleteObject(hbsBackground);
-		hbsBackground = CreatePatternBrush(hbmBackground);
 	}
 
 	InvalidateRect(hWnd, NULL, FALSE);

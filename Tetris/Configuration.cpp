@@ -74,8 +74,10 @@ bool Configuration::InitializeIniPaths()
 	pathBackgroundColor = path + BACKGROUND_COLOR_FILE_PATH;
 	pathBackground = path + BACKGROUND_FILE_PATH;
 	FindFile(pathBackground);
-	pathGameOver = path + GAMEOVER_FILE_PATH;
-	FindFile(pathGameOver);
+	pathBeginSplash = path + BEGIN_SPLASH_FILE_PATH;
+	FindFile(pathBeginSplash);
+	pathGameOverSplash = path + GAMEOVER_SPLASH_FILE_PATH;
+	FindFile(pathGameOverSplash);
 
 	pathPauseIcon = path + PAUSE_ICON_FILE_PATH;
 	FindFile(pathPauseIcon);
@@ -161,7 +163,7 @@ bool Configuration::LoadParameters()
 	useColorRandom = GetConfigurationBool(keyBitmap, keyUseColorRandom);
 	GetConfigurationStr(keyBitmap, keyUnitBitmap, unitBitmap);
 	useMassColor = GetConfigurationBool(keyBitmap, keyUseMassColor);
-	backgroundMode = (BackgroundMode)GetConfigurationInt(keyBitmap, keyBackgroundMode);
+	backgroundMode = (RenderMode)GetConfigurationInt(keyBitmap, keyBackgroundMode);
 
 	return true;
 }

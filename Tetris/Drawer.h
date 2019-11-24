@@ -36,6 +36,7 @@ private:
 	Drawer();
 	~Drawer();
 	
+	void DrawBitmap(HBITMAP hbmBitmap, RenderMode renderMode, RenderAlignment renderAlignment, RECT* pRect);
 	void DrawBackground();
 
 	void DrawFrame(Frame* pFrame);
@@ -55,6 +56,7 @@ private:
 
 	void DrawIcon(GameFrame* pGameFrame);
 	void DrawMask(GameFrame* pGameFrame);
+	void DrawSplash(GameFrame* pGameFrame);
 
 	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
 	void GetDCResolution(HDC hdc, int* px, int* py);
@@ -89,12 +91,11 @@ private:
 	HBRUSH hbsMassLight;
 	// background
 	Bitmap* pBitmapBackground;
-	COLORREF clBackground;
-	HBRUSH hbsBackground;
 	HBITMAP hbmBackground;
 	AnimatedGifPoller* pAnimatedGifPoller;
 	bool isAnimatedBackground;
 	HFONT hftInfo;
+	Bitmap* pBitmapBegin;
 	Bitmap* pBitmapGameOver;
 	Bitmap* pBitmapPause;
 	Bitmap* pBitmapResume;

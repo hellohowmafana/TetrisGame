@@ -28,7 +28,8 @@ public:
 	wstring pathUnitBitmap;
 	wstring pathPauseIcon;
 	wstring pathResumeIcon;
-	wstring pathGameOver;
+	wstring pathBeginSplash;
+	wstring pathGameOverSplash;
 
 	double iconScaleRatio;
 	double maskTransparency;

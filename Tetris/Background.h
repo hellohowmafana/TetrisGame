@@ -1,12 +1,10 @@
 #pragma once
 #include <string>
 #include <Windows.h>
+#include "RenderMode.h"
 using namespace std;
 
 class Configuration;
-
-enum class BackgroundMode
-{ Color = 0, General = 1, Strech = 2, Tile = 3, UniformFill = 4, Uniform = 5 };
 
 class Background
 {
@@ -16,7 +14,8 @@ public:
 
 	wstring pathBackground;
 	COLORREF colorBackground;
-	BackgroundMode backgroundMode;
+	RenderMode renderMode;
+	RenderAlignment renderAlignment;
 
 private:
 	Background() {};
