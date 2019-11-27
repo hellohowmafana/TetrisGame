@@ -446,7 +446,7 @@ bool Mass::Load(const wstring label, wstring value)
 			getline(stringstream, str);
 			MassLine* pMassLine = CreateLine();
 			wchar_t** szUnits = new wchar_t * [pGameFrame->sizeX];
-			Utility::Spliwstring((wchar_t*)(str.c_str()), L' ', szUnits, pGameFrame->sizeX);
+			Utility::SplitString((wchar_t*)(str.c_str()), L' ', szUnits, pGameFrame->sizeX);
 			for (int i = 0; i < pGameFrame->sizeX; i++)
 			{
 				pMassLine->at(i).isSolid = szUnits[i][0] == L'1';

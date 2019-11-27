@@ -15,7 +15,32 @@ bool Utility::RandomTrue(double rate)
 	return dist(mt) < rate;
 }
 
-int Utility::Spliwstring(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count)
+void Utility::RandomTrue(vector<bool>* pvecBool, double rate, bool leanTrue)
+{
+	if (0 == rate)
+	{
+		fill(pvecBool->begin(), pvecBool->end(), false);
+	}
+
+	else if (1 == rate)
+	{
+		fill(pvecBool->begin(), pvecBool->end(), true);
+		return;
+	}
+
+	else
+	{
+		int trueCount;
+		if (leanTrue)
+			trueCount = (int)ceil(pvecBool->size() * rate);
+		else
+			trueCount = (int)floor(pvecBool->size() * rate);
+		fill(pvecBool->begin(), next(pvecBool->begin(), trueCount), true);
+		fill(next(pvecBool->begin(), trueCount), pvecBool->end(), false);
+	}
+}
+
+int Utility::SplitString(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count)
 {
 	// return tokens count
 	if (nullptr == tokens)

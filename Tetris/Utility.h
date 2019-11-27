@@ -9,8 +9,9 @@ class Utility
 public:
 	static int Random(int min, int max);
 	static bool RandomTrue(double rate);
+	static void RandomTrue(vector<bool>* pvecBool, double rate, bool leanTrue);
 
-	static int Spliwstring(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count);
+	static int SplitString(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count);
 
 	static void CenterWindow(HWND hWnd);
 	static void MoveWindow(HWND hWnd, int x, int y);

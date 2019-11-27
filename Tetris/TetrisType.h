@@ -11,29 +11,29 @@ typedef map<wstring, TetrisTypeGroup*> TetrisTypeLibrary;
 class TetrisType
 {
 public:
-	static void Create(wchar_t const* group, wchar_t const* name,
+	static void Create(wstring group, wstring name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
 	static void Delete(TetrisType* pTetrisType);
 	static void Clear();
-	static TetrisTypeGroup* CreateGroup(wchar_t const* group);
-	static void DeleteGroup(wchar_t const* group);
-	static bool ExsitGroup(wchar_t const* group);
-	static TetrisType* GetTetrisType(wchar_t const* group, wchar_t const* name);
-	static TetrisTypeGroup* GetGroup(wchar_t const* group);
+	static TetrisTypeGroup* CreateGroup(wstring group);
+	static void DeleteGroup(wstring group);
+	static bool ExsitGroup(wstring group);
+	static TetrisType* GetTetrisType(wstring group, wstring name);
+	static TetrisTypeGroup* GetGroup(wstring group);
 	static int GetTetrisTypesCount();
-	static int GetTetrisTypesCount(wchar_t const* group);
-	static int GetRandomColor(wchar_t const* group);
+	static int GetTetrisTypesCount(wstring group);
+	static int GetRandomColor(wstring group);
 	static TetrisType* Random();
 
 private:
-	TetrisType(wchar_t const* group, wchar_t const* name,
+	TetrisType(wstring group, wstring name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
 	~TetrisType();
-	bool Initialize(wchar_t const* group, wchar_t const* name,
+	bool Initialize(wstring group, wstring name,
 		bool penetrable, bool twoRotation, bool clockwiseRotation,
 		int horizontalCenterOffset,
 		int row, int col, char* pData, size_t dataCount, int color);
@@ -42,9 +42,9 @@ private:
 	void GetXY(int pos, int* px, int* py);
 
 public:
-	static const wchar_t* classic;
-	wchar_t* group;
-	wchar_t* name;
+	static wstring classic;
+	wstring group;
+	wstring name;
 	bool penetrable;
 	bool twoRotation;
 	bool clockwiseRotation;

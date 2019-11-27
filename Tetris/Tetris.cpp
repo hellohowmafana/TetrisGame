@@ -1,13 +1,14 @@
 // Tetris.cpp : Defines the entry point for the application.
 //
 #include "framework.h"
-#include "Tetris.h"
-#include "Configuration.h"
-#include "Drawer.h"
 
 #include <Unknwn.h>
 #include <Windows.h>
 #include <gdiplus.h>
+
+#include "Tetris.h"
+#include "Configuration.h"
+#include "Drawer.h"
 #include "GameFrame.h"
 #include "Controller.h"
 #include "SaveDialog.h"

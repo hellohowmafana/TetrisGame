@@ -28,10 +28,11 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	iconScaleRatio = pConfiguration->iconScaleRatio;
 	maskTransparency = pConfiguration->maskTransparency;
 
-	pBorderColor = &pConfiguration->colorBorder;
-	pSeparatorColor = &pConfiguration->colorSeparator;
-	pTetrisColors = &pConfiguration->vecTetrisColors;
-	pMassColor = &pConfiguration->colorMass;
+	backgroundColor = pConfiguration->colorFrameBackground;
+	borderColor = pConfiguration->colorBorder;
+	separatorColor = pConfiguration->colorSeparator;
+	tetrisColors = pConfiguration->vecTetrisColors;
+	massColor = pConfiguration->colorMass;
 	pathUnitBitmap = pConfiguration->pathUnitBitmapFile;
 
 	pathPauseIcon = pConfiguration->pathPauseIcon;
@@ -248,7 +249,7 @@ bool GameFrame::Load(const wstring label, wstring value)
 	if (Archive::labelFrame == label)
 	{
 		wchar_t* szs[2];
-		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 2);
+		Utility::SplitString((wchar_t*)(value.c_str()), L',', szs, 2);
 		sizeX = stoi(szs[0]);
 		sizeY = stoi(szs[1]);
 	}

@@ -2,8 +2,10 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include <gdiplus.h>
 #include "RenderMode.h"
 using namespace std;
+using Color = Gdiplus::Color;
 
 class Background;
 
@@ -21,13 +23,14 @@ private:
 
 	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
 
-	const wstring UNIT_BITMAP_FILE_PATH = BITMAPS_PATH + L"\\unit.bmp";
-	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.bmp";
-	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.bmp";
-	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.bmp";
-	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.bmp";
-	const wstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.bmp";
-	const wstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.bmp";
+	const wstring UNIT_BITMAP_FILE_PATH = BITMAPS_PATH + L"\\unit.png";
+	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.png";
+	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.png";
+	const wstring FRAME_BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\frame background color.png";
+	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.png";
+	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.png";
+	const wstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.png";
+	const wstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.png";
 	const wstring BACKGROUND_FILE_PATH = BITMAPS_PATH + L"\\background.*";
 	const wstring BEGIN_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\begin.*";
 	const wstring GAMEOVER_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
@@ -58,6 +61,7 @@ public:
 	wstring pathUnitBitmapFile;
 	wstring pathTetrisColorFile;
 	wstring pathMassColorFile;
+	wstring	pathFrameBackgroundColorFile;
 	wstring	pathBorderColorFile;
 	wstring pathSeparatorColorFile;
 	wstring pathInformationColor;
@@ -130,6 +134,7 @@ private:
 	const wstring keyUnitBitmap = L"UnitBitmap";
 	const wstring keyUseMassColor = L"UseMassColor";
 	const wstring keyBackgroundMode = L"BackgroundMode";
+	const wstring keyBackgroundAlignment = L"BackgroundAlignment";
 
 public:
 	// window
@@ -182,14 +187,17 @@ public:
 	wstring unitBitmap;
 	bool useMassColor;
 	RenderMode backgroundMode;
+	RenderAlignmentHorizontal backgroundAlignmentHorizontal;
+	RenderAlignmentVertical backgroundAlignmentVertical;
 
 public:
-	COLORREF colorBorder;
-	COLORREF colorSeparator;
-	vector<COLORREF> vecTetrisColors;
-	COLORREF colorMass;
-	COLORREF colorInfo;
-	COLORREF colorBackground;
+	Color colorFrameBackground;
+	Color colorBorder;
+	Color colorSeparator;
+	vector<Color> vecTetrisColors;
+	Color colorMass;
+	Color colorInfo;
+	Color colorBackground;
 
 public:
 	static Configuration singleton;
@@ -204,18 +212,30 @@ private:
 	bool LoadLevels();
 	bool LoadShapes();
 	bool LoadColors();
-	bool GetColorFromFile(const wchar_t* file, COLORREF* pColor);
-	bool GetColorsFromFile(const wchar_t* file, vector<COLORREF>* pvecColors);
+	bool GetColorFromFile(wstring file, Color& color);
+	bool GetColorsFromFile(wstring file, vector<Color>& vecColors);
 	wstring& FindFile(wstring& path);
 	void FindFiles(wstring path, vector<wstring>* pvecFiles);
 
 	bool SaveWindowPostion(int w, int h, int l, int t, bool c);
 
 private:
-	bool SplitStringToInts(wchar_t* szStr, wchar_t ch, int* v1, int* v2);
-	bool SplitStringToInts(wchar_t* szStr, wchar_t ch, vector<int>& vecInts);
-	bool SplitStringToDoubles(wchar_t* szStr, wchar_t ch, vector<double>& vecDoubles);
-	bool ParseTetrisTypeDeclaration(wchar_t* szStr, wchar_t* name,
-		bool* pPenetrable, bool* pClockwiseRotation, bool* pTwoRotation, int* pHorizontalCenterOffset);
+#define MAX_BUFFER_LENGTH 256
+	wchar_t buffer[MAX_BUFFER_LENGTH];
+	const int bufferSize = MAX_BUFFER_LENGTH;
+#undef MAX_BUFFER_LENGTH
+	wchar_t* GetConfigurationString(wstring section, wstring key);
+	int GetConfigurationInt(wstring section, wstring key);
+	bool GetConfigurationBool(wstring section, wstring key);
+	double GetConfigurationDouble(wstring section, wstring key);
+	bool GetConfigurationIntPair(wstring section, wstring key, int& val1, int& val2);
+	bool  GetConfigurationIntArray(wstring section, wstring key, vector<int>& vec);
+	bool  GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec);
+
+	bool SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2);
+	bool SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecInts);
+	bool SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles);
+	bool ParseTetrisTypeDeclaration(wstring str, wstring& name,
+		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
 };
 

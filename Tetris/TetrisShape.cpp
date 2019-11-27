@@ -542,7 +542,7 @@ bool TetrisShape::Load(const wstring label, wstring value)
 	{
 		GameFrame* pGameFrame = ((PromptFrame*)pUnitFrame)->GetGameFrame();
 		wchar_t* szs[3];
-		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 3);
+		Utility::SplitString((wchar_t*)(value.c_str()), L',', szs, 3);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), TetrisType::GetRandomColor(pTetrisType->group));
 		CenterPostion(false, false);
 	}
@@ -550,7 +550,7 @@ bool TetrisShape::Load(const wstring label, wstring value)
 	{
 		GameFrame* pGameFrame = (GameFrame*)pUnitFrame;
 		wchar_t* szs[5];
-		Utility::Spliwstring((wchar_t*)(value.c_str()), L',', szs, 5);
+		Utility::SplitString((wchar_t*)(value.c_str()), L',', szs, 5);
 		Initialize(TetrisType::GetTetrisType(szs[0], szs[1]), IntToTetrisRotation(stoi(szs[2])), TetrisType::GetRandomColor(pTetrisType->group));
 		SetPostion(stoi(szs[3]), stoi(szs[4]));
 	}

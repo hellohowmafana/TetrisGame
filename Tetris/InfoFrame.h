@@ -17,7 +17,7 @@ public:
 
 	static InfoFrame singleton;
 
-	COLORREF colorInfo;
+	Color colorInfo;
 	wstring fontFace;
 	int fontHeight;
 	int fontWidth;

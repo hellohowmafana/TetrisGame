@@ -2,15 +2,14 @@
 #include "Utility.h"
 #include "Controller.h"
 #include <bitset>
-#define CreateSolidPen(width, color) CreatePen(PS_SOLID, (width), (color))
 
 Drawer Drawer::singleton;
 
 Drawer::Drawer() :
-	pGameFrame(nullptr), hpnBorder(NULL), hpnSeparator(NULL), hbsMass(NULL),
+	pGameFrame(nullptr),
 	hdc(NULL), hdcCmp(NULL), hbmCmp(NULL), initialized(false),
 	dcWidth(0), dcHeight(0),
-	pAnimatedGifPoller(nullptr)
+	pGifPollerBackground(nullptr)
 {
 
 }
@@ -40,69 +39,85 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 		this->pInfoFrame = pInfoFrame;
 		this->pBackground = pBackground;
 
-		HDC hdcRef = GetDC(hWnd);
+		HDC hdc = GetDC(hWnd);
 
-		hpnBorder = CreateSolidPen(pGameFrame->borderThickness, *pGameFrame->pBorderColor);
-		hpnSeparator = CreateSolidPen(pGameFrame->separatorThickness, *pGameFrame->pSeparatorColor);
+		pbrsFrame = new SolidBrush(pGameFrame->backgroundColor);
+		ppenBorder = new Pen(pGameFrame->borderColor, (REAL)pGameFrame->borderThickness);
+		ppenBorder->SetAlignment(PenAlignmentInset);
+		ppenSeprator = new Pen(pGameFrame->separatorColor, (REAL)pGameFrame->separatorThickness);
 
 		if (pGameFrame->useColor)
 		{
-			for (size_t i = 0; i < pGameFrame->pTetrisColors->size(); i++)
+			for (size_t i = 0; i < pGameFrame->tetrisColors.size(); i++)
 			{
-				vecTetrisBrushes.push_back(CreateSolidBrush(pGameFrame->pTetrisColors->at(i)));
+				vecTetrisBrushes.push_back(new SolidBrush(pGameFrame->tetrisColors.at(i)));
+				if (!pGameFrame->useMassColor)
+					vecTetrisBrushesLight.push_back(new SolidBrush(LightColor(pGameFrame->tetrisColors.at(i), 0.5)));
 			}
 
-			hbsMass = CreateSolidBrush(*pGameFrame->pMassColor);
-			hbsMassLight = CreateSolidBrush(LightColor(*pGameFrame->pMassColor, 0.5));
+			if (pGameFrame->useMassColor)
+			{
+				pbrsMass = new SolidBrush(pGameFrame->massColor);
+				pbrsMassLight = new SolidBrush(LightColor(pGameFrame->massColor, 0.5));
+			}
 		}
 		else
 		{
 			Bitmap bitmapUnit(pGameFrame->pathUnitBitmap.c_str());
-			HBITMAP hbmUnitBitmap = CreateHBITMAP(&bitmapUnit);
-			hbmUnit = StretchBitmap(hdcRef, hbmUnitBitmap, pGameFrame->unitWidth, pGameFrame->unitWidth);
-			hbmUnitLight = LightBitmap(hdcRef, hbmUnit, 0.5);
-			DeleteObject(hbmUnitBitmap);
+			pbmpUnit = StretchBitmap(hdc, &bitmapUnit, pGameFrame->unitWidth, pGameFrame->unitWidth);
+			pbmpUnitLight = LightBitmap(hdc, &bitmapUnit, 0.5);
 		}
 
 		if (RenderMode::Color != pBackground->renderMode)
 		{
-			pBitmapBackground = new Bitmap(pBackground->pathBackground.c_str());
-			if (Status::Ok != pBitmapBackground->GetLastStatus())
+			pbmpBackground = new Bitmap(pBackground->pathBackground.c_str());
+			if (Status::Ok != pbmpBackground->GetLastStatus())
 				return false;
-			SetBitmapDCResolution(pBitmapBackground, hdcRef);
-			hbmBackground = CreateHBITMAP(pBitmapBackground);
-			if (AnimatedGifPoller::IsAnimatedGif(pBitmapBackground))
+			SetBitmapDCResolution(pbmpBackground, hdc);
+			if (AnimatedGifPoller::IsAnimatedGif(pbmpBackground))
 			{
-				pAnimatedGifPoller = new AnimatedGifPoller(pBitmapBackground, BackgroundFrameChangedProcStatic);
-				pAnimatedGifPoller->SetLoopInfinate(true);
-				pAnimatedGifPoller->Start();
+				pGifPollerBackground = new AnimatedGifPoller(pbmpBackground, BackgroundFrameChangedProcStatic);
+				pGifPollerBackground->SetLoopInfinate(true);
+				pGifPollerBackground->Start();
 			}
-			isAnimatedBackground = AnimatedGifPoller::IsAnimatedGif(pBitmapBackground);
+			isAnimatedBackground = AnimatedGifPoller::IsAnimatedGif(pbmpBackground);
 		}
 
-		hftInfo = CreateFont(pInfoFrame->fontHeight, pInfoFrame->fontWidth, 0, 0,
-			pInfoFrame->fontWeight*100, FALSE, FALSE, FALSE,
-			DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-			DEFAULT_QUALITY, FF_DONTCARE, pInfoFrame->fontFace.c_str());
+		LOGFONT logFont;
+		logFont.lfHeight = pInfoFrame->fontHeight;
+		logFont.lfWidth = pInfoFrame->fontWidth;
+		logFont.lfEscapement = 0;
+		logFont.lfOrientation = 0;
+		logFont.lfWeight = pInfoFrame->fontWeight * 100;
+		logFont.lfItalic = FALSE;
+		logFont.lfUnderline = FALSE;
+		logFont.lfStrikeOut = FALSE;
+		logFont.lfCharSet = DEFAULT_CHARSET;
+		logFont.lfOutPrecision=OUT_DEFAULT_PRECIS;
+		logFont.lfClipPrecision=CLIP_DEFAULT_PRECIS;
+		logFont.lfQuality=DEFAULT_QUALITY;
+		logFont.lfPitchAndFamily=FF_DONTCARE;
+		wcscpy(logFont.lfFaceName, pInfoFrame->fontFace.c_str());
+		pfntInfo = new Font(hdc, &logFont);
+		pbrsInfo = new SolidBrush(pInfoFrame->colorInfo);
 
-		pBitmapBegin = new Bitmap(pGameFrame->pathBeginSplash.c_str());
-		if (Status::Ok != pBitmapBegin->GetLastStatus())
+		pbmpBegin = new Bitmap(pGameFrame->pathBeginSplash.c_str());
+		if (Status::Ok != pbmpBegin->GetLastStatus())
+			return false;
+		pbmpGameOver = new Bitmap(pGameFrame->pathGameOverSplash.c_str());
+		if (Status::Ok != pbmpGameOver->GetLastStatus())
 			return false;
 
-		pBitmapGameOver = new Bitmap(pGameFrame->pathGameOverSplash.c_str());
-		if (Status::Ok != pBitmapGameOver->GetLastStatus())
+		pbmpPause = new Bitmap(pGameFrame->pathPauseIcon.c_str());
+		if (Status::Ok != pbmpPause->GetLastStatus())
+			return false;
+		pbmpResume = new Bitmap(pGameFrame->pathResumeIcon.c_str());
+		if (Status::Ok != pbmpResume->GetLastStatus())
 			return false;
 
-		pBitmapPause = new Bitmap(pGameFrame->pathPauseIcon.c_str());
-		if (Status::Ok != pBitmapPause->GetLastStatus())
-			return false;
-		pBitmapResume = new Bitmap(pGameFrame->pathResumeIcon.c_str());
-		if (Status::Ok != pBitmapResume->GetLastStatus())
-			return false;
+		pbrsMask = new SolidBrush(Color((BYTE)(255 * pGameFrame->maskTransparency), 255, 255, 255));
 
-		pBrushMask = new SolidBrush(Color((BYTE)(255 * pGameFrame->maskTransparency), 255, 255, 255));
-
-		ReleaseDC(hWnd, hdcRef);
+		ReleaseDC(hWnd, hdc);
 	}
 	catch (...){
 		return false;
@@ -117,61 +132,71 @@ bool Drawer::Deinitialize()
 {
 	if (!initialized) return false;
 
-	this->pGameFrame = nullptr;
-	this->pPromptFrame = nullptr;
-	this->pInfoFrame = nullptr;
-	this->pBackground = nullptr;
-
-	DeleteObject(hpnBorder);
-	hpnBorder = NULL;
-	DeleteObject(hpnSeparator);
-	hpnSeparator = NULL;
+	delete pbrsFrame;
+	pbrsFrame = nullptr;
+	delete ppenBorder;
+	ppenBorder = nullptr;
+	delete ppenSeprator;
+	ppenSeprator = nullptr;
 	if (pGameFrame->useColor)
 	{
 		for (size_t i = 0; i < vecTetrisBrushes.size(); i++)
 		{
-			DeleteObject(vecTetrisBrushes.at(i));
+			delete vecTetrisBrushes.at(i);
+			if (!pGameFrame->useMassColor)
+				delete vecTetrisBrushesLight.at(i);
 		}
 		vecTetrisBrushes.clear();
-		DeleteObject(hbsMass);
-		hbsMass = NULL;
+		if (!pGameFrame->useMassColor)
+			vecTetrisBrushesLight.clear();
+
+		if (pGameFrame->useMassColor)
+		{
+			delete pbrsMass;
+			pbrsMass = nullptr;
+		}
 	}
 	else
 	{
-		DeleteObject(hbmUnit);
-		hbmUnit = NULL;
-		DeleteObject(hbmUnitLight);
-		hbmUnitLight = NULL;
+		delete pbmpUnit;
+		pbmpUnit = nullptr;
+		delete pbmpUnitLight;
+		pbmpUnitLight = nullptr;
 	}
 
 	if (RenderMode::Color != pBackground->renderMode)
 	{
-		delete pBitmapBackground;
-		pBitmapBackground = nullptr;
-		DeleteObject(hbmBackground);
-		hbmBackground = NULL;
-		if (pAnimatedGifPoller)
+		delete pbmpBackground;
+		pbmpBackground = nullptr;
+		if (pGifPollerBackground)
 		{
-			delete pAnimatedGifPoller;
-			pAnimatedGifPoller = nullptr;
+			delete pGifPollerBackground;
+			pGifPollerBackground = nullptr;
 		}
 	}
 
-	DeleteObject(hftInfo);
-	hftInfo = NULL;
+	delete pfntInfo;
+	pfntInfo = nullptr;
+	delete pbrsInfo;
+	pbrsInfo = nullptr;
 
-	delete pBitmapBegin;
-	pBitmapBegin = nullptr;
-	delete pBitmapGameOver;
-	pBitmapGameOver = nullptr;
+	delete pbmpBegin;
+	pbmpBegin = nullptr;
+	delete pbmpGameOver;
+	pbmpGameOver = nullptr;
 
-	delete pBitmapPause;
-	pBitmapPause = nullptr;
-	delete pBitmapResume;
-	pBitmapResume = nullptr;
+	delete pbmpPause;
+	pbmpPause = nullptr;
+	delete pbmpResume;
+	pbmpResume = nullptr;
 
-	delete pBrushMask;
-	pBrushMask = nullptr;
+	delete pbrsMask;
+	pbrsMask = nullptr;
+
+	this->pGameFrame = nullptr;
+	this->pPromptFrame = nullptr;
+	this->pInfoFrame = nullptr;
+	this->pBackground = nullptr;
 
 	initialized = false;
 
@@ -254,7 +279,18 @@ void Drawer::Invalidate()
 	InvalidateRgn(hWnd, NULL, FALSE);
 }
 
-void Drawer::DrawBitmap(HBITMAP hbmBitmap, RenderMode renderMode, RenderAlignment renderAlignment, RECT* pRect)
+void Drawer::DrawSolidColor(const Color& color, const Rect& rect)
+{
+	if (!IsValid()) return;
+
+	Graphics grp(hdcCmp);
+	SolidBrush brs(color);
+	grp.FillRectangle(&brs, rect);
+}
+
+void Drawer::DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
+	RenderAlignmentHorizontal renderAlignmentHorizontal,
+	RenderAlignmentVertical renderAlignmentVertical, const Rect& rect)
 {
 	if (!IsValid()) return;
 
@@ -265,72 +301,103 @@ void Drawer::DrawBitmap(HBITMAP hbmBitmap, RenderMode renderMode, RenderAlignmen
 	{
 	case RenderMode::General:
 	{
-		Graphics graphics(hdcCmp);
-		Bitmap bitmap(hbmBitmap, NULL);
-		graphics.DrawImage(&bitmap, pRect->left, pRect->top);
+		int x = 0;
+		switch (renderAlignmentHorizontal)
+		{
+		case RenderAlignmentHorizontal::Left:
+			x = rect.X;
+			break;
+		case RenderAlignmentHorizontal::Right:
+			x = rect.Width - (int)pBitmap->GetWidth() + rect.X;
+			break;
+		case RenderAlignmentHorizontal::Center:
+			x = (rect.Width - (int)pBitmap->GetWidth()) / 2 + rect.X;
+			break;
+		default:
+			break;
+		}
+		int y = 0;
+		switch (renderAlignmentVertical)
+		{
+		case RenderAlignmentVertical::Top:
+			y = rect.Y;
+			break;
+		case RenderAlignmentVertical::Bottom:
+			y = rect.Height - (int)pBitmap->GetHeight() + rect.Y;
+			break;
+		case RenderAlignmentVertical::Center:
+			y = (rect.Height - (int)pBitmap->GetHeight()) / 2 + rect.Y;
+			break;
+		default:
+			break;
+		}
+		Graphics(hdcCmp).DrawImage(pBitmap, x, y);
 		break;
 	}
 	case RenderMode::Strech:
 	{
-		Graphics graphics(hdcCmp);
-		Bitmap bitmap(hbmBitmap, NULL);
-		graphics.DrawImage(&bitmap, pRect->left, pRect->top, pRect->right - pRect->left, pRect->bottom - pRect->top);
+		Graphics(hdcCmp).DrawImage(pBitmap, rect.X, rect.Y, rect.Width, rect.Height);
 		break;
 	}
 	case RenderMode::Tile:
 	{
-		HBRUSH hbs = CreatePatternBrush(hbmBitmap);
-		FillRect(hdcCmp, pRect, hbs);
-		DeleteObject(hbs);
+		TextureBrush* pbrsTile = nullptr;
+		if (AnimatedGifPoller::IsAnimatedGif(pBitmap))
+		{
+			Bitmap bmpBrush(pBitmap->GetWidth(), pBitmap->GetHeight(), pBitmap->GetPixelFormat());
+			Graphics grpBrush(&bmpBrush);
+			grpBrush.DrawImage(pBitmap,0,0);
+			pbrsTile = new TextureBrush(&bmpBrush);
+		}
+		else
+		{
+			pbrsTile = new TextureBrush(pBitmap);
+		}
+		Graphics(hdcCmp).FillRectangle(pbrsTile, rect);
+		delete pbrsTile;
 		break;
 	}
 	case RenderMode::UniformFill:
 	{
-		Bitmap bitmap(hbmBitmap, NULL);
+		int bitmapWidth = pBitmap->GetWidth();
+		int bitmapHeight = pBitmap->GetHeight();
+		int dstWidth = rect.Width;
+		int dstHeight = rect.Height;
 
-		int bitmapWidth = bitmap.GetWidth();
-		int bitmapHeight = bitmap.GetHeight();
-		int clientWidth = pRect->right - pRect->left;
-		int clientHeight = pRect->bottom - pRect->top;
-
-		REAL rateWidth = (REAL)bitmapWidth / clientWidth;
-		REAL rateHeight = (REAL)bitmapHeight / clientHeight;
+		REAL rateWidth = (REAL)bitmapWidth / dstWidth;
+		REAL rateHeight = (REAL)bitmapHeight / dstHeight;
 		REAL rate = rateWidth < rateHeight ? rateWidth : rateHeight;
 
 		bool fitWidth = rate == rateWidth;
-		REAL srcWidth = fitWidth ? bitmapWidth : clientWidth * rate;
-		REAL srcHeight = !fitWidth ? bitmapHeight : clientHeight * rate;
-		REAL srcX = fitWidth ? 0 : (bitmapWidth / rate - clientWidth) / 2;
-		REAL srcY = !fitWidth ? 0 : (bitmapHeight / rate - clientHeight) / 2;
+		REAL srcWidth = fitWidth ? bitmapWidth : dstWidth * rate;
+		REAL srcHeight = !fitWidth ? bitmapHeight : dstHeight * rate;
+		REAL srcX = fitWidth ? 0 : (bitmapWidth / rate - dstWidth) / 2;
+		REAL srcY = !fitWidth ? 0 : (bitmapHeight / rate - dstHeight) / 2;
 
-		Graphics graphics(hdcCmp);
-		graphics.DrawImage(&bitmap,
-			RectF((REAL)pRect->left, (REAL)pRect->top, (REAL)clientWidth, (REAL)clientHeight),
+		Graphics(hdcCmp).DrawImage(pBitmap,
+			RectF((REAL)rect.X, (REAL)rect.Y, (REAL)dstWidth, (REAL)dstHeight),
 			srcX, srcY, srcWidth, srcHeight, Unit::UnitPixel);
 
 		break;
 	}
 	case RenderMode::Uniform:
 	{
-		Bitmap bitmap(hbmBitmap, NULL);
+		int bitmapWidth = pBitmap->GetWidth();
+		int bitmapHeight = pBitmap->GetHeight();
+		int dstWidth = rect.Width;
+		int dstHeight = rect.Height;
 
-		int bitmapWidth = bitmap.GetWidth();
-		int bitmapHeight = bitmap.GetHeight();
-		int clientWidth = pRect->right - pRect->left;
-		int clientHeight = pRect->bottom - pRect->top;
-
-		REAL rateWidth = (REAL)bitmapWidth / clientWidth;
-		REAL rateHeight = (REAL)bitmapHeight / clientHeight;
+		REAL rateWidth = (REAL)bitmapWidth / dstWidth;
+		REAL rateHeight = (REAL)bitmapHeight / dstHeight;
 		REAL rate = rateWidth > rateHeight ? rateWidth : rateHeight;
 
 		bool fitWidth = rate == rateWidth;
-		REAL width = fitWidth ? clientWidth : (bitmapWidth / rate);
-		REAL height = !fitWidth ? clientHeight : (bitmapHeight / rate);
-		REAL x = (fitWidth ? 0 : (clientWidth - width) / 2) + pRect->left;
-		REAL y = (!fitWidth ? 0 : (clientHeight - height) / 2) + pRect->top;
+		REAL width = fitWidth ? dstWidth : (bitmapWidth / rate);
+		REAL height = !fitWidth ? dstHeight : (bitmapHeight / rate);
+		REAL x = (fitWidth ? 0 : (dstWidth - width) / 2) + rect.X;
+		REAL y = (!fitWidth ? 0 : (dstHeight - height) / 2) + rect.Y;
 
-		Graphics graphics(hdcCmp);
-		graphics.DrawImage(&bitmap, x, y, width, height);
+		Graphics(hdcCmp).DrawImage(pBitmap, x, y, width, height);
 
 		break;
 	}
@@ -342,16 +409,18 @@ void Drawer::DrawBackground()
 	if (!IsValid()) return;
 
 	// cover background with solid color
-	RECT rect;
-	GetClientRect(hWnd, &rect);
-	HBRUSH hbsBackgroundColor = CreateSolidBrush(pBackground->colorBackground);
-	FillRect(hdcCmp, &rect, hbsBackgroundColor);
-	DeleteObject(hbsBackgroundColor);
+	RECT clientRect;
+	GetClientRect(hWnd, &clientRect);
+	Rect rect(clientRect.left, clientRect.top,
+		clientRect.right - clientRect.left, clientRect.bottom - clientRect.top);
+	DrawSolidColor(pBackground->colorBackground, rect);
 
 	// draw bitmap with mode
 	if(RenderMode::Color != pBackground->renderMode)
-		DrawBitmap(hbmBackground, pBackground->renderMode,
-			pBackground->renderAlignment, &rect);
+		DrawBitmap(pbmpBackground,
+			pBackground->renderMode,
+			pBackground->renderAlignmentHorizontal,
+			pBackground->renderAlignmentVertical, rect);
 }
 
 void Drawer::DrawFrame(Frame* pFrame)
@@ -361,6 +430,7 @@ void Drawer::DrawFrame(Frame* pFrame)
 	if (dynamic_cast<const UnitFrame*>(pFrame) != nullptr)
 	{
 		UnitFrame* pUnitFrame = (UnitFrame*)pFrame;
+		DrawBackground(pFrame);
 		DrawBorder(pUnitFrame);
 		DrawSeparators(pUnitFrame);
 	}
@@ -369,25 +439,26 @@ void Drawer::DrawFrame(Frame* pFrame)
 	}
 }
 
+void Drawer::DrawBackground(Frame* pFrame)
+{
+	if (!IsValid()) return;
+
+	Rect rect(pFrame->GetLeft(), pFrame->GetTop(), pFrame->GetWidth(), pFrame->GetHeight());
+	Graphics(hdcCmp).FillRectangle(pbrsFrame, rect);
+}
+
 void Drawer::DrawBorder(UnitFrame* pUnitFrame)
 {
 	if (!IsValid()) return;
 
 	if (pUnitFrame->borderThickness == 0) return;
 
-	SelectObject(hdcCmp, hpnBorder);
-	SelectObject(hdcCmp, GetStockObject(WHITE_BRUSH));
-	int innerWidth = (pUnitFrame->unitWidth + pUnitFrame->separatorThickness) * pUnitFrame->sizeX
-		+ pUnitFrame->separatorThickness;
-	int innerHeight = (pUnitFrame->unitWidth + pUnitFrame->separatorThickness) * pUnitFrame->sizeY
-		+ pUnitFrame->separatorThickness;
-	int totalWidth = pUnitFrame->borderThickness * 2 + innerWidth;
-	int totalHeight = pUnitFrame->borderThickness * 2 + innerHeight;
-	int left = pUnitFrame->left + pUnitFrame->borderThickness / 2;
-	int top = pUnitFrame->top + pUnitFrame->borderThickness / 2;
-	int width = totalWidth - pUnitFrame->borderThickness;
-	int height = totalHeight - pUnitFrame->borderThickness;
-	Rectangle(hdcCmp, left, top, left + width + 1, top + height + 1);
+	int x = pUnitFrame->GetLeft();
+	int y = pUnitFrame->GetTop();
+	int width = pUnitFrame->GetWidth();
+	int height = pUnitFrame->GetHeight();
+
+	Graphics(hdcCmp).DrawRectangle(ppenBorder, x, y, width, height);
 }
 
 void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
@@ -396,8 +467,6 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 
 	if (pUnitFrame->separatorThickness == 0) return;
 
-	SelectObject(hdcCmp, hpnSeparator);
-
 	int top = pUnitFrame->top + pUnitFrame->borderThickness;
 	int bottom = top +
 		(pUnitFrame->unitWidth + pUnitFrame->separatorThickness) * pUnitFrame->sizeY
@@ -405,11 +474,10 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 
 	for (int n = 0; n <= pUnitFrame->sizeX; n++)
 	{
-		int x1 = pUnitFrame->left + pUnitFrame->borderThickness
+		int x = pUnitFrame->left + pUnitFrame->borderThickness
 			+ n * (pUnitFrame->unitWidth + pUnitFrame->separatorThickness)
 			+ pUnitFrame->separatorThickness / 2;
-		int x2 = x1 + 1;
-		Rectangle(hdcCmp, x1, top, x2, bottom + 1);
+		Graphics(hdcCmp).DrawLine(ppenSeprator, x, top, x, bottom);
 	}
 
 	int left = pUnitFrame->left + pUnitFrame->borderThickness;
@@ -419,87 +487,112 @@ void Drawer::DrawSeparators(UnitFrame* pUnitFrame)
 
 	for (int n = 0; n <= pUnitFrame->sizeY; n++)
 	{
-		int y1 = pUnitFrame->top + pUnitFrame->borderThickness
+		int y = pUnitFrame->top + pUnitFrame->borderThickness
 			+ n * (pUnitFrame->unitWidth + pUnitFrame->separatorThickness)
 			+ pUnitFrame->separatorThickness / 2;
-		int y2 = y1 + 1;
-		Rectangle(hdcCmp, left, y1, right, y2);
+		Graphics(hdcCmp).DrawLine(ppenSeprator, left, y, right, y);
 	}
 }
 
-void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, HGDIOBJ gdiObj, bool isBitmap)
+Rect* Drawer::GetUnitRectangle(UnitFrame* pUnitFrame, int x, int y, Rect* pRect)
+{
+	INT left = pUnitFrame->left + pUnitFrame->borderThickness
+		+ pUnitFrame->separatorThickness * (x + 1) + pUnitFrame->unitWidth * x;
+	INT width = pUnitFrame->unitWidth;
+	INT top = pUnitFrame->top + pUnitFrame->borderThickness
+		+ pUnitFrame->separatorThickness * (y + 1) + pUnitFrame->unitWidth * y;
+	INT height = pUnitFrame->unitWidth;
+	pRect->X = left;
+	pRect->Y = top;
+	pRect->Width = width;
+	pRect->Height = height;
+	return pRect;
+}
+
+void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, Brush* pBrush)
 {
 	if (!IsValid()) return;
 
-	if (x < 0 || x >= pUnitFrame->sizeX
-		|| y < 0 || y >= pUnitFrame->sizeY)
-		return;
+	if (!pUnitFrame->ValidateXY(x, y)) return;
 
-	LONG left = pUnitFrame->left + pUnitFrame->borderThickness
-		+ pUnitFrame->separatorThickness * (x + 1) + pUnitFrame->unitWidth * x;
-	LONG right = left + pUnitFrame->unitWidth;
-	LONG top = pUnitFrame->top + pUnitFrame->borderThickness
-		+ pUnitFrame->separatorThickness * (y + 1) + pUnitFrame->unitWidth * y;
-	LONG bottom = top + pUnitFrame->unitWidth;
-	RECT rect = { left, top, right, bottom };
-	if (isBitmap)
-	{
-		Bitmap bitmap((HBITMAP)gdiObj, NULL);
-		Graphics graphics(hdcCmp);
-		graphics.DrawImage(&bitmap, rect.left, rect.top);
-	}
-	else
-	{
-		FillRect(hdcCmp, &rect, (HBRUSH)gdiObj);
-	}
+	Rect rect;
+	GetUnitRectangle(pUnitFrame, x, y, &rect);
+	Graphics(hdcCmp).FillRectangle(pBrush, rect);
 }
 
-void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, HGDIOBJ gdiObj, bool isBitmap)
+void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap)
 {
+	if (!IsValid()) return;
+
+	if (!pUnitFrame->ValidateXY(x, y)) return;
+
+	Rect rect;
+	GetUnitRectangle(pUnitFrame, x, y, &rect);
+	Graphics(hdcCmp).DrawImage(pBitmap, rect);
+}
+
+void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush)
+{
+	if (!IsValid()) return;
+
+	if (!pUnitFrame->ValidateY(y)) return;
+
 	for (int i = 0; i < pUnitFrame->sizeX; i++)
 	{
-		DrawUnit(pUnitFrame, i, y, gdiObj, isBitmap);
+		DrawUnit(pUnitFrame, i, y, pBrush);
 	}
 }
 
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HGDIOBJ gdiObj, bool isBitmap)
+void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap)
 {
+	if (!IsValid()) return;
+
+	if (!pUnitFrame->ValidateY(y)) return;
+
+	for (int i = 0; i < pUnitFrame->sizeX; i++)
+	{
+		DrawUnit(pUnitFrame, i, y, pBitmap);
+	}
+}
+
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush)
+{
+	if (!IsValid()) return;
+	
 	if (1 == blankRate)
 		return;
 
-	if (0 == blankRate)
+	int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
+	vector<bool> vecSolid(count);
+	Utility::RandomTrue(&vecSolid, (1 - blankRate), false);
+	for (int i = 0; i < count; i++)
 	{
-		for (int i = 0; i < pUnitFrame->GetWidth(); i++)
+		if (vecSolid[i])
 		{
-			for (int j = 0; j < pUnitFrame->GetHeight(); j++)
-			{
-				DrawUnit(pUnitFrame, i, j, gdiObj, isBitmap);
-			}
+			int x = i % pUnitFrame->GetWidth();
+			int y = i / pUnitFrame->GetWidth();
+			DrawUnit(pUnitFrame, x, y, pBrush);
 		}
 	}
-	else
-	{
-		int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
-		int blankCount;
-		if (leanBlank)
-			blankCount = (int)floor(count * blankRate);
-		else
-			blankCount = (int)ceil(count * blankRate);
-		vector<bool> vecSolids(count, false);
-		for (size_t i = 0; i < (size_t)(count - blankCount); i++)
-		{
-			vecSolids[i] = true;
-		}
-		random_shuffle(vecSolids.begin(), vecSolids.end());
+}
 
-		for (int i = 0; i < count; i++)
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap)
+{
+	if (!IsValid()) return;
+	
+	if (1 == blankRate)
+		return;
+
+	int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
+	vector<bool> vecSolid(count);
+	Utility::RandomTrue(&vecSolid, (1 - blankRate), false);
+	for (int i = 0; i < count; i++)
+	{
+		if (vecSolid[i])
 		{
-			if (vecSolids[i])
-			{
-				int x = i % pUnitFrame->GetWidth();
-				int y = i / pUnitFrame->GetWidth();
-				DrawUnit(pUnitFrame, x, y, gdiObj, isBitmap);
-			}
+			int x = i % pUnitFrame->GetWidth();
+			int y = i / pUnitFrame->GetWidth();
+			DrawUnit(pUnitFrame, x, y, pBitmap);
 		}
 	}
 }
@@ -518,10 +611,13 @@ void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 	{
 		for (int j = pTetrisShape->GetTop(); j <= pTetrisShape->GetBottom(); j++)
 		{
-			if(pTetrisShape->IsSolid(i, j, true))
-				DrawUnit(pUnitFrame, i, j,
-					pGameFrame->useColor ? (HGDIOBJ)vecTetrisBrushes[pTetrisShape->GetColor()]: (HGDIOBJ)hbmUnit,
-					!pGameFrame->useColor);
+			if (pTetrisShape->IsSolid(i, j, true))
+			{
+				if (pGameFrame->useColor)
+					DrawUnit(pUnitFrame, i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
+				else
+					DrawUnit(pUnitFrame, i, j, pbmpUnit);
+			}
 		}
 	}
 }
@@ -556,21 +652,21 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 			bool useColor = pGameFrame->useColor;
 			if (useColor)
 			{
-				HBRUSH hbs;
+				Brush* pbrs;
 				if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
-					hbs = hbsMassLight;
+					pbrs = pGameFrame->useMassColor ? pbrsMassLight : vecTetrisBrushesLight[it->color];
 				else
-					hbs = pGameFrame->useMassColor ? hbsMass : vecTetrisBrushes[it->color];
-				DrawUnit(pGameFrame, x, y, (HGDIOBJ)hbs, false);
+					pbrs = pGameFrame->useMassColor ? pbrsMass : vecTetrisBrushes[it->color];
+				DrawUnit(pGameFrame, x, y, pbrs);
 			}
 			else
 			{
-				HBITMAP hbm;
+				Bitmap* pbmp;
 				if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
-					hbm = hbmUnitLight;
+					pbmp = pbmpUnitLight;
 				else
-					hbm = hbmUnit;
-				DrawUnit(pGameFrame, x, y, (HGDIOBJ)hbm, true);
+					pbmp = pbmpUnit;
+				DrawUnit(pGameFrame, x, y, pbmp);
 			}
 		}
 		x++;
@@ -579,9 +675,10 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 
 void Drawer::DrawFill(UnitFrame* pUnitFrame, double blankRate)
 {
-	DrawUnits(pUnitFrame, blankRate, false,
-		pGameFrame->useColor ? (HGDIOBJ)hbsMass : (HGDIOBJ)hbmUnit,
-		!pGameFrame->useColor);
+	if (pGameFrame->useColor)
+		DrawUnits(pUnitFrame, blankRate, pbrsMass);
+	else
+		DrawUnits(pUnitFrame, blankRate, pbmpUnit);
 }
 
 void Drawer::DrawRollingLines(GameFrame* pGameFrame)
@@ -592,9 +689,10 @@ void Drawer::DrawRollingLines(GameFrame* pGameFrame)
 		for (int i = pGameFrame->sizeY - pGameFrame->rolledRows;
 			i < pGameFrame->sizeY; i++)
 		{
-			DrawLine(pGameFrame, i,
-				pGameFrame->useColor ? (HGDIOBJ)hbsMass : (HGDIOBJ)hbmUnit,
-				!pGameFrame->useColor);
+			if (pGameFrame->useColor)
+				DrawLine(pGameFrame, i, pbrsMass);
+			else
+				DrawLine(pGameFrame, i, pbmpUnit);
 		}
 	}
 }
@@ -611,13 +709,20 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 	infos.append(to_wstring(pInfoFrame->GetLevel())).append(L"\n\n");
 	infos.append(to_wstring(pInfoFrame->GetScore())).append(L"\n\n");
 	infos.append(to_wstring(pInfoFrame->GetStartLine()));
-	RECT rcInfo = { pInfoFrame->left, pInfoFrame->top,
-		pInfoFrame->left + pInfoFrame->sizeX, pInfoFrame->top + pInfoFrame->sizeY };
-	SetBkMode(hdcCmp, TRANSPARENT);
-	SetTextColor(hdcCmp, pInfoFrame->colorInfo);
-	SelectObject(hdcCmp, hftInfo);
-	DrawText(hdcCmp, labels.c_str(), (int)labels.size(), &rcInfo, DT_LEFT);
-	DrawText(hdcCmp, infos.c_str(), (int)infos.size(), &rcInfo, DT_RIGHT);
+
+	RectF rcInfo((REAL)pInfoFrame->left, (REAL)pInfoFrame->top,
+		(REAL)pInfoFrame->GetWidth(), (REAL)pInfoFrame->GetHeight());
+	Graphics grp(hdcCmp);
+
+	StringFormat stringFormatLeft;
+	stringFormatLeft.SetAlignment(StringAlignmentNear);
+	grp.DrawString(labels.c_str(), (INT)labels.size(),
+		pfntInfo, rcInfo, &stringFormatLeft, pbrsInfo);
+
+	StringFormat stringFormatRight;
+	stringFormatRight.SetAlignment(StringAlignmentFar);
+	grp.DrawString(infos.c_str(), (INT)infos.size(),
+		pfntInfo, rcInfo, &stringFormatRight, pbrsInfo);
 }
 
 void Drawer::DrawIcon(GameFrame* pGameFrame)
@@ -627,7 +732,7 @@ void Drawer::DrawIcon(GameFrame* pGameFrame)
 	if (GameState::Pause != pController->GetGameState() && GameState::ResumeDelay != pController->GetGameState())
 		return;
 
-	Image* pIcon = GameState::Pause == pController->GetGameState() ? pBitmapPause : pBitmapResume;
+	Image* pIcon = GameState::Pause == pController->GetGameState() ? pbmpPause : pbmpResume;
 
 	REAL rate = pIcon->GetWidth() * pIcon->GetHeight() /
 		(pGameFrame->GetWidth() * pGameFrame->GetHeight() * (REAL)pGameFrame->iconScaleRatio);
@@ -653,8 +758,8 @@ void Drawer::DrawIcon(GameFrame* pGameFrame)
 	REAL left = (pGameFrame->GetWidth() - width) / 2 + pGameFrame->GetLeft();
 	REAL top = (pGameFrame->GetHeight() - height) / 2 + pGameFrame->GetTop();
 
-	Graphics graphics(hdcCmp);
-	graphics.DrawImage(pIcon, left, top, width, height);
+	Graphics grp(hdcCmp);
+	grp.DrawImage(pIcon, left, top, width, height);
 }
 
 void Drawer::DrawMask(GameFrame* pGameFrame)
@@ -664,8 +769,8 @@ void Drawer::DrawMask(GameFrame* pGameFrame)
 	if (GameState::Pause != pController->GetGameState() && GameState::ResumeDelay != pController->GetGameState())
 		return;
 	
-	Graphics graphics(hdcCmp);
-	graphics.FillRectangle(pBrushMask, pGameFrame->GetLeft(), pGameFrame->GetTop(),
+	Graphics grp(hdcCmp);
+	grp.FillRectangle(pbrsMask, pGameFrame->GetLeft(), pGameFrame->GetTop(),
 		pGameFrame->GetWidth(), pGameFrame->GetHeight());
 }
 
@@ -676,18 +781,18 @@ void Drawer::DrawSplash(GameFrame* pGameFrame)
 	if (pController->IsStarted())
 		return;
 	
-	HBITMAP hbmSplash = CreateHBITMAP(
-		GameState::None == pController->GetGameState() ?
-		pBitmapBegin : pBitmapGameOver);
-	int left = pGameFrame->GetLeft() + pGameFrame->borderThickness;
-	int top = pGameFrame->GetTop() + pGameFrame->borderThickness;
-	int right = pGameFrame->GetLeft() + pGameFrame->GetWidth() - pGameFrame->borderThickness;
-	int bottom = pGameFrame->GetTop() + pGameFrame->GetHeight() - pGameFrame->borderThickness;
-	RECT rect = { left, top, right, bottom};
-	DrawBitmap(hbmSplash, RenderMode::Uniform,
-		RenderAlignment::HorizontalCenter | RenderAlignment::VerticalCenter,
-		&rect);
-	DeleteObject(hbmSplash);
+	int x = pGameFrame->GetLeft() + pGameFrame->borderThickness;
+	int y = pGameFrame->GetTop() + pGameFrame->borderThickness;
+	int width = pGameFrame->GetWidth() - pGameFrame->borderThickness;
+	int height = pGameFrame->GetHeight() - pGameFrame->borderThickness;
+	Rect rect(x, y, width, height);
+//	DrawBitmap(
+//GameState::None == pController->GetGameState() ?
+//		pbmpBegin : pbmpGameOver,
+// RenderMode::Uniform,
+//
+//		RenderAlignment::HorizontalCenter | RenderAlignment::VerticalCenter,
+//		rect);
 }
 
 void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)
@@ -716,32 +821,61 @@ void Drawer::SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc)
 	pBitmap->SetResolution((REAL)resX, (REAL)resY);
 }
 
-COLORREF Drawer::LightColor(COLORREF color, double ratio)
+Color Drawer::LightColor(Color& color, float ratio)
 {
-	int r = (int)(GetRValue(color) * ratio + (0xFF) * (1 - ratio));
-	int g = (int)(GetGValue(color) * ratio + (0xFF) * (1 - ratio));
-	int b = (int)(GetBValue(color) * ratio + (0xFF) * (1 - ratio));
-	return RGB(r, g, b);
+	BYTE a = color.GetA();
+	BYTE r = (BYTE)round(color.GetR() * ratio + (0xFF) * (1 - ratio));
+	BYTE g = (BYTE)round(color.GetG() * ratio + (0xFF) * (1 - ratio));
+	BYTE b = (BYTE)round(color.GetB() * ratio + (0xFF) * (1 - ratio));
+	return Color(a, r, g, b);
 }
 
-HBITMAP Drawer::StretchBitmap(HDC hdcRef, HBITMAP hbm, int dstWidth, int dstHeight)
+Bitmap* Drawer::StretchBitmap(HDC hdc, Bitmap* pBmp, int dstWidth, int dstHeight)
+{
+	Bitmap* pBmpDst = new Bitmap(dstWidth, dstHeight, pBmp->GetPixelFormat());
+	Graphics grp(pBmpDst);
+	grp.DrawImage(pBmp, 0, 0, dstWidth, dstHeight);
+	return pBmpDst;
+}
+
+Bitmap* Drawer::LightBitmap(HDC hdc, Bitmap* pBmp, float ratio)
+{
+	int width = pBmp->GetWidth();
+	int height = pBmp->GetHeight();
+	Bitmap* pBmpDst = new Bitmap(width, height, pBmp->GetPixelFormat());
+	Graphics grp(pBmpDst);
+	Rect dstRect(0, 0, width, height);
+	ImageAttributes imageAttributes;
+	// r,g,b transform to (1 - ratio)*source + ratio*255
+	ColorMatrix colorMatrix = {
+		1.0f - ratio,0.0f,0.0f,0.0f,0.0f,
+		0.0f,1.0f - ratio,0.0f,0.0f,0.0f,
+		0.0f,0.0f,1.0f - ratio,0.0f,0.0f,
+		0.0f,0.0f,0.0f,1.0f,0.0f,
+		ratio,ratio,ratio,0.0f,1.0f };
+	imageAttributes.SetColorMatrix(&colorMatrix);
+	grp.DrawImage(pBmp, dstRect, 0, 0, width, height, UnitPixel, &imageAttributes);
+	return pBmpDst;
+}
+
+HBITMAP Drawer::StretchBitmap(HDC hdc, HBITMAP hbm, int dstWidth, int dstHeight)
 {
 	Bitmap bitmap(hbm, NULL);
 	int srcWidth = bitmap.GetWidth();
 	int srcHeight = bitmap.GetHeight();
 
 	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, dstWidth, dstHeight);
+	HDC hdcDst = CreateCompatibleDC(hdc);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, dstWidth, dstHeight);
 	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
 
-	HDC hdcSrc = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, srcWidth, srcHeight);
+	HDC hdcSrc = CreateCompatibleDC(hdc);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, srcWidth, srcHeight);
 	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
 
 	// stretch bitmap
-	Graphics graphics(hdcSrc);
-	graphics.DrawImage(&bitmap, 0, 0, srcWidth, srcHeight);
+	Graphics grp(hdcSrc);
+	grp.DrawImage(&bitmap, 0, 0, srcWidth, srcHeight);
 
 	SetStretchBltMode(hdcDst, COLORONCOLOR);
 	StretchBlt(hdcDst, 0, 0, dstWidth, dstHeight,
@@ -759,26 +893,26 @@ HBITMAP Drawer::StretchBitmap(HDC hdcRef, HBITMAP hbm, int dstWidth, int dstHeig
 	return hbmDst;
 }
 
-HBITMAP Drawer::LightBitmap(HDC hdcRef, HBITMAP hbm, double ratio)
+HBITMAP Drawer::LightBitmap(HDC hdc, HBITMAP hbm, float ratio)
 {
 	Bitmap bitmap(hbm, NULL);
 	UINT width = bitmap.GetWidth();
 	UINT height = bitmap.GetHeight();
 
 	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, width, height);
+	HDC hdcDst = CreateCompatibleDC(hdc);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, width, height);
 	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
 
-	HDC hdcSrc = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, width, height);
+	HDC hdcSrc = CreateCompatibleDC(hdc);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, width, height);
 	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
 
 	// alpha blend bitmap
 	FloodFill(hdcSrc, 0, 0, RGB(255, 255, 255));
 
-	Graphics graphics(hdcDst);
-	graphics.DrawImage(&bitmap, 0, 0, width, height);
+	Graphics grp(hdcDst);
+	grp.DrawImage(&bitmap, 0, 0, width, height);
 
 	BLENDFUNCTION bf;
 	bf.BlendOp = AC_SRC_OVER;
@@ -800,7 +934,7 @@ HBITMAP Drawer::LightBitmap(HDC hdcRef, HBITMAP hbm, double ratio)
 	return hbmDst;
 }
 
-HBITMAP Drawer::TranslateBitmap(HDC hdcRef, HBITMAP hbm, int offsetX, int offsetY)
+HBITMAP Drawer::TranslateBitmap(HDC hdc, HBITMAP hbm, int offsetX, int offsetY)
 {
 	Bitmap bitmap(hbm, NULL);
 	UINT width = bitmap.GetWidth();
@@ -813,17 +947,17 @@ HBITMAP Drawer::TranslateBitmap(HDC hdcRef, HBITMAP hbm, int offsetX, int offset
 		offsetY += height;
 
 	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdcRef, width, height);
+	HDC hdcDst = CreateCompatibleDC(hdc);
+	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, width, height);
 	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
 
-	HDC hdcSrc = CreateCompatibleDC(hdcRef);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdcRef, width, height);
+	HDC hdcSrc = CreateCompatibleDC(hdc);
+	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, width, height);
 	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
 
 	// translate bitmap
-	Graphics graphics(hdcSrc);
-	graphics.DrawImage(&bitmap, 0, 0, width, height);
+	Graphics grp(hdcSrc);
+	grp.DrawImage(&bitmap, 0, 0, width, height);
 	BitBlt(hdcDst, 0, 0, offsetX, offsetY,
 		hdcSrc, width - offsetX, height - offsetY,
 		SRCCOPY);
@@ -856,7 +990,7 @@ HBITMAP Drawer::CreateHBITMAP(Bitmap* pBitmap)
 	return hbm;
 }
 
-HBRUSH Drawer::GetRandomTetrisBrush()
+Brush* Drawer::GetRandomTetrisBrush()
 {
 	return vecTetrisBrushes[Utility::Random(0, (int)vecTetrisBrushes.size() - 1)];
 }
@@ -873,11 +1007,5 @@ void Drawer::BackgroundFrameChangedProcStatic(Bitmap* pBitmap, SHORT sLoopedCoun
 
 void Drawer::BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UINT uCurrentFrame)
 {
-	if (RenderMode::Tile == pBackground->renderMode)
-	{
-		DeleteObject(hbmBackground);
-		hbmBackground = CreateHBITMAP(pBitmap);
-	}
-
 	InvalidateRect(hWnd, NULL, FALSE);
 }

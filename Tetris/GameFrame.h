@@ -23,8 +23,8 @@ public:
 	bool useColorRandom;
 	bool useMassColor;
 
-	vector<COLORREF>* pTetrisColors;
-	COLORREF* pMassColor;
+	vector<Color> tetrisColors;
+	Color massColor;
 	wstring pathUnitBitmap;
 	wstring pathPauseIcon;
 	wstring pathResumeIcon;

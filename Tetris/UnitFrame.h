@@ -1,6 +1,9 @@
 #pragma once
 #include "Frame.h"
 #include <Windows.h>
+#include <gdiplus.h>
+using Color = Gdiplus::Color;
+
 class UnitFrame :
 	public Frame
 {
@@ -8,8 +11,9 @@ public:
 	int unitWidth;
 	int borderThickness;
 	int separatorThickness;
-	COLORREF* pBorderColor;
-	COLORREF* pSeparatorColor;
+	Color backgroundColor;
+	Color borderColor;
+	Color separatorColor;
 
 public:
 	bool ValidateX(int x);

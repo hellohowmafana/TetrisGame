@@ -36,16 +36,24 @@ private:
 	Drawer();
 	~Drawer();
 	
-	void DrawBitmap(HBITMAP hbmBitmap, RenderMode renderMode, RenderAlignment renderAlignment, RECT* pRect);
+	void DrawSolidColor(const Color& color, const Rect& rect);
+	void DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
+		RenderAlignmentHorizontal renderAlignmentHorizontal,
+		RenderAlignmentVertical renderAlignmentVertical, const Rect& rect);
 	void DrawBackground();
 
 	void DrawFrame(Frame* pFrame);
+	void DrawBackground(Frame* pFrame);
 	void DrawBorder(UnitFrame* pUnitFrame);
 	void DrawSeparators(UnitFrame* pUnitFrame);
 
-	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, HGDIOBJ gdiObj, bool isBitmap);
-	void DrawLine(UnitFrame* pUnitFrame, int y, HGDIOBJ gdiObj, bool isBitmap);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, bool leanBlank, HGDIOBJ gdiObj, bool isBitmap);
+	Rect* GetUnitRectangle(UnitFrame* pUnitFrame, int x, int y, Rect* pRect);
+	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, Brush* pBrush);
+	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap);
+	void DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush);
+	void DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap);
+	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush);
+	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap);
 	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape);
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
@@ -61,13 +69,15 @@ private:
 	void GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight);
 	void GetDCResolution(HDC hdc, int* px, int* py);
 	void SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc);
-	COLORREF LightColor(COLORREF color, double ratio);
-	HBITMAP StretchBitmap(HDC hdcRef, HBITMAP hbm, int dstWidth, int dstHeight);
-	HBITMAP LightBitmap(HDC hdcRef, HBITMAP hbm, double ratio);
-	HBITMAP TranslateBitmap(HDC hdcRef, HBITMAP hbm, int offsetX, int offsetY);
+	Color LightColor(Color& color, float ratio);
+	Bitmap* StretchBitmap(HDC hdc, Bitmap* pBmp, int dstWidth, int dstHeight);
+	Bitmap* LightBitmap(HDC hdc, Bitmap* pBmp, float ratio);
+	HBITMAP StretchBitmap(HDC hdc, HBITMAP hbm, int dstWidth, int dstHeight);
+	HBITMAP LightBitmap(HDC hdc, HBITMAP hbm, float ratio);
+	HBITMAP TranslateBitmap(HDC hdc, HBITMAP hbm, int offsetX, int offsetY);
 	HBITMAP CreateHBITMAP(Bitmap* pBitmap);
 
-	HBRUSH GetRandomTetrisBrush();
+	Brush* GetRandomTetrisBrush();
 	
 	bool IsValid();
 
@@ -80,26 +90,32 @@ private:
 	PromptFrame* pPromptFrame;
 	InfoFrame* pInfoFrame;
 	Background* pBackground;
+	
 	HDC hdc;
 	HWND hWnd;
-	HPEN hpnBorder;
-	HPEN hpnSeparator;
-	HBITMAP hbmUnit;
-	HBITMAP hbmUnitLight;
-	vector<HBRUSH> vecTetrisBrushes;
-	HBRUSH hbsMass;
-	HBRUSH hbsMassLight;
-	// background
-	Bitmap* pBitmapBackground;
-	HBITMAP hbmBackground;
-	AnimatedGifPoller* pAnimatedGifPoller;
+
+	Brush* pbrsFrame;
+	Pen* ppenBorder;
+	Pen* ppenSeprator;
+	Bitmap* pbmpUnit;
+	Bitmap* pbmpUnitLight;
+	vector<Brush*> vecTetrisBrushes;
+	vector<Brush*> vecTetrisBrushesLight;
+	Brush* pbrsMass;
+	Brush* pbrsMassLight;
+
+	Bitmap* pbmpBackground;
+	AnimatedGifPoller* pGifPollerBackground;
 	bool isAnimatedBackground;
-	HFONT hftInfo;
-	Bitmap* pBitmapBegin;
-	Bitmap* pBitmapGameOver;
-	Bitmap* pBitmapPause;
-	Bitmap* pBitmapResume;
-	Brush* pBrushMask;
+
+	Font* pfntInfo;
+	Brush* pbrsInfo;
+
+	Bitmap* pbmpBegin;
+	Bitmap* pbmpGameOver;
+	Bitmap* pbmpPause;
+	Bitmap* pbmpResume;
+	Brush* pbrsMask;
 	
 	bool initialized;
 	bool attached;

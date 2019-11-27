@@ -1,8 +1,10 @@
 #pragma once
 #include <string>
 #include <Windows.h>
+#include <gdiplus.h>
 #include "RenderMode.h"
 using namespace std;
+using Color = Gdiplus::Color;
 
 class Configuration;
 
@@ -13,9 +15,10 @@ public:
 	static Background singleton;
 
 	wstring pathBackground;
-	COLORREF colorBackground;
+	Color colorBackground;
 	RenderMode renderMode;
-	RenderAlignment renderAlignment;
+	RenderAlignmentHorizontal renderAlignmentHorizontal;
+	RenderAlignmentVertical renderAlignmentVertical;
 
 private:
 	Background() {};

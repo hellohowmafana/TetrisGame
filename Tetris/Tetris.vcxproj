@@ -238,18 +238,6 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ResourceCompile Include="Tetris.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Image Include="inis\bitmaps\background color.bmp" />
-    <Image Include="inis\bitmaps\background.jpeg" />
-    <Image Include="inis\bitmaps\begin.png" />
-    <Image Include="inis\bitmaps\game over.png" />
-    <Image Include="inis\bitmaps\information color.bmp" />
-    <Image Include="inis\bitmaps\mass color.bmp" />
-    <Image Include="inis\bitmaps\separator color.bmp" />
-    <Image Include="inis\bitmaps\tetris color.bmp">
-      <DeploymentContent>true</DeploymentContent>
-    </Image>
-    <Image Include="inis\bitmaps\border color.bmp" />
-    <Image Include="inis\bitmaps\unit.bmp" />
     <Image Include="inis\icons\pause.png" />
     <Image Include="inis\icons\resume.png" />
     <Image Include="small.ico" />

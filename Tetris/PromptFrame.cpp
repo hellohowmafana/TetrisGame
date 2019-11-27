@@ -2,7 +2,6 @@
 
 bool PromptFrame::Initialize(Configuration* pConfiguration)
 {
-	// initialize from configuration
 	left = pConfiguration->promptFrameLeft;
 	top = pConfiguration->promptFrameTop;
 	sizeX = pConfiguration->promptFrameSizeX;
@@ -10,8 +9,9 @@ bool PromptFrame::Initialize(Configuration* pConfiguration)
 	unitWidth = pConfiguration->unitWidth;
 	borderThickness = pConfiguration->borderThickness;
 	separatorThickness = pConfiguration->separatorThickness;
-	pBorderColor = &pConfiguration->colorBorder;
-	pSeparatorColor = &pConfiguration->colorSeparator;
+	backgroundColor = pConfiguration->colorFrameBackground;
+	borderColor = pConfiguration->colorBorder;
+	separatorColor = pConfiguration->colorSeparator;
 
 	return true;
 }

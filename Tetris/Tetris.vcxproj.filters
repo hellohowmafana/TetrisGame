@@ -192,41 +192,11 @@
     <Image Include="Tetris.ico">
       <Filter>Resource Files</Filter>
     </Image>
-    <Image Include="inis\bitmaps\tetris color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\separator color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\border color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\mass color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\background.jpeg">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\background color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\information color.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\game over.png">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
     <Image Include="inis\icons\pause.png">
       <Filter>inis\icons</Filter>
     </Image>
     <Image Include="inis\icons\resume.png">
       <Filter>inis\icons</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\unit.bmp">
-      <Filter>inis\bitmaps</Filter>
-    </Image>
-    <Image Include="inis\bitmaps\begin.png">
-      <Filter>inis\bitmaps</Filter>
     </Image>
   </ItemGroup>
   <ItemGroup>
