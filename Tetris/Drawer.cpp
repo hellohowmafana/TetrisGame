@@ -64,8 +64,8 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 		else
 		{
 			Bitmap bitmapUnit(pGameFrame->pathUnitBitmap.c_str());
-			pbmpUnit = StretchBitmap(hdc, &bitmapUnit, pGameFrame->unitWidth, pGameFrame->unitWidth);
-			pbmpUnitLight = LightBitmap(hdc, &bitmapUnit, 0.5);
+			pbmpUnit = StretchBitmap(&bitmapUnit, pGameFrame->unitWidth, pGameFrame->unitWidth);
+			pbmpUnitLight = LightBitmap(pbmpUnit, 0.5);
 		}
 
 		if (RenderMode::Color != pBackground->renderMode)
@@ -301,36 +301,24 @@ void Drawer::DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
 	{
 	case RenderMode::General:
 	{
-		int x = 0;
-		switch (renderAlignmentHorizontal)
-		{
-		case RenderAlignmentHorizontal::Left:
-			x = rect.X;
-			break;
-		case RenderAlignmentHorizontal::Right:
-			x = rect.Width - (int)pBitmap->GetWidth() + rect.X;
-			break;
-		case RenderAlignmentHorizontal::Center:
-			x = (rect.Width - (int)pBitmap->GetWidth()) / 2 + rect.X;
-			break;
-		default:
-			break;
-		}
-		int y = 0;
-		switch (renderAlignmentVertical)
-		{
-		case RenderAlignmentVertical::Top:
-			y = rect.Y;
-			break;
-		case RenderAlignmentVertical::Bottom:
-			y = rect.Height - (int)pBitmap->GetHeight() + rect.Y;
-			break;
-		case RenderAlignmentVertical::Center:
-			y = (rect.Height - (int)pBitmap->GetHeight()) / 2 + rect.Y;
-			break;
-		default:
-			break;
-		}
+		REAL x = 0;
+		if (RenderAlignmentHorizontal::Left == renderAlignmentHorizontal)
+			x = 0;
+		else if(RenderAlignmentHorizontal::Right == renderAlignmentHorizontal)
+			x = (REAL)rect.Width - pBitmap->GetWidth();
+		else if(RenderAlignmentHorizontal::Center == renderAlignmentHorizontal)
+			x = ((REAL)rect.Width - pBitmap->GetWidth()) / 2;
+		x += rect.X;
+		
+		REAL y = 0;
+		if (RenderAlignmentVertical::Top == renderAlignmentVertical)
+			y = 0;
+		else if(RenderAlignmentVertical::Bottom == renderAlignmentVertical)
+			y = (REAL)rect.Height - pBitmap->GetHeight();
+		else if(RenderAlignmentVertical::Center == renderAlignmentVertical)
+			y = ((REAL)rect.Height - pBitmap->GetHeight()) / 2;
+		y += rect.Y;
+
 		Graphics(hdcCmp).DrawImage(pBitmap, x, y);
 		break;
 	}
@@ -341,20 +329,28 @@ void Drawer::DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
 	}
 	case RenderMode::Tile:
 	{
-		TextureBrush* pbrsTile = nullptr;
-		if (AnimatedGifPoller::IsAnimatedGif(pBitmap))
-		{
-			Bitmap bmpBrush(pBitmap->GetWidth(), pBitmap->GetHeight(), pBitmap->GetPixelFormat());
-			Graphics grpBrush(&bmpBrush);
-			grpBrush.DrawImage(pBitmap,0,0);
-			pbrsTile = new TextureBrush(&bmpBrush);
-		}
-		else
-		{
-			pbrsTile = new TextureBrush(pBitmap);
-		}
+		int offsetX = 0;
+		if (RenderAlignmentHorizontal::Left == renderAlignmentHorizontal)
+			offsetX = 0;
+		else if (RenderAlignmentHorizontal::Right == renderAlignmentHorizontal)
+			offsetX = rect.Width % pBitmap->GetWidth();
+		else if (RenderAlignmentHorizontal::Center == renderAlignmentHorizontal)
+			offsetX = (rect.Width % pBitmap->GetWidth()) / 2;
+
+		int offsetY = 0;
+		if (RenderAlignmentVertical::Top == renderAlignmentVertical)
+			offsetY = 0;
+		else if (RenderAlignmentVertical::Bottom == renderAlignmentVertical)
+			offsetY = rect.Height % pBitmap->GetHeight();
+		else if (RenderAlignmentVertical::Center == renderAlignmentVertical)
+			offsetY = (rect.Height % pBitmap->GetHeight()) / 2;
+
+		Bitmap* pBmpTile = TranslateBitmap(pBitmap, offsetX, offsetY);
+		TextureBrush* pbrsTile = new TextureBrush(pBmpTile);
 		Graphics(hdcCmp).FillRectangle(pbrsTile, rect);
 		delete pbrsTile;
+		delete pBmpTile;
+
 		break;
 	}
 	case RenderMode::UniformFill:
@@ -371,12 +367,32 @@ void Drawer::DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
 		bool fitWidth = rate == rateWidth;
 		REAL srcWidth = fitWidth ? bitmapWidth : dstWidth * rate;
 		REAL srcHeight = !fitWidth ? bitmapHeight : dstHeight * rate;
-		REAL srcX = fitWidth ? 0 : (bitmapWidth / rate - dstWidth) / 2;
-		REAL srcY = !fitWidth ? 0 : (bitmapHeight / rate - dstHeight) / 2;
+
+		REAL srcX = 0;
+		if (!fitWidth)
+		{
+			if (RenderAlignmentHorizontal::Left == renderAlignmentHorizontal)
+				srcX = 0;
+			else if (RenderAlignmentHorizontal::Right == renderAlignmentHorizontal)
+				srcX = bitmapWidth - dstWidth * rate;
+			else if (RenderAlignmentHorizontal::Center == renderAlignmentHorizontal)
+				srcX = (bitmapWidth - dstWidth * rate) / 2;
+		}
+		
+		REAL srcY = 0;
+		if (fitWidth)
+		{
+			if (RenderAlignmentVertical::Top == renderAlignmentVertical)
+				srcY = 0;
+			else if (RenderAlignmentVertical::Bottom == renderAlignmentVertical)
+				srcY = bitmapHeight - dstHeight * rate;
+			else if (RenderAlignmentVertical::Center == renderAlignmentVertical)
+				srcY = (bitmapHeight - dstHeight * rate) / 2;
+		}
 
 		Graphics(hdcCmp).DrawImage(pBitmap,
 			RectF((REAL)rect.X, (REAL)rect.Y, (REAL)dstWidth, (REAL)dstHeight),
-			srcX, srcY, srcWidth, srcHeight, Unit::UnitPixel);
+			srcX, srcY, srcWidth, srcHeight, UnitPixel);
 
 		break;
 	}
@@ -394,8 +410,30 @@ void Drawer::DrawBitmap(Bitmap* pBitmap, RenderMode renderMode,
 		bool fitWidth = rate == rateWidth;
 		REAL width = fitWidth ? dstWidth : (bitmapWidth / rate);
 		REAL height = !fitWidth ? dstHeight : (bitmapHeight / rate);
-		REAL x = (fitWidth ? 0 : (dstWidth - width) / 2) + rect.X;
-		REAL y = (!fitWidth ? 0 : (dstHeight - height) / 2) + rect.Y;
+
+		REAL x = 0;
+		if (!fitWidth)
+		{
+			if (RenderAlignmentHorizontal::Left == renderAlignmentHorizontal)
+				x = 0;
+			else if (RenderAlignmentHorizontal::Right == renderAlignmentHorizontal)
+				x = dstWidth - width;
+			else if (RenderAlignmentHorizontal::Center == renderAlignmentHorizontal)
+				x = (dstWidth - width) / 2;
+		}
+		x += rect.X;
+
+		REAL y = 0;
+		if (fitWidth)
+		{
+			if (RenderAlignmentVertical::Top == renderAlignmentVertical)
+				y = 0;
+			else if (RenderAlignmentVertical::Bottom == renderAlignmentVertical)
+				y = dstHeight - height;
+			else if (RenderAlignmentVertical::Center == renderAlignmentVertical)
+				y = (dstHeight - height) / 2;
+		}
+		y += rect.Y;
 
 		Graphics(hdcCmp).DrawImage(pBitmap, x, y, width, height);
 
@@ -783,16 +821,14 @@ void Drawer::DrawSplash(GameFrame* pGameFrame)
 	
 	int x = pGameFrame->GetLeft() + pGameFrame->borderThickness;
 	int y = pGameFrame->GetTop() + pGameFrame->borderThickness;
-	int width = pGameFrame->GetWidth() - pGameFrame->borderThickness;
-	int height = pGameFrame->GetHeight() - pGameFrame->borderThickness;
+	int width = pGameFrame->GetWidth() - pGameFrame->borderThickness * 2;
+	int height = pGameFrame->GetHeight() - pGameFrame->borderThickness * 2;
 	Rect rect(x, y, width, height);
-//	DrawBitmap(
-//GameState::None == pController->GetGameState() ?
-//		pbmpBegin : pbmpGameOver,
-// RenderMode::Uniform,
-//
-//		RenderAlignment::HorizontalCenter | RenderAlignment::VerticalCenter,
-//		rect);
+	DrawBitmap(
+		GameState::None == pController->GetGameState() ?
+		pbmpBegin : pbmpGameOver,
+		RenderMode::Uniform,
+		RenderAlignmentHorizontal::Center, RenderAlignmentVertical::Center, rect);
 }
 
 void Drawer::GetDCSize(HDC hdc, LONG * pWidth, LONG * pHeight)
@@ -830,7 +866,7 @@ Color Drawer::LightColor(Color& color, float ratio)
 	return Color(a, r, g, b);
 }
 
-Bitmap* Drawer::StretchBitmap(HDC hdc, Bitmap* pBmp, int dstWidth, int dstHeight)
+Bitmap* Drawer::StretchBitmap(Bitmap* pBmp, int dstWidth, int dstHeight)
 {
 	Bitmap* pBmpDst = new Bitmap(dstWidth, dstHeight, pBmp->GetPixelFormat());
 	Graphics grp(pBmpDst);
@@ -838,7 +874,7 @@ Bitmap* Drawer::StretchBitmap(HDC hdc, Bitmap* pBmp, int dstWidth, int dstHeight
 	return pBmpDst;
 }
 
-Bitmap* Drawer::LightBitmap(HDC hdc, Bitmap* pBmp, float ratio)
+Bitmap* Drawer::LightBitmap(Bitmap* pBmp, float ratio)
 {
 	int width = pBmp->GetWidth();
 	int height = pBmp->GetHeight();
@@ -858,87 +894,11 @@ Bitmap* Drawer::LightBitmap(HDC hdc, Bitmap* pBmp, float ratio)
 	return pBmpDst;
 }
 
-HBITMAP Drawer::StretchBitmap(HDC hdc, HBITMAP hbm, int dstWidth, int dstHeight)
+Bitmap* Drawer::TranslateBitmap(Bitmap* pBmp, int offsetX, int offsetY)
 {
-	Bitmap bitmap(hbm, NULL);
-	int srcWidth = bitmap.GetWidth();
-	int srcHeight = bitmap.GetHeight();
+	UINT width = pBmp->GetWidth();
+	UINT height = pBmp->GetHeight();
 
-	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdc);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, dstWidth, dstHeight);
-	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
-
-	HDC hdcSrc = CreateCompatibleDC(hdc);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, srcWidth, srcHeight);
-	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
-
-	// stretch bitmap
-	Graphics grp(hdcSrc);
-	grp.DrawImage(&bitmap, 0, 0, srcWidth, srcHeight);
-
-	SetStretchBltMode(hdcDst, COLORONCOLOR);
-	StretchBlt(hdcDst, 0, 0, dstWidth, dstHeight,
-		hdcSrc, 0, 0, srcWidth, srcHeight,
-		SRCCOPY);
-
-	// delete compatible dcs
-	SelectObject(hdcDst, hbmDstOrignal);
-	DeleteDC(hdcDst);
-
-	SelectObject(hdcSrc, hbmSrcOrignal);
-	DeleteDC(hdcSrc);
-	DeleteObject(hbmSrc);
-
-	return hbmDst;
-}
-
-HBITMAP Drawer::LightBitmap(HDC hdc, HBITMAP hbm, float ratio)
-{
-	Bitmap bitmap(hbm, NULL);
-	UINT width = bitmap.GetWidth();
-	UINT height = bitmap.GetHeight();
-
-	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdc);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, width, height);
-	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
-
-	HDC hdcSrc = CreateCompatibleDC(hdc);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, width, height);
-	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
-
-	// alpha blend bitmap
-	FloodFill(hdcSrc, 0, 0, RGB(255, 255, 255));
-
-	Graphics grp(hdcDst);
-	grp.DrawImage(&bitmap, 0, 0, width, height);
-
-	BLENDFUNCTION bf;
-	bf.BlendOp = AC_SRC_OVER;
-	bf.BlendFlags = 0;
-	bf.AlphaFormat = 0;
-	bf.SourceConstantAlpha = (BYTE)(0xFF * ratio);
-	AlphaBlend(hdcDst, 0, 0, width, height,
-		hdcSrc, 0, 0, width, height,
-		bf);
-
-	// delete compatible dcs
-	SelectObject(hdcDst, hbmDstOrignal);
-	DeleteDC(hdcDst);
-
-	SelectObject(hdcSrc, hbmSrcOrignal);
-	DeleteDC(hdcSrc);
-	DeleteObject(hbmSrc);
-
-	return hbmDst;
-}
-
-HBITMAP Drawer::TranslateBitmap(HDC hdc, HBITMAP hbm, int offsetX, int offsetY)
-{
-	Bitmap bitmap(hbm, NULL);
-	UINT width = bitmap.GetWidth();
-	UINT height = bitmap.GetHeight();
 	offsetX %= width;
 	offsetY %= height;
 	if (offsetX < 0)
@@ -946,48 +906,18 @@ HBITMAP Drawer::TranslateBitmap(HDC hdc, HBITMAP hbm, int offsetX, int offsetY)
 	if (offsetY < 0)
 		offsetY += height;
 
-	// create compatible dcs
-	HDC hdcDst = CreateCompatibleDC(hdc);
-	HBITMAP hbmDst = CreateCompatibleBitmap(hdc, width, height);
-	HGDIOBJ hbmDstOrignal = SelectObject(hdcDst, hbmDst);
+	Bitmap* pBmpDst = new Bitmap(width, height, pBmp->GetPixelFormat());
+	Graphics grp(pBmpDst);
+	grp.DrawImage(pBmp, 0, 0,
+		width - offsetX, height - offsetY, offsetX, offsetY, UnitPixel);
+	grp.DrawImage(pBmp, offsetX, 0,
+		0, height - offsetY, width - offsetX, offsetY, UnitPixel);
+	grp.DrawImage(pBmp, offsetX, offsetY,
+		0, 0, width - offsetX, height - offsetY, UnitPixel);
+	grp.DrawImage(pBmp, 0, offsetY,
+		width - offsetX, 0, offsetX, height - offsetY, UnitPixel);
 
-	HDC hdcSrc = CreateCompatibleDC(hdc);
-	HBITMAP hbmSrc = CreateCompatibleBitmap(hdc, width, height);
-	HGDIOBJ hbmSrcOrignal = SelectObject(hdcSrc, hbmSrc);
-
-	// translate bitmap
-	Graphics grp(hdcSrc);
-	grp.DrawImage(&bitmap, 0, 0, width, height);
-	BitBlt(hdcDst, 0, 0, offsetX, offsetY,
-		hdcSrc, width - offsetX, height - offsetY,
-		SRCCOPY);
-	BitBlt(hdcDst, offsetX, 0, width - offsetX, offsetY,
-		hdcSrc, 0, height - offsetY,
-		SRCCOPY);
-	BitBlt(hdcDst, offsetX, offsetY, width - offsetX, height - offsetY,
-		hdcSrc, 0, 0,
-		SRCCOPY);
-	BitBlt(hdcDst, 0, offsetY, offsetX, height - offsetY,
-		hdcSrc, width - offsetX, 0,
-		SRCCOPY);
-
-	// delete compatible dcs
-	SelectObject(hdcDst, hbmDstOrignal);
-	DeleteDC(hdcDst);
-
-	SelectObject(hdcSrc, hbmSrcOrignal);
-	DeleteDC(hdcSrc);
-	DeleteObject(hbmSrc);
-
-	return hbmDst;
-}
-
-HBITMAP Drawer::CreateHBITMAP(Bitmap* pBitmap)
-{
-	Color color;
-	HBITMAP hbm;
-	pBitmap->GetHBITMAP(color, &hbm);
-	return hbm;
+	return pBmpDst;
 }
 
 Brush* Drawer::GetRandomTetrisBrush()

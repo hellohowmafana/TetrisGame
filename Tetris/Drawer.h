@@ -70,12 +70,9 @@ private:
 	void GetDCResolution(HDC hdc, int* px, int* py);
 	void SetBitmapDCResolution(Bitmap* pBitmap, HDC hdc);
 	Color LightColor(Color& color, float ratio);
-	Bitmap* StretchBitmap(HDC hdc, Bitmap* pBmp, int dstWidth, int dstHeight);
-	Bitmap* LightBitmap(HDC hdc, Bitmap* pBmp, float ratio);
-	HBITMAP StretchBitmap(HDC hdc, HBITMAP hbm, int dstWidth, int dstHeight);
-	HBITMAP LightBitmap(HDC hdc, HBITMAP hbm, float ratio);
-	HBITMAP TranslateBitmap(HDC hdc, HBITMAP hbm, int offsetX, int offsetY);
-	HBITMAP CreateHBITMAP(Bitmap* pBitmap);
+	Bitmap* StretchBitmap(Bitmap* pBmp, int dstWidth, int dstHeight);
+	Bitmap* LightBitmap(Bitmap* pBmp, float ratio);
+	Bitmap* TranslateBitmap(Bitmap* pBmp, int offsetX, int offsetY);
 
 	Brush* GetRandomTetrisBrush();
 	

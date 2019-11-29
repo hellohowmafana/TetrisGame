@@ -192,6 +192,7 @@ bool Controller::Start()
 	if (!IsResourceInitialized())
 		return false;
 	gameState = GameState::Start;
+	InvalidateDraw();
 	PlayMusic(MusicType::Bgm);
 	StartStepDown(false);
 	return true;
