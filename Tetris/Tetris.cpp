@@ -6,15 +6,15 @@
 #include <Windows.h>
 #include <gdiplus.h>
 
-#include "Tetris.h"
-#include "Configuration.h"
-#include "Drawer.h"
-#include "GameFrame.h"
-#include "Controller.h"
-#include "SaveDialog.h"
-#include "LoadDialog.h"
-#include "Utility.h"
-#include "Musician.h"
+#include "Tetris.hpp"
+#include "Configuration.hpp"
+#include "Drawer.hpp"
+#include "GameFrame.hpp"
+#include "Controller.hpp"
+#include "SaveDialog.hpp"
+#include "LoadDialog.hpp"
+#include "Utility.hpp"
+#include "Musician.hpp"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 

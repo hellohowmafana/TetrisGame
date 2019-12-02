@@ -1,6 +1,6 @@
 #pragma once
-#include "GameFrame.h"
-#include "Musician.h"
+#include "GameFrame.hpp"
+#include "Musician.hpp"
 
 class Drawer;
 

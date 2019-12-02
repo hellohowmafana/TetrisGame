@@ -1,10 +1,10 @@
-#include "Configuration.h"
+#include "Configuration.hpp"
 #include <fstream> 
-#include "TetrisShape.h"
-#include "Level.h"
+#include "TetrisShape.hpp"
+#include "Level.hpp"
 #include <gdiplus.h>
-#include "Background.h"
-#include "Musician.h"
+#include "Background.hpp"
+#include "Musician.hpp"
 using namespace Gdiplus;
 
 Configuration Configuration::singleton;

@@ -1,4 +1,4 @@
-#include "AnimatedGifPoller.h"
+#include "AnimatedGifPoller.hpp"
 
 AnimatedGifPoller::AnimatedGifPoller(Bitmap* pBitmap, FrameChangedProc pFrameChangedProc) :
 	m_pBitmap(nullptr),

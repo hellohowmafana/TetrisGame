@@ -1,9 +1,9 @@
 #pragma once
-#include "Configuration.h"
-#include "Mass.h"
-#include "TetrisShape.h"
-#include "UnitFrame.h"
-#include "ISerializable.h"
+#include "Configuration.hpp"
+#include "Mass.hpp"
+#include "TetrisShape.hpp"
+#include "UnitFrame.hpp"
+#include "ISerializable.hpp"
 #include <Windows.h>
 
 class PromptFrame;

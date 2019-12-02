@@ -3,13 +3,13 @@
 #pragma comment(lib, "gdiplus.lib")
 
 #include <vector>
-#include "GameFrame.h"
-#include "PromptFrame.h"
-#include "InfoFrame.h"
-#include "Background.h"
+#include "GameFrame.hpp"
+#include "PromptFrame.hpp"
+#include "InfoFrame.hpp"
+#include "Background.hpp"
 #include <Unknwn.h>
 #include <gdiplus.h>
-#include "AnimatedGifPoller.h"
+#include "AnimatedGifPoller.hpp"
 
 using namespace std;
 using namespace Gdiplus;

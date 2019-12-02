@@ -1,6 +1,6 @@
 #pragma once
-#include "Frame.h"
-#include "Configuration.h"
+#include "Frame.hpp"
+#include "Configuration.hpp"
 
 class GameFrame;
 

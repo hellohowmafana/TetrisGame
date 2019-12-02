@@ -1,6 +1,6 @@
-#include "LoadDialog.h"
+#include "LoadDialog.hpp"
 #include "resource.h"
-#include "Configuration.h"
+#include "Configuration.hpp"
 
 INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {

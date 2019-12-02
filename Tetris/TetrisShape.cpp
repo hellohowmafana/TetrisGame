@@ -1,7 +1,7 @@
-#include "TetrisShape.h"
-#include "PromptFrame.h"
-#include "GameFrame.h"
-#include "Utility.h"
+#include "TetrisShape.hpp"
+#include "PromptFrame.hpp"
+#include "GameFrame.hpp"
+#include "Utility.hpp"
 
 TetrisShape::TetrisShape() :
 	posX(0),

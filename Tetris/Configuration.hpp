@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <vector>
 #include <gdiplus.h>
-#include "RenderMode.h"
+#include "RenderMode.hpp"
 using namespace std;
 using Color = Gdiplus::Color;
 

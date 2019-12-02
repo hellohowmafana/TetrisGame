@@ -1,8 +1,8 @@
 #pragma once
 #include <string>
 #include <fstream>
-#include "Utility.h"
-#include "Archive.h"
+#include "Utility.hpp"
+#include "Archive.hpp"
 
 class ISerializable
 {

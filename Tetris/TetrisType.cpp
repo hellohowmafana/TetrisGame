@@ -1,5 +1,5 @@
-#include "TetrisType.h"
-#include "Utility.h"
+#include "TetrisType.hpp"
+#include "Utility.hpp"
 
 void TetrisType::Create(wstring group, wstring name,
 	bool penetrable, bool twoRotation, bool clockwiseRotation,

@@ -1,7 +1,7 @@
-#include "Mass.h"
-#include "TetrisShape.h"
-#include "GameFrame.h"
-#include "Utility.h"
+#include "Mass.hpp"
+#include "TetrisShape.hpp"
+#include "GameFrame.hpp"
+#include "Utility.hpp"
 #include <sstream>
 
 bool Mass::Initialize()

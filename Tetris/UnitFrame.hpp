@@ -1,5 +1,5 @@
 #pragma once
-#include "Frame.h"
+#include "Frame.hpp"
 #include <Windows.h>
 #include <gdiplus.h>
 using Color = Gdiplus::Color;

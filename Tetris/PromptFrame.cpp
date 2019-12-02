@@ -1,4 +1,4 @@
-#include "PromptFrame.h"
+#include "PromptFrame.hpp"
 
 bool PromptFrame::Initialize(Configuration* pConfiguration)
 {

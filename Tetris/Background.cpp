@@ -1,5 +1,5 @@
-#include "Background.h"
-#include "Configuration.h"
+#include "Background.hpp"
+#include "Configuration.hpp"
 
 void Background::Initialize(Configuration* pConfiguration)
 {

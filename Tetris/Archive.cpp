@@ -1,7 +1,7 @@
-#include "Archive.h"
+#include "Archive.hpp"
 #include <fstream>
-#include "Utility.h"
-#include "Controller.h"
+#include "Utility.hpp"
+#include "Controller.hpp"
 
 bool Archive::Exist(wstring archive)
 {

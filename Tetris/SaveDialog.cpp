@@ -1,4 +1,4 @@
-#include "SaveDialog.h"
+#include "SaveDialog.hpp"
 #include "resource.h"
 
 INT_PTR SaveDialog::SaveDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)

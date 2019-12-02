@@ -1,5 +1,5 @@
-#include "InfoFrame.h"
-#include"GameFrame.h"
+#include "InfoFrame.hpp"
+#include "GameFrame.hpp"
 
 void InfoFrame::Initialize(Configuration* pConfiguration)
 {

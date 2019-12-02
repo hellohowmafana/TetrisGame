@@ -31,6 +31,9 @@
     <Filter Include="inis\sound">
       <UniqueIdentifier>{c71fd096-284c-4716-9b0e-d1ef5c665a8a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="records">
+      <UniqueIdentifier>{e211903a-5f75-4c7d-9c70-407196e42903}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -42,73 +45,76 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Tetris.h">
+    <ClInclude Include="Tetris.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Configuration.h">
+    <ClInclude Include="Configuration.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Controller.h">
+    <ClInclude Include="Controller.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Drawer.h">
+    <ClInclude Include="Drawer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TetrisShape.h">
+    <ClInclude Include="TetrisShape.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="TetrisType.h">
+    <ClInclude Include="TetrisType.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Utility.h">
+    <ClInclude Include="Utility.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="GameFrame.h">
+    <ClInclude Include="GameFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Mass.h">
+    <ClInclude Include="Mass.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Archive.h">
+    <ClInclude Include="Archive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ISerializable.h">
+    <ClInclude Include="ISerializable.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Frame.h">
+    <ClInclude Include="Frame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="UnitFrame.h">
+    <ClInclude Include="UnitFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PromptFrame.h">
+    <ClInclude Include="PromptFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="InfoFrame.h">
+    <ClInclude Include="InfoFrame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Background.h">
+    <ClInclude Include="Background.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Level.h">
+    <ClInclude Include="Level.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AnimatedGifPoller.h">
+    <ClInclude Include="AnimatedGifPoller.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Music.h">
+    <ClInclude Include="Music.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Musician.h">
+    <ClInclude Include="Musician.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="LoadDialog.h">
+    <ClInclude Include="LoadDialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="SaveDialog.h">
+    <ClInclude Include="SaveDialog.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RenderMode.h">
+    <ClInclude Include="RenderMode.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Recorder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -179,6 +185,9 @@
     <ClCompile Include="SaveDialog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Recorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Tetris.rc">
@@ -217,6 +226,9 @@
     </Text>
     <Text Include="inis\shapes\penerable_calssic.txt">
       <Filter>inis\shapes</Filter>
+    </Text>
+    <Text Include="records\record1.txt">
+      <Filter>records</Filter>
     </Text>
   </ItemGroup>
   <ItemGroup>

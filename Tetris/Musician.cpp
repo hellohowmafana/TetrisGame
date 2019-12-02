@@ -1,6 +1,6 @@
-#include "Musician.h"
-#include "Configuration.h"
-#include "Utility.h"
+#include "Musician.hpp"
+#include "Configuration.hpp"
+#include "Utility.hpp"
 
 Musician Musician::singleton;
 

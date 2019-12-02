@@ -183,32 +183,33 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="AnimatedGifPoller.h" />
-    <ClInclude Include="Archive.h" />
-    <ClInclude Include="LoadDialog.h" />
-    <ClInclude Include="Background.h" />
-    <ClInclude Include="Frame.h" />
-    <ClInclude Include="InfoFrame.h" />
-    <ClInclude Include="ISerializable.h" />
-    <ClInclude Include="Level.h" />
-    <ClInclude Include="Mass.h" />
-    <ClInclude Include="Configuration.h" />
-    <ClInclude Include="Controller.h" />
-    <ClInclude Include="Drawer.h" />
+    <ClInclude Include="AnimatedGifPoller.hpp" />
+    <ClInclude Include="Archive.hpp" />
+    <ClInclude Include="LoadDialog.hpp" />
+    <ClInclude Include="Background.hpp" />
+    <ClInclude Include="Frame.hpp" />
+    <ClInclude Include="InfoFrame.hpp" />
+    <ClInclude Include="ISerializable.hpp" />
+    <ClInclude Include="Level.hpp" />
+    <ClInclude Include="Mass.hpp" />
+    <ClInclude Include="Configuration.hpp" />
+    <ClInclude Include="Controller.hpp" />
+    <ClInclude Include="Drawer.hpp" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="GameFrame.h" />
-    <ClInclude Include="Music.h" />
-    <ClInclude Include="Musician.h" />
-    <ClInclude Include="PromptFrame.h" />
-    <ClInclude Include="RenderMode.h" />
+    <ClInclude Include="GameFrame.hpp" />
+    <ClInclude Include="Music.hpp" />
+    <ClInclude Include="Musician.hpp" />
+    <ClInclude Include="PromptFrame.hpp" />
+    <ClInclude Include="Recorder.hpp" />
+    <ClInclude Include="RenderMode.hpp" />
     <ClInclude Include="Resource.h" />
-    <ClInclude Include="SaveDialog.h" />
+    <ClInclude Include="SaveDialog.hpp" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="Tetris.h" />
-    <ClInclude Include="TetrisShape.h" />
-    <ClInclude Include="TetrisType.h" />
-    <ClInclude Include="UnitFrame.h" />
-    <ClInclude Include="Utility.h" />
+    <ClInclude Include="Tetris.hpp" />
+    <ClInclude Include="TetrisShape.hpp" />
+    <ClInclude Include="TetrisType.hpp" />
+    <ClInclude Include="UnitFrame.hpp" />
+    <ClInclude Include="Utility.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="AnimatedGifPoller.cpp" />
@@ -226,6 +227,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Musician.cpp" />
     <ClCompile Include="PromptFrame.cpp" />
+    <ClCompile Include="Recorder.cpp" />
     <ClCompile Include="SaveDialog.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tetris.cpp" />
@@ -254,6 +256,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     </Text>
     <Text Include="inis\shapes\penerable_calssic.txt" />
     <Text Include="readme.txt" />
+    <Text Include="records\record1.txt" />
   </ItemGroup>
   <ItemGroup>
     <Media Include="inis\sound\dropped.mp3" />

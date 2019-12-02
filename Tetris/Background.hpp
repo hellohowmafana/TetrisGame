@@ -2,7 +2,7 @@
 #include <string>
 #include <Windows.h>
 #include <gdiplus.h>
-#include "RenderMode.h"
+#include "RenderMode.hpp"
 using namespace std;
 using Color = Gdiplus::Color;
 

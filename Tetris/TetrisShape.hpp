@@ -1,7 +1,7 @@
 #pragma once
-#include "TetrisType.h"
+#include "TetrisType.hpp"
 #include <vector>
-#include "ISerializable.h"
+#include "ISerializable.hpp"
 using namespace std;
 
 class UnitFrame;

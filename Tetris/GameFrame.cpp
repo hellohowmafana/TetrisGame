@@ -1,7 +1,7 @@
-#include "GameFrame.h"
-#include "PromptFrame.h"
-#include "InfoFrame.h"
-#include "Level.h"
+#include "GameFrame.hpp"
+#include "PromptFrame.hpp"
+#include "InfoFrame.hpp"
+#include "Level.hpp"
 GameFrame GameFrame::singleton;
 
 GameFrame::GameFrame()

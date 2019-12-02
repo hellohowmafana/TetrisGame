@@ -1,7 +1,7 @@
 #pragma once
-#include "UnitFrame.h"
-#include "TetrisShape.h"
-#include "Configuration.h"
+#include "UnitFrame.hpp"
+#include "TetrisShape.hpp"
+#include "Configuration.hpp"
 
 class GameFrame;
 

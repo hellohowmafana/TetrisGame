@@ -1,6 +1,6 @@
-#include "Drawer.h"
-#include "Utility.h"
-#include "Controller.h"
+#include "Drawer.hpp"
+#include "Utility.hpp"
+#include "Controller.hpp"
 #include <bitset>
 
 Drawer Drawer::singleton;

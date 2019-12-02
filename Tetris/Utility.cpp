@@ -1,4 +1,4 @@
-#include "Utility.h"
+#include "Utility.hpp"
 
 int Utility::Random(int min, int max) {
 	random_device rd;

@@ -1,9 +1,9 @@
-#include "Controller.h"
-#include "Configuration.h"
-#include "Level.h"
-#include "Archive.h"
-#include "Drawer.h"
-#include "Musician.h"
+#include "Controller.hpp"
+#include "Configuration.hpp"
+#include "Level.hpp"
+#include "Archive.hpp"
+#include "Drawer.hpp"
+#include "Musician.hpp"
 
 Controller Controller::singleton;
 
