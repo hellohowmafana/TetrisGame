@@ -2,6 +2,7 @@
 #include <list>
 #include <vector>
 #include "ISerializable.hpp"
+#include "IBinarySerializable.hpp"
 using namespace std;
 
 class GameFrame;
@@ -16,7 +17,7 @@ struct MassUnit
 typedef vector<MassUnit> MassLine;
 typedef list<MassLine*> MassBlock;
 
-class Mass : public ISerializable
+class Mass : public ISerializable, public IBinarySerializable
 {
 public:
 	bool Initialize();
@@ -36,8 +37,8 @@ public:
 	bool HasFullLine();
 	void RemoveLine(int line);
 	int RemoveFullLines(int from, int to);
-	bool GenerateLine(int line, double blankRate);
-	bool GenerateLines(int line, int count, double blankRate);
+	bool GenerateLine(int line, float blankRate);
+	bool GenerateLines(int line, int count, float blankRate);
 	void Clear();
 	bool IsFull();
 	vector<MassLine*>* GetFullLines(vector<MassLine*>* pvecLines, int from, int to);
@@ -77,4 +78,7 @@ private:
 public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
+
+	virtual bool Save(char* pData, size_t& size);
+	virtual bool Load(char* pData);
 };

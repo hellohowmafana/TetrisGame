@@ -2,12 +2,14 @@
 #include "TetrisType.hpp"
 #include <vector>
 #include "ISerializable.hpp"
+#include "IBinarySerializable.hpp"
 using namespace std;
 
 class UnitFrame;
+
 enum class TetrisRotation {Rotation0, Rotation1, Rotation2, Rotation3};
 
-class TetrisShape : public ISerializable
+class TetrisShape : public ISerializable, public IBinarySerializable
 {
 public:
 	TetrisShape();
@@ -70,6 +72,10 @@ private:
 public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
+
+	virtual bool Save(char* pData, size_t& size);
+	virtual bool Load(char* pData);
+
 	TetrisRotation IntToTetrisRotation(int irotation);
 	int TetrisRotationToInt(TetrisRotation rotation);
 };

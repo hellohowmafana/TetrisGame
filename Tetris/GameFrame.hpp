@@ -16,7 +16,7 @@ public:
 
 	int startLevel;
 	int startLine;
-	double startLineBlankRate;
+	float startLineBlankRate;
 	vector<int> vecRemoveScores;
 	int droppedScore;
 	bool useColor;

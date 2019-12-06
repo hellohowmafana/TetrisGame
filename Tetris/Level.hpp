@@ -8,7 +8,7 @@ public:
 	int minScore; // include, -1 for infinate
 	int maxScore; // exclude, -1 for infinate
 	int stepDownTimeSpan;
-	double scoreRate;
+	float scoreRate;
 
 	static vector<Level> vecLevels;
 	static Level* GetLevel(int level);

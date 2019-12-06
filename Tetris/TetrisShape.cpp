@@ -566,6 +566,52 @@ bool TetrisShape::Load(const wstring label, wstring value)
 	return true;
 }
 
+bool TetrisShape::Save(char* pData, size_t& size)
+{
+	bool current = pData[0] == 0;
+	if (current)
+	{
+		size = 0;
+		PutWstring(pData, pTetrisType->group, size);
+		PutWstring(pData, pTetrisType->name, size);
+		PutUchar(pData, TetrisRotationToInt(rotation), size);
+		PutUchar(pData, posX, size);
+		PutUchar(pData, posY, size);
+	}
+	else
+	{
+		size = 0;
+		PutWstring(pData, pTetrisType->group, size);
+		PutWstring(pData, pTetrisType->name, size);
+		PutUchar(pData, TetrisRotationToInt(rotation), size);
+	}
+	return true;
+}
+
+bool TetrisShape::Load(char* pData)
+{
+	bool current = pData[0] == 0;
+	if (current)
+	{
+		TakeWstring(pData, pTetrisType->group);
+		TakeWstring(pData, pTetrisType->name);
+		int iRotation;
+		TakeUchar(pData, iRotation);
+		rotation = IntToTetrisRotation(iRotation);
+		TakeUchar(pData, posX);
+		TakeUchar(pData, posY);
+	}
+	else
+	{
+		TakeWstring(pData, pTetrisType->group);
+		TakeWstring(pData, pTetrisType->name);
+		int iRotation;
+		TakeUchar(pData, iRotation);
+		rotation = IntToTetrisRotation(iRotation);
+	}
+	return true;
+}
+
 TetrisRotation TetrisShape::IntToTetrisRotation(int irotation)
 {
 	switch (irotation)

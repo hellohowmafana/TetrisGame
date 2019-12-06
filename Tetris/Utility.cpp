@@ -7,15 +7,15 @@ int Utility::Random(int min, int max) {
 	return dist(mt);
 };
 
-bool Utility::RandomTrue(double rate)
+bool Utility::RandomTrue(float rate)
 {
 	random_device rd;
 	mt19937 mt(rd());
-	uniform_real_distribution<double> dist(0.0, 1.0);
+	uniform_real_distribution<float> dist(0.0, 1.0);
 	return dist(mt) < rate;
 }
 
-void Utility::RandomTrue(vector<bool>* pvecBool, double rate, bool leanTrue)
+void Utility::RandomTrue(vector<bool>* pvecBool, float rate, bool leanTrue)
 {
 	if (0 == rate)
 	{

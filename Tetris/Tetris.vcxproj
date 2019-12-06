@@ -185,6 +185,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
   <ItemGroup>
     <ClInclude Include="AnimatedGifPoller.hpp" />
     <ClInclude Include="Archive.hpp" />
+    <ClInclude Include="IBinarySerializable.hpp" />
     <ClInclude Include="LoadDialog.hpp" />
     <ClInclude Include="Background.hpp" />
     <ClInclude Include="Frame.hpp" />
@@ -214,6 +215,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
   <ItemGroup>
     <ClCompile Include="AnimatedGifPoller.cpp" />
     <ClCompile Include="Archive.cpp" />
+    <ClCompile Include="IBinarySerializable.cpp" />
     <ClCompile Include="LoadDialog.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Frame.cpp" />

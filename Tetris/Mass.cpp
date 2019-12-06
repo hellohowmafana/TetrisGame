@@ -182,7 +182,7 @@ int Mass::RemoveFullLines(int from, int to)
 	return count;
 }
 
-bool Mass::GenerateLine(int line, double blankRate)
+bool Mass::GenerateLine(int line, float blankRate)
 {
 	if (line <= 0 || line >= top)
 		return false;
@@ -191,7 +191,7 @@ bool Mass::GenerateLine(int line, double blankRate)
 	for (size_t i = 0; i < pMassLine->size(); i++)
 	{
 		(*pMassLine)[i].color = -1;
-		(*pMassLine)[i].isSolid = Utility::RandomTrue(1.0 - blankRate);
+		(*pMassLine)[i].isSolid = Utility::RandomTrue(1.0f - blankRate);
 	}
 	InsertLine(0, pMassLine);
 
@@ -207,7 +207,7 @@ bool Mass::GenerateLine(int line, double blankRate)
 	return true;
 }
 
-bool Mass::GenerateLines(int line, int count, double blankRate)
+bool Mass::GenerateLines(int line, int count, float blankRate)
 {
 	if (line <= 0 || line + count - 1 >= top)
 		return false;
@@ -218,7 +218,7 @@ bool Mass::GenerateLines(int line, int count, double blankRate)
 		for (size_t i = 0; i < pMassLine->size(); i++)
 		{
 			(*pMassLine)[i].color = -1;
-			(*pMassLine)[i].isSolid = Utility::RandomTrue(1.0 - blankRate);
+			(*pMassLine)[i].isSolid = Utility::RandomTrue(1.0f - blankRate);
 		}
 		InsertLine(0, pMassLine);
 	}
@@ -462,4 +462,16 @@ bool Mass::Load(const wstring label, wstring value)
 		return false;
 	}
 	return true;
+}
+
+bool Mass::Save(char* pData, size_t& size)
+{
+	size = 0;
+
+	return false;
+}
+
+bool Mass::Load(char* pData)
+{
+	return false;
 }

@@ -8,8 +8,8 @@ class Utility
 {
 public:
 	static int Random(int min, int max);
-	static bool RandomTrue(double rate);
-	static void RandomTrue(vector<bool>* pvecBool, double rate, bool leanTrue);
+	static bool RandomTrue(float rate);
+	static void RandomTrue(vector<bool>* pvecBool, float rate, bool leanTrue);
 
 	static int SplitString(wchar_t* szString, wchar_t delimiter, wchar_t** tokens, int count);
 

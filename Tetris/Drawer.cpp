@@ -55,11 +55,8 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 					vecTetrisBrushesLight.push_back(new SolidBrush(LightColor(pGameFrame->tetrisColors.at(i), 0.5)));
 			}
 
-			if (pGameFrame->useMassColor)
-			{
-				pbrsMass = new SolidBrush(pGameFrame->massColor);
-				pbrsMassLight = new SolidBrush(LightColor(pGameFrame->massColor, 0.5));
-			}
+			pbrsMass = new SolidBrush(pGameFrame->massColor);
+			pbrsMassLight = new SolidBrush(LightColor(pGameFrame->massColor, 0.5));
 		}
 		else
 		{
@@ -150,11 +147,10 @@ bool Drawer::Deinitialize()
 		if (!pGameFrame->useMassColor)
 			vecTetrisBrushesLight.clear();
 
-		if (pGameFrame->useMassColor)
-		{
-			delete pbrsMass;
-			pbrsMass = nullptr;
-		}
+		delete pbrsMass;
+		pbrsMass = nullptr;
+		delete pbrsMassLight;
+		pbrsMassLight = nullptr;
 	}
 	else
 	{
@@ -593,7 +589,7 @@ void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap)
 	}
 }
 
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush)
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, float blankRate, Brush* pBrush)
 {
 	if (!IsValid()) return;
 	
@@ -614,7 +610,7 @@ void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush)
 	}
 }
 
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap)
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, float blankRate, Bitmap* pBitmap)
 {
 	if (!IsValid()) return;
 	
@@ -692,9 +688,9 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 			{
 				Brush* pbrs;
 				if (GameState::BlinkLight == pController->GetGameState() && pGameFrame->IsLastFullLine(pMassLine))
-					pbrs = pGameFrame->useMassColor ? pbrsMassLight : vecTetrisBrushesLight[it->color];
+					pbrs = pGameFrame->useMassColor || -1 == it->color ? pbrsMassLight : vecTetrisBrushesLight[it->color];
 				else
-					pbrs = pGameFrame->useMassColor ? pbrsMass : vecTetrisBrushes[it->color];
+					pbrs = pGameFrame->useMassColor || -1 == it->color ? pbrsMass : vecTetrisBrushes[it->color];
 				DrawUnit(pGameFrame, x, y, pbrs);
 			}
 			else
@@ -711,7 +707,7 @@ void Drawer::DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y)
 	}
 }
 
-void Drawer::DrawFill(UnitFrame* pUnitFrame, double blankRate)
+void Drawer::DrawFill(UnitFrame* pUnitFrame, float blankRate)
 {
 	if (pGameFrame->useColor)
 		DrawUnits(pUnitFrame, blankRate, pbrsMass);

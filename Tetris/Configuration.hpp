@@ -157,17 +157,17 @@ public:
 	int infoFontHeight;
 	int infoFontWidth;
 	int infoFontWeight;
-	double iconScaleRatio;
-	double maskTransparency;
+	float iconScaleRatio;
+	float maskTransparency;
 
 	// game
 	int startLevel;
 	int startLine;
-	double startLineBlankRate;
+	float startLineBlankRate;
 	vector<int> vecRemoveScores;
 	int droppedScore;
 	int maxLevel;
-	vector<double> vecScoreGainRate;
+	vector<float> vecScoreGainRate;
 	vector<int> vecLevelScore;
 	vector<int> vecStepDownTimespan;
 	int dropTimespan;
@@ -231,14 +231,14 @@ private:
 	wchar_t* GetConfigurationString(wstring section, wstring key);
 	int GetConfigurationInt(wstring section, wstring key);
 	bool GetConfigurationBool(wstring section, wstring key);
-	double GetConfigurationDouble(wstring section, wstring key);
+	float GetConfigurationFloat(wstring section, wstring key);
 	bool GetConfigurationIntPair(wstring section, wstring key, int& val1, int& val2);
 	bool  GetConfigurationIntArray(wstring section, wstring key, vector<int>& vec);
-	bool  GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec);
+	bool  GetConfigurationFloatArray(wstring section, wstring key, vector<float>& vec);
 
 	bool SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2);
 	bool SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecInts);
-	bool SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles);
+	bool SplitStringToFloats(wstring str, wchar_t ch, vector<float>& vecDoubles);
 	bool ParseTetrisTypeDeclaration(wstring str, wstring& name,
 		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
 };

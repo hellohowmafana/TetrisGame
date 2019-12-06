@@ -101,17 +101,17 @@ bool Configuration::LoadParameters()
 	infoFontHeight = GetConfigurationInt(keyDisplay, keyInfoFontHeight);
 	infoFontWidth = GetConfigurationInt(keyDisplay, keyInfoFontWidth);
 	infoFontWeight = GetConfigurationInt(keyDisplay, keyInfoFontWeight);
-	iconScaleRatio = GetConfigurationDouble(keyDisplay, keyIconScaleRatio);
-	maskTransparency = GetConfigurationDouble(keyDisplay, keyMaskTransparency);
+	iconScaleRatio = GetConfigurationFloat(keyDisplay, keyIconScaleRatio);
+	maskTransparency = GetConfigurationFloat(keyDisplay, keyMaskTransparency);
 
 	// game
 	startLevel = GetConfigurationInt(keyGame, keyStartLevel);
 	startLine = GetConfigurationInt(keyGame, keyStartLine);
-	startLineBlankRate = GetConfigurationDouble(keyGame, keyStartLineBlankRate);
+	startLineBlankRate = GetConfigurationFloat(keyGame, keyStartLineBlankRate);
 	GetConfigurationIntArray(keyGame, keyRemoveScores, vecRemoveScores);
 	droppedScore = GetConfigurationInt(keyGame, keyDroppedScore);
 	maxLevel = GetConfigurationInt(keyGame, keyMaxLevel);
-	GetConfigurationDoubleArray(keyGame, keyScoreGainRate, vecScoreGainRate);
+	GetConfigurationFloatArray(keyGame, keyScoreGainRate, vecScoreGainRate);
 	GetConfigurationIntArray(keyGame, keyLevelScore, vecLevelScore);
 	GetConfigurationIntArray(keyGame, keyStepDownTimespan, vecStepDownTimespan);
 	dropTimespan = GetConfigurationInt(keyGame, keyDropTimespan);
@@ -156,7 +156,7 @@ bool Configuration::LoadLevels()
 			i < vecLevelScore.size() - 1 ? vecLevelScore[i + 1] : -1;
 		pvecLevels->at(i).stepDownTimeSpan =
 			i < vecStepDownTimespan.size() ? vecStepDownTimespan[i] : *(vecStepDownTimespan.end() - 1);
-		double scoreGainRate =
+		float scoreGainRate =
 			i < vecScoreGainRate.size() ? vecScoreGainRate[i] : *(vecScoreGainRate.end() - 1);
 		pvecLevels->at(i).scoreRate = 
 			(i == 0 ? 1 : pvecLevels->at(i - 1).scoreRate) + scoreGainRate;
@@ -358,12 +358,12 @@ bool Configuration::GetConfigurationBool(wstring section, wstring key)
 	return GetConfigurationInt(section,key);
 }
 
-double Configuration::GetConfigurationDouble(wstring section, wstring key)
+float Configuration::GetConfigurationFloat(wstring section, wstring key)
 {
 	try
 	{
 		const wchar_t* pszBuffer = GetConfigurationString(section, key);
-		return stod(pszBuffer);
+		return stof(pszBuffer);
 	}
 	catch (const std::exception&)
 	{
@@ -383,10 +383,10 @@ bool Configuration::GetConfigurationIntArray(wstring section, wstring key, vecto
 	return SplitStringToInts(pszBuffer, L',', vec);
 }
 
-bool Configuration::GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec)
+bool Configuration::GetConfigurationFloatArray(wstring section, wstring key, vector<float>& vec)
 {
 	wchar_t* pszBuffer = GetConfigurationString(section, key);
-	return SplitStringToDoubles(pszBuffer, L',', vec);
+	return SplitStringToFloats(pszBuffer, L',', vec);
 }
 
 bool Configuration::SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2)
@@ -426,7 +426,7 @@ bool Configuration::SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecI
 	}
 }
 
-bool Configuration::SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles)
+bool Configuration::SplitStringToFloats(wstring str, wchar_t ch, vector<float>& vecDoubles)
 {
 	try {
 		vector<wchar_t*> tokens; // token pointers
@@ -435,7 +435,7 @@ bool Configuration::SplitStringToDoubles(wstring str, wchar_t ch, vector<double>
 		vecDoubles.clear();
 		for (size_t i = 0; i < tokens.size(); i++)
 		{
-			vecDoubles.push_back(stod(tokens[i]));
+			vecDoubles.push_back(stof(tokens[i]));
 		}
 		return true;
 	}

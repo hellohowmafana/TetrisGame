@@ -52,12 +52,12 @@ private:
 	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap);
 	void DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush);
 	void DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap);
+	void DrawUnits(UnitFrame* pUnitFrame, float blankRate, Brush* pBrush);
+	void DrawUnits(UnitFrame* pUnitFrame, float blankRate, Bitmap* pBitmap);
 	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape);
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
-	void DrawFill(UnitFrame* pUnitFrame, double blankRate);
+	void DrawFill(UnitFrame* pUnitFrame, float blankRate);
 	void DrawRollingLines(GameFrame* pGameFrame);
 
 	void DrawInfo(InfoFrame* pInfoFrame);
