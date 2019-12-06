@@ -278,11 +278,17 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	case WM_ERASEBKGND:
 		return 1;
 	case WM_KEYDOWN:
-		{
-			Controller* pController = &Controller::singleton;
-			pController->KeyDownAction(wParam);
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnKeyDown(wParam);
 		break;
-		}
+	}
+	case WM_KEYUP:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnKeyUp(wParam);
+		break;
+	}
 	case WM_DESTROY:
 		Drawer::singleton.Deinitialize();
         PostQuitMessage(0);

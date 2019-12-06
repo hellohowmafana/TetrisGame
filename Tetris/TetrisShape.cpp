@@ -230,6 +230,11 @@ void TetrisShape::CalculateRotationPosition(TetrisRotation dst, TetrisRotation s
 	}
 }
 
+bool TetrisShape::CanRotate()
+{
+	return pTetrisType->canRotate;
+}
+
 bool TetrisShape::Rotate()
 {
 	if (!pTetrisType->canRotate) return true;

@@ -10,9 +10,10 @@ Controller Controller::singleton;
 void Controller::Initialize(Configuration* pConfiguration)
 {
 	this->dropImmediate = pConfiguration->dropImmediate;
-
 	this->stepDownTimespan = Level::GetLevel(pConfiguration->startLevel)->stepDownTimeSpan;
 	this->dropTimespan = pConfiguration->dropTimespan;
+	this->stepHorizontalTimespan = pConfiguration->stepHorizontalTimespan;
+	this->rotateTimespan = pConfiguration->rotateTimespan;
 	this->removeBlinkTimespan = pConfiguration->removeBlinkTimespan;
 	this->removeBlinkCount = pConfiguration->removeBlinkCount;
 	removeBlinkTimes = 0;
@@ -80,27 +81,70 @@ bool Controller::IsStarted()
 		GameState::RollDown != gameState;
 }
 
-void Controller::KeyDownAction(WPARAM keyCode)
+bool Controller::IsStarting()
+{
+	return GameState::None != gameState &&
+		GameState::End != gameState &&
+		GameState::RollUp != gameState &&
+		GameState::RollDown != gameState &&
+		GameState::Pause != gameState;
+}
+
+void Controller::OnKeyDown(WPARAM keyCode)
 {
 	switch (keyCode)
 	{
 	case VK_LEFT:
-		StepHorizontal(true);
+		if (IsStarting())
+		{
+			if (!startingStepLeft)
+			{
+				StepHorizontal(true);
+				StartStepHorizontal(true);
+			}
+		}
 		break;
 	case VK_RIGHT:
-		StepHorizontal(false);
-		break;
-	case VK_DOWN:
-		StepDown();
+		if (IsStarting())
+		{
+			if (!startingStepRight)
+			{
+				StepHorizontal(false);
+				StartStepHorizontal(false);
+			}
+		}
 		break;
 	case VK_UP:
-		Rotate();
+		if (IsStarting())
+		{
+			if (!startingRotate)
+			{
+				Rotate();
+				StartRotate();
+			}
+		}
 		break;
+	case VK_DOWN:
 	case VK_SPACE:
-		dropImmediate ? Drop() : StepDown();
+		if (IsStarting())
+		{
+			if (dropImmediate)
+			{
+				Drop();
+			}
+			else
+			{
+				if (!startingDrop)
+				{
+					StepDown();
+					StartStepDown(true);
+				}
+			}
+		}
 		break;
 	case VK_RETURN:
-		Restart();
+		if(IsStarted())
+			Restart();
 		break;
 	case 'P':
 		if (GameState::Pause == gameState)
@@ -111,24 +155,54 @@ void Controller::KeyDownAction(WPARAM keyCode)
 	default:
 		break;
 	}
-	InvalidateDraw();
 }
 
-void Controller::KeyUpAction(WPARAM keyCode)
+void Controller::OnKeyUp(WPARAM keyCode)
 {
+	switch (keyCode)
+	{
+	case VK_LEFT:
+		if (IsStarting())
+			EndStepHorizontal();
+		break;
+	case VK_RIGHT:
+		if (IsStarting())
+			EndStepHorizontal();
+		break;
+	case VK_UP:
+		if (IsStarting())
+			EndRotate();
+		break;
+	case VK_DOWN:
+	case VK_SPACE:
+		if (IsStarting())
+		{
+			if (!dropImmediate)
+			{
+				startingDrop = false;
+				StartStepDown(false);
+			}
+		}
+		break;
+	default:
+		break;
+	}
 }
 
 void Controller::Rotate()
 {
-	if (GameState::Start != gameState)
+	if (!IsStarting())
 		return;
-	pGameFrame->Rotate();
-	PlayMusic(MusicType::Rotate);
+	if (pGameFrame->Rotate())
+	{
+		PlayMusic(MusicType::Rotate);
+		InvalidateDraw();
+	}
 }
 
 void Controller::StepHorizontal(bool left)
 {
-	if (GameState::Start != gameState)
+	if (!IsStarting())
 		return;
 	if (left)
 	{
@@ -139,11 +213,12 @@ void Controller::StepHorizontal(bool left)
 		pGameFrame->StepRight();
 	}
 	PlayMusic(MusicType::StepHorizontal);
+	InvalidateDraw();
 }
 
 void Controller::StepDown()
 {
-	if (GameState::Start != gameState)
+	if (!IsStarting())
 		return;
 	if (pGameFrame->StepDown())
 	{
@@ -155,12 +230,13 @@ void Controller::StepDown()
 	{
 		// not dropped
 		PlayMusic(MusicType::StepDown);
+		InvalidateDraw();
 	}
 }
 
 void Controller::Drop()
 {
-	if (GameState::Start != gameState)
+	if (!IsStarting())
 		return;
 	pGameFrame->Drop();
 	EndStepDown();
@@ -184,7 +260,7 @@ void Controller::EndDrop()
 	}
 	pGameFrame->RebornTetrisShape();
 	InvalidateDraw();
-	StartStepDown(false);
+	StartStepDown(startingDrop);
 }
 
 bool Controller::Start()
@@ -204,6 +280,7 @@ void Controller::End()
 	EndStepDown();
 	EndRemoveBlink();
 	StartRoll();
+	InvalidateDraw();
 }
 
 void Controller::Pause()
@@ -211,6 +288,7 @@ void Controller::Pause()
 	EndStepDown();
 	EndRemoveBlink();
 	gameState = GameState::Pause;
+	InvalidateDraw();
 }
 
 void Controller::Resume()
@@ -290,13 +368,16 @@ void Controller::StopBgm()
 
 bool Controller::StartStepDown(bool isDropping)
 {
+	startingDrop = isDropping;
 	return SetTimer(hWnd, ST_STEPDOWN,
-		isDropping ? dropTimespan : stepDownTimespan,
+		isDropping ? dropTimespan * 10 : stepDownTimespan * 10,
 		StepDownTimerProcStatic);
 }
 
 bool Controller::EndStepDown()
 {
+	if(startingDrop)
+		startingDrop = false;
 	return KillTimer(hWnd, ST_STEPDOWN);
 }
 
@@ -308,14 +389,61 @@ void Controller::StepDownTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD
 void Controller::StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
 {
 	StepDown();
-	InvalidateDraw();
+}
+
+bool Controller::StartStepHorizontal(bool stepLeft)
+{
+	startingStepLeft = stepLeft;
+	startingStepRight = !stepLeft;
+	return SetTimer(hWnd, ST_STEPHORIZONTAL, stepHorizontalTimespan * 10, StepHorizontalTimerProcStatic);
+}
+
+bool Controller::EndStepHorizontal()
+{
+	if (startingStepLeft)
+		startingStepLeft = false;
+	else
+		startingStepRight = false;
+	return KillTimer(hWnd, ST_STEPHORIZONTAL);
+}
+
+void Controller::StepHorizontalTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.StepHorizontalTimerProc(hWnd, msg, id, millisecond);
+}
+
+void Controller::StepHorizontalTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	StepHorizontal(startingStepLeft);
+}
+
+bool Controller::StartRotate()
+{
+	startingRotate = true;
+	return SetTimer(hWnd, ST_ROTATE, rotateTimespan * 10, RotateTimerProcStatic);
+}
+
+bool Controller::EndRotate()
+{
+	startingRotate = false;
+	return KillTimer(hWnd, ST_ROTATE);
+}
+
+void Controller::RotateTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.RotateTimerProc(hWnd, msg, id, millisecond);
+}
+
+void Controller::RotateTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Rotate();
 }
 
 bool Controller::StartRemoveBlink()
 {
 	gameState = GameState::BlinkNormal;
    	removeBlinkTimes = 0;
-	return SetTimer(hWnd, ST_REMOVEBLINK, removeBlinkTimespan, RemoveBlinkTimerProcStatic);
+	return SetTimer(hWnd, ST_REMOVEBLINK, removeBlinkTimespan * 10, RemoveBlinkTimerProcStatic);
 }
 
 bool Controller::EndRemoveBlink()
@@ -358,7 +486,7 @@ bool Controller::StartRoll()
 {
 	gameState = GameState::RollUp;
 	pGameFrame->rolledRows = 0;
-	return SetTimer(hWnd, ST_ROLL, rollTimespan, RollTimerProcStatic);
+	return SetTimer(hWnd, ST_ROLL, rollTimespan * 10, RollTimerProcStatic);
 }
 
 bool Controller::EndRoll()
@@ -406,9 +534,8 @@ void Controller::RollTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD milliseco
 bool Controller::StartResume()
 {
 	gameState = GameState::ResumeDelay;
-	gameState = GameState::ResumeDelay;
 	InvalidateDraw();
-	return SetTimer(hWnd, ST_RESUME, resumeDelayTimespan, ResumeTimerProcStatic);
+	return SetTimer(hWnd, ST_RESUME, resumeDelayTimespan * 10, ResumeTimerProcStatic);
 }
 
 bool Controller::EndResume()

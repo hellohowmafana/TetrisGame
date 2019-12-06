@@ -118,6 +118,8 @@ private:
 	const wstring keyStepDownTimespan = L"StepDownTimespan";
 	const wstring keyDropTimespan = L"DropTimespan";
 	const wstring keyDropImmediate = L"DropImmediate";
+	const wstring keyStepHorizontalTimespan = L"StepHorizontalTimespan";
+	const wstring keyRotateTimespan = L"RotateTimespan";
 	const wstring keyRemoveBlinkTimespan = L"RemoveBlinkTimespan";
 	const wstring keyRemoveBlinkCount = L"RemoveBlinkCount";
 	const wstring keyRollTimespan = L"RollTimespan";
@@ -170,6 +172,8 @@ public:
 	vector<int> vecStepDownTimespan;
 	int dropTimespan;
 	bool dropImmediate;
+	int stepHorizontalTimespan;
+	int rotateTimespan;
 	int removeBlinkTimespan;
 	int removeBlinkCount;
 	int rollTimespan;

@@ -65,7 +65,7 @@ public:
 	int Union();
 	bool HasFullLine();
 	void RemoveFullLines();
-	void Rotate();
+	bool Rotate();
 	void RebornTetrisShape();
 	bool IsFull();
 

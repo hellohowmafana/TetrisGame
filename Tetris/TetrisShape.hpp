@@ -27,6 +27,7 @@ public:
 	bool Move(int offestX, int offsetY);
 	bool MoveTo(int x, int y);
 	void CalculateRotationPosition(TetrisRotation dst, TetrisRotation src, int* pPosX, int* pPosY);
+	bool CanRotate();
 	bool Rotate();
 	bool RotateBack();
 	bool StepLeft();

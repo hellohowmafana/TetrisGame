@@ -26,9 +26,10 @@ public:
 	bool IsResourceInitialized();
 	GameState GetGameState();
 	bool IsStarted();
+	bool IsStarting();
 
-	void KeyDownAction(WPARAM keyCode);
-	void KeyUpAction(WPARAM keyCode);
+	void OnKeyDown(WPARAM keyCode);
+	void OnKeyUp(WPARAM keyCode);
 
 	void Rotate();
 	void StepHorizontal(bool left);
@@ -57,9 +58,11 @@ public:
 
 private:
 	const UINT_PTR ST_STEPDOWN = 1;
-	const UINT_PTR ST_REMOVEBLINK = 2;
-	const UINT_PTR ST_ROLL = 3;
-	const UINT_PTR ST_RESUME = 4;
+	const UINT_PTR ST_STEPHORIZONTAL = 2;
+	const UINT_PTR ST_ROTATE = 3;
+	const UINT_PTR ST_REMOVEBLINK = 4;
+	const UINT_PTR ST_ROLL = 5;
+	const UINT_PTR ST_RESUME = 6;
 
 	int removeBlinkCount;
 	int removeBlinkTimes;
@@ -68,6 +71,16 @@ private:
 	bool EndStepDown();
 	static void CALLBACK StepDownTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void StepDownTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+
+	bool StartStepHorizontal(bool stepLeft);
+	bool EndStepHorizontal();
+	static void CALLBACK StepHorizontalTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void StepHorizontalTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+
+	bool StartRotate();
+	bool EndRotate();
+	static void CALLBACK RotateTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void RotateTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 
 	bool StartRemoveBlink();
 	bool EndRemoveBlink();
@@ -98,12 +111,17 @@ private:
 	Musician* pMusician;
 	bool initialized;
 	GameState gameState;
+	bool startingDrop;
+	bool startingStepLeft;
+	bool startingStepRight;
+	bool startingRotate;
 
 	bool dropImmediate;
 
 	UINT stepDownTimespan;
 	UINT dropTimespan;
-	UINT dropDelayTimespan;
+	UINT stepHorizontalTimespan;
+	UINT rotateTimespan;
 	UINT removeBlinkTimespan;
 	UINT rollTimespan;
 	UINT resumeDelayTimespan;

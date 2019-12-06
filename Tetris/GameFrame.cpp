@@ -172,11 +172,23 @@ void GameFrame::RemoveFullLines()
 	}
 }
 
-void GameFrame::Rotate()
+bool GameFrame::Rotate()
 {
-	if(tetrisShape.Rotate())
+	if (!tetrisShape.CanRotate())
+		return false;
+	if (tetrisShape.Rotate())
+	{
 		if (mass.HitTest(&tetrisShape))
+		{
 			tetrisShape.RotateBack();
+			return false;
+		}
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void GameFrame::RebornTetrisShape()

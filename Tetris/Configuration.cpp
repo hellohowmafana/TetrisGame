@@ -116,6 +116,8 @@ bool Configuration::LoadParameters()
 	GetConfigurationIntArray(keyGame, keyStepDownTimespan, vecStepDownTimespan);
 	dropTimespan = GetConfigurationInt(keyGame, keyDropTimespan);
 	dropImmediate = GetConfigurationBool(keyGame, keyDropImmediate);
+	stepHorizontalTimespan = GetConfigurationInt(keyGame, keyStepHorizontalTimespan);
+	rotateTimespan = GetConfigurationInt(keyGame, keyRotateTimespan);
 	removeBlinkTimespan = GetConfigurationInt(keyGame, keyRemoveBlinkTimespan);
 	removeBlinkCount = GetConfigurationInt(keyGame, keyRemoveBlinkCount);
 	rollTimespan = GetConfigurationInt(keyGame, keyRollTimespan);
