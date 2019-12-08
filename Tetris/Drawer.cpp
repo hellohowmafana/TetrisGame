@@ -51,8 +51,7 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 			for (size_t i = 0; i < pGameFrame->tetrisColors.size(); i++)
 			{
 				vecTetrisBrushes.push_back(new SolidBrush(pGameFrame->tetrisColors.at(i)));
-				if (!pGameFrame->useMassColor)
-					vecTetrisBrushesLight.push_back(new SolidBrush(LightColor(pGameFrame->tetrisColors.at(i), 0.5)));
+				vecTetrisBrushesLight.push_back(new SolidBrush(LightColor(pGameFrame->tetrisColors.at(i), 0.5)));
 			}
 
 			pbrsMass = new SolidBrush(pGameFrame->massColor);
@@ -140,12 +139,10 @@ bool Drawer::Deinitialize()
 		for (size_t i = 0; i < vecTetrisBrushes.size(); i++)
 		{
 			delete vecTetrisBrushes.at(i);
-			if (!pGameFrame->useMassColor)
-				delete vecTetrisBrushesLight.at(i);
+			delete vecTetrisBrushesLight.at(i);
 		}
 		vecTetrisBrushes.clear();
-		if (!pGameFrame->useMassColor)
-			vecTetrisBrushesLight.clear();
+		vecTetrisBrushesLight.clear();
 
 		delete pbrsMass;
 		pbrsMass = nullptr;
@@ -250,12 +247,12 @@ void Drawer::DrawElements()
 
 		if (pController->IsStarted())
 		{
-			DrawShape(pGameFrame, pGameFrame->GetShape());
 			DrawMass(pGameFrame, pGameFrame->GetMass());
+			DrawShape(pGameFrame, pGameFrame->GetShape(), pController->IsShapeLighting());
 			DrawMask(pGameFrame);
 			DrawIcon(pGameFrame);
 		
-			DrawShape(pPromptFrame, pPromptFrame->GetTerisShape());
+			DrawShape(pPromptFrame, pPromptFrame->GetTerisShape(), false);
 		}
 		else
 		{
@@ -631,7 +628,7 @@ void Drawer::DrawUnits(UnitFrame* pUnitFrame, float blankRate, Bitmap* pBitmap)
 	}
 }
 
-void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
+void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape, bool isLighting)
 {
 	if (GameState::None == pController->GetGameState() ||
 		GameState::RollDown == pController->GetGameState())
@@ -648,9 +645,11 @@ void Drawer::DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape)
 			if (pTetrisShape->IsSolid(i, j, true))
 			{
 				if (pGameFrame->useColor)
-					DrawUnit(pUnitFrame, i, j, vecTetrisBrushes[pTetrisShape->GetColor()]);
+					DrawUnit(pUnitFrame, i, j,
+						isLighting ? vecTetrisBrushesLight[pTetrisShape->GetColor()]
+						: vecTetrisBrushes[pTetrisShape->GetColor()]);
 				else
-					DrawUnit(pUnitFrame, i, j, pbmpUnit);
+					DrawUnit(pUnitFrame, i, j, isLighting ? pbmpUnitLight : pbmpUnit);
 			}
 		}
 	}

@@ -27,6 +27,7 @@ public:
 	GameState GetGameState();
 	bool IsStarted();
 	bool IsStarting();
+	bool IsShapeLighting();
 
 	void OnKeyDown(WPARAM keyCode);
 	void OnKeyUp(WPARAM keyCode);
@@ -35,7 +36,7 @@ public:
 	void StepHorizontal(bool left);
 	void StepDown();
 	void Drop();
-	void EndDrop();
+	void FinishDrop();
 
 	bool Start();
 	void End();
@@ -63,6 +64,7 @@ private:
 	const UINT_PTR ST_REMOVEBLINK = 4;
 	const UINT_PTR ST_ROLL = 5;
 	const UINT_PTR ST_RESUME = 6;
+	const UINT_PTR ST_SHAPEBLINK = 7;
 
 	int removeBlinkCount;
 	int removeBlinkTimes;
@@ -86,6 +88,7 @@ private:
 	bool EndRemoveBlink();
 	static void CALLBACK RemoveBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void FinishRemoveBlink();
 
 	bool StartRoll();
 	bool EndRoll();
@@ -96,6 +99,11 @@ private:
 	bool EndResume();
 	static void CALLBACK ResumeTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 	void ResumeTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+
+	bool StartShapeBlink();
+	bool EndShapeBlink();
+	static void CALLBACK ShapeBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
+	void ShapeBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond);
 
 private:
 	Controller() {};
@@ -111,6 +119,7 @@ private:
 	Musician* pMusician;
 	bool initialized;
 	GameState gameState;
+	bool isShapeLighting;
 	bool startingDrop;
 	bool startingStepLeft;
 	bool startingStepRight;
@@ -125,6 +134,7 @@ private:
 	UINT removeBlinkTimespan;
 	UINT rollTimespan;
 	UINT resumeDelayTimespan;
+	UINT shapeBlinkTimespan;
 
 	bool soundOn;
 	bool bgmOn;

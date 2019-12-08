@@ -19,6 +19,7 @@ void Controller::Initialize(Configuration* pConfiguration)
 	removeBlinkTimes = 0;
 	this->rollTimespan = pConfiguration->rollTimespan;
 	this->resumeDelayTimespan = pConfiguration->resumeDelayTimespan;
+	this->shapeBlinkTimespan = pConfiguration->shapeBlinkTimespan;
 
 	soundOn = pConfiguration->soundOn;
 	bgmOn = pConfiguration->bgmOn;
@@ -83,11 +84,12 @@ bool Controller::IsStarted()
 
 bool Controller::IsStarting()
 {
-	return GameState::None != gameState &&
-		GameState::End != gameState &&
-		GameState::RollUp != gameState &&
-		GameState::RollDown != gameState &&
-		GameState::Pause != gameState;
+	return GameState::Start == gameState;
+}
+
+bool Controller::IsShapeLighting()
+{
+	return isShapeLighting;
 }
 
 void Controller::OnKeyDown(WPARAM keyCode)
@@ -224,7 +226,7 @@ void Controller::StepDown()
 	{
 		// dropped
 		EndStepDown();
-		EndDrop();
+		FinishDrop();
 	}
 	else
 	{
@@ -240,11 +242,13 @@ void Controller::Drop()
 		return;
 	pGameFrame->Drop();
 	EndStepDown();
-	EndDrop();
+	FinishDrop();
 }
 
-void Controller::EndDrop()
+void Controller::FinishDrop()
 {
+	if (pGameFrame->GetShape()->IsPenerable())
+		EndShapeBlink();
 	PlayMusic(MusicType::Dropped);
 	if (pGameFrame->Union() > 0)
 	{
@@ -259,6 +263,8 @@ void Controller::EndDrop()
 		return;
 	}
 	pGameFrame->RebornTetrisShape();
+	if (pGameFrame->GetShape()->IsPenerable())
+		StartShapeBlink();
 	InvalidateDraw();
 	StartStepDown(startingDrop);
 }
@@ -268,6 +274,9 @@ bool Controller::Start()
 	if (!IsResourceInitialized())
 		return false;
 	gameState = GameState::Start;
+	isShapeLighting = false;
+	if (pGameFrame->GetShape()->IsPenerable())
+		StartShapeBlink();
 	InvalidateDraw();
 	PlayMusic(MusicType::Bgm);
 	StartStepDown(false);
@@ -463,13 +472,7 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 	if (removeBlinkCount == removeBlinkTimes)
 	{
 		EndRemoveBlink();
-
-		pGameFrame->RemoveFullLines();
-		pGameFrame->RebornTetrisShape();
-		
-		InvalidateDraw();
-
-		StartStepDown(false);
+		FinishRemoveBlink();
 	}
 	else
 	{
@@ -480,6 +483,16 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 		
 		InvalidateDraw();
 	}
+}
+
+void Controller::FinishRemoveBlink()
+{
+	pGameFrame->RemoveFullLines();
+	pGameFrame->RebornTetrisShape();
+	if (pGameFrame->GetShape()->IsPenerable())
+		StartShapeBlink();
+	InvalidateDraw();
+	StartStepDown(false);
 }
 
 bool Controller::StartRoll()
@@ -552,6 +565,31 @@ void Controller::ResumeTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millise
 {
 	EndResume();
 	Resume();
+	InvalidateDraw();
+}
+
+bool Controller::StartShapeBlink()
+{
+	isShapeLighting = true;
+	InvalidateDraw();
+	return SetTimer(hWnd, ST_SHAPEBLINK, shapeBlinkTimespan * 10, ShapeBlinkTimerProcStatic);
+}
+
+bool Controller::EndShapeBlink()
+{
+	isShapeLighting = false;
+	InvalidateDraw();
+	return KillTimer(hWnd, ST_SHAPEBLINK);
+}
+
+void Controller::ShapeBlinkTimerProcStatic(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	Controller::singleton.ShapeBlinkTimerProc(hWnd, msg, id, millisecond);
+}
+
+void Controller::ShapeBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD millisecond)
+{
+	isShapeLighting = !isShapeLighting;
 	InvalidateDraw();
 }
 

@@ -14,6 +14,7 @@ class GameFrame : public UnitFrame, public ISerializable
 public:
 	static GameFrame singleton;
 
+	vector<wstring> vecShapes;
 	int startLevel;
 	int startLine;
 	float startLineBlankRate;
@@ -68,7 +69,6 @@ public:
 	bool Rotate();
 	void RebornTetrisShape();
 	bool IsFull();
-
 	bool IsLastFullLine(const MassLine* pMassLine);
 
 	Mass* GetMass();

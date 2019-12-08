@@ -164,6 +164,6 @@ void TetrisType::GetXY(int pos, int* px, int* py)
 	*py = pos / col;
 }
 
-wstring TetrisType::classic = L"classic";
+const wstring TetrisType::classic = L"classic";
 
 TetrisTypeLibrary TetrisType::tetrisTypeLibrary;

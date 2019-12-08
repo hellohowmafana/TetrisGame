@@ -36,6 +36,7 @@ public:
 	bool StepRight();
 	bool StepDown();
 	bool StepUp();
+	bool IsPenerable();
 
 	bool ValidateX(int x, bool frameCoordinate);
 	bool ValidateY(int y, bool frameCoordinate);

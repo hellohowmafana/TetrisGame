@@ -54,7 +54,7 @@ private:
 	void DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap);
 	void DrawUnits(UnitFrame* pUnitFrame, float blankRate, Brush* pBrush);
 	void DrawUnits(UnitFrame* pUnitFrame, float blankRate, Bitmap* pBitmap);
-	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape);
+	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape, bool isLighting);
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);
 	void DrawFill(UnitFrame* pUnitFrame, float blankRate);

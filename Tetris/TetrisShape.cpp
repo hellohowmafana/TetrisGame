@@ -352,6 +352,11 @@ bool TetrisShape::StepUp()
 	return true;
 }
 
+bool TetrisShape::IsPenerable()
+{
+	return GetType()->penetrable;
+}
+
 bool TetrisShape::ValidateX(int x, bool frameCoordinate)
 {
 	if (frameCoordinate)

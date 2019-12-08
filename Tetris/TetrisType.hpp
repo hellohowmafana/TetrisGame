@@ -42,7 +42,7 @@ private:
 	void GetXY(int pos, int* px, int* py);
 
 public:
-	static wstring classic;
+	static const wstring classic;
 	wstring group;
 	wstring name;
 	bool penetrable;
