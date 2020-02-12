@@ -1,138 +1,203 @@
 #include "Recorder.hpp"
+#include "BinarySerializer.h"
+#include "Controller.hpp"
 
-bool Recorder::SaveParameters(Configuration* pConfiguration, char* pData)
+ofstream& Recorder::getofstream()
 {
-	return false;
+	return *dynamic_cast<ofstream*>(pstream);
 }
 
-bool Recorder::Save(wstring file, Configuration* pConfiguration, Controller* pController)
+ifstream& Recorder::getifstream()
 {
-	ofstream ofs(file.c_str(), ios::binary | ios::trunc, ios::_Default_open_prot);
-	ofs.write(head, strlen(head));
-	ofs.write((char*)&version, sizeof(version));
-	ofs.write(tail, strlen(tail));
-	return false;
+	return *dynamic_cast<ifstream*>(pstream);
+}
+
+Recorder Recorder::singleton;
+
+bool Recorder::StartRecord(wstring file, Configuration* pConfiguration, Controller* pController)
+{
+	try
+	{
+		output = true;
+		file = pConfiguration->pathRecords + L"\\" + file;
+		pstream = new ofstream(file.c_str(), ios::binary | ios::trunc, ios::_Default_open_prot);
+		ofstream& ofs = getofstream();
+	
+		ofs.write(head, strlen(head));
+		ofs.write((char*)&version, sizeof(version));
+
+		IBinarySerializable* binarySerializables[] =
+		{
+			pConfiguration,
+			pController->GetGameFrame(),
+		};
+
+		for (size_t i = 0; i < 2; i++)
+		{
+			IBinarySerializable* pBinarySerialiable = binarySerializables[i];
+
+			unsigned int size = 0;
+			pBinarySerialiable->Save(0, size);
+			ofs.write((char*)&size, sizeof(size));
+
+			char* pData = new char[size];
+			size = 0;
+			pBinarySerialiable->Save(pData, size);
+			ofs.write((char*)pData, size);
+			delete[] pData;
+		}
+
+		posTrackSize = ofs.tellp();
+		unsigned int trackSize = 0;
+		ofs.write((char*)&trackSize, sizeof(unsigned int));
+
+		times = 1;
+		lastTrackedState = TrackState::End;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool Recorder::EndRecord()
+{
+	if (!output)
+		return false;
+	try
+	{
+		ofstream& ofs = getofstream();
+		ofs.write(tail, strlen(tail));
+		ofs.close();
+		
+		delete pstream;
+		pstream = nullptr;
+
+		return true;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
 }
 
 bool Recorder::Load(wstring file, Configuration* pConfiguration, Controller* pController)
 {
-	return false;
-}
+	try
+	{
+		bool output = false;
+		pstream = new ifstream(file.c_str(), ios::binary, ios::_Default_open_prot);
+		ifstream& ifs = getifstream();
 
-bool RecordParameters::Save(char* pData, size_t& size)
-{
-	if (!pConfiguration)
+		char* data;
+		
+		// head
+		data = new char[strlen(head)];
+		ifs.read(data, strlen(head));
+		if (strncmp(head, data, strlen(head)) != 0)
+			return false;
+		delete[] data;
+
+		// version
+		unsigned short version;
+		ifs.read((char*)&version, sizeof(unsigned short));
+
+		IBinarySerializable* binarySerializables[] =
+		{
+			pConfiguration,
+			pController->GetGameFrame(),
+		};
+
+		for (size_t i = 0; i < 2; i++)
+		{
+			IBinarySerializable* pBinarySerialiable = binarySerializables[i];
+
+			unsigned int size;
+			ifs.read((char*)&size, sizeof(size));
+			
+			char* pData = new char[size];
+			ifs.read(pData, size);
+			pBinarySerialiable->Load(pData);
+			delete[] pData;
+		}
+	}
+	catch (const std::exception&)
+	{
 		return false;
-
-	// just get size while pData is 0
-	size = 0;
-
-	// window
-	PutUshort(pData, pConfiguration->windowWidth, size);
-	PutUshort(pData, pConfiguration->windowHeight, size);
-	PutUshort(pData, pConfiguration->windowLeft, size);
-	PutUshort(pData, pConfiguration->windowTop, size);
-	PutBool(pData, pConfiguration->windowCenter, size);
-
-	// display
-	PutUshort(pData, pConfiguration->frameLeft, size);
-	PutUshort(pData, pConfiguration->frameTop, size);
-	PutUchar(pData, pConfiguration->frameSizeX, size);
-	PutUchar(pData, pConfiguration->frameSizeY, size);
-	PutUshort(pData, pConfiguration->promptFrameLeft, size);
-	PutUshort(pData, pConfiguration->promptFrameTop, size);
-	PutUchar(pData, pConfiguration->promptFrameSizeX, size);
-	PutUchar(pData, pConfiguration->promptFrameSizeY, size);
-	PutUshort(pData, pConfiguration->infoFrameLeft, size);
-	PutUshort(pData, pConfiguration->infoFrameTop, size);
-	PutUshort(pData, pConfiguration->infoFrameSizeX, size);
-	PutUshort(pData, pConfiguration->infoFrameSizeY, size);
-	PutUchar(pData, pConfiguration->borderThickness, size);
-	PutUchar(pData, pConfiguration->separatorThickness, size);
-	PutUshort(pData, pConfiguration->unitWidth, size);
-	PutWstring(pData, pConfiguration->infoFontFace, size);
-	PutUshort(pData, pConfiguration->infoFontHeight, size);
-	PutUshort(pData, pConfiguration->infoFontWidth, size);
-	PutUshort(pData, pConfiguration->infoFontWeight, size);
-	PutFloat(pData, pConfiguration->iconScaleRatio, size);
-	PutFloat(pData, pConfiguration->maskTransparency, size);
-
-	// game
-	PutUshort(pData, pConfiguration->startLevel, size);
-	PutUshort(pData, pConfiguration->startLine, size);
-	PutFloat(pData, pConfiguration->startLineBlankRate, size);
-	PutUshortArray(pData, pConfiguration->vecRemoveScores, size);
-	PutUshort(pData, pConfiguration->droppedScore, size);
-	PutUchar(pData, pConfiguration->maxLevel, size);
-	PutFloatArray(pData, pConfiguration->vecScoreGainRate, size);
-	PutUshortArray(pData, pConfiguration->vecLevelScore, size);
-	PutUshortArray(pData, pConfiguration->vecStepDownTimespan, size);
-	PutUshort(pData, pConfiguration->dropTimespan, size);
-	PutBool(pData, pConfiguration->dropImmediate, size);
-	PutUshort(pData, pConfiguration->removeBlinkTimespan, size);
-	PutUchar(pData, pConfiguration->removeBlinkCount, size);
-	PutUshort(pData, pConfiguration->rollTimespan, size);
-	PutUshort(pData, pConfiguration->resumeDelayTimespan, size);
-
+	}
 	return true;
 }
 
-bool RecordParameters::Load(char* pData)
+bool Recorder::Unload()
 {
-	if (!pConfiguration)
+	if (output)
 		return false;
+	try
+	{
+		ifstream& ifs = getifstream();
+		ifs.close();
 
-	// window
-	TakeUshort(pData, pConfiguration->windowWidth);
-	TakeUshort(pData, pConfiguration->windowHeight);
-	TakeUshort(pData, pConfiguration->windowLeft);
-	TakeUshort(pData, pConfiguration->windowTop);
-	TakeBool(pData, pConfiguration->windowCenter);
+		delete pstream;
+		pstream = nullptr;
 
-	// display
-	TakeUshort(pData, pConfiguration->frameLeft);
-	TakeUshort(pData, pConfiguration->frameTop);
-	TakeUchar(pData, pConfiguration->frameSizeX);
-	TakeUchar(pData, pConfiguration->frameSizeY);
-	TakeUshort(pData, pConfiguration->promptFrameLeft);
-	TakeUshort(pData, pConfiguration->promptFrameTop);
-	TakeUchar(pData, pConfiguration->promptFrameSizeX);
-	TakeUchar(pData, pConfiguration->promptFrameSizeY);
-	TakeUshort(pData, pConfiguration->infoFrameLeft);
-	TakeUshort(pData, pConfiguration->infoFrameTop);
-	TakeUshort(pData, pConfiguration->infoFrameSizeX);
-	TakeUshort(pData, pConfiguration->infoFrameSizeY);
-	TakeUchar(pData, pConfiguration->borderThickness);
-	TakeUchar(pData, pConfiguration->separatorThickness);
-	TakeUshort(pData, pConfiguration->unitWidth);
-	TakeWstring(pData, pConfiguration->infoFontFace);
-	TakeUshort(pData, pConfiguration->infoFontHeight);
-	TakeUshort(pData, pConfiguration->infoFontWidth);
-	TakeUshort(pData, pConfiguration->infoFontWeight);
-	TakeFloat(pData, pConfiguration->iconScaleRatio);
-	TakeFloat(pData, pConfiguration->maskTransparency);
+		return true;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
+}
 
-	// game
-	TakeUshort(pData, pConfiguration->startLevel);
-	TakeUshort(pData, pConfiguration->startLine);
-	TakeFloat(pData, pConfiguration->startLineBlankRate);
-	TakeUshortArray(pData, pConfiguration->vecRemoveScores);
-	TakeUshort(pData, pConfiguration->droppedScore);
-	TakeUchar(pData, pConfiguration->maxLevel);
-	TakeFloatArray(pData, pConfiguration->vecScoreGainRate);
-	TakeUshortArray(pData, pConfiguration->vecLevelScore);
-	TakeUshortArray(pData, pConfiguration->vecStepDownTimespan);
-	TakeUshort(pData, pConfiguration->dropTimespan);
-	TakeBool(pData, pConfiguration->dropImmediate);
-	TakeUshort(pData, pConfiguration->removeBlinkTimespan);
-	TakeUchar(pData, pConfiguration->removeBlinkCount);
-	TakeUshort(pData, pConfiguration->rollTimespan);
-	TakeUshort(pData, pConfiguration->resumeDelayTimespan);
+bool Recorder::Track(TrackState state)
+{
+	bool record = false;
+	if (state == lastTrackedState)
+	{
+		if (times == 0xFF)
+			record = true;
+		else
+			times++;
+	}
+	else
+	{
+		record = true;
+	}
 
+	if (record)
+	{
+		try
+		{
+			//ofstream& ofs = getofstream();
+			//if (times == 1)
+			//	ofs.write((char*)state, sizeof(state));
+			//else
+			//	ofs.write((char*))
+		}
+		catch (const std::exception&)
+		{
+			return false;
+		}
+	}
+
+	lastTrackedState = state;
 	return true;
 }
 
-void RecordParameters::Set(Configuration* pConfiguration)
+bool Recorder::EndTrack()
 {
-	this->pConfiguration = pConfiguration;
+	try
+	{
+		ofstream& ofs = getofstream();
+		size_t size = ofs.tellp() - posTrackSize - sizeof(size_t);
+		ofs.seekp(posTrackSize);
+		ofs.write((char*)size, sizeof(size_t));
+		return true;
+	}
+	catch (const std::exception&)
+	{
+		return false;
+	}
 }
+

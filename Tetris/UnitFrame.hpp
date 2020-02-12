@@ -16,9 +16,9 @@ public:
 	Color separatorColor;
 
 public:
-	bool ValidateX(int x);
-	bool ValidateY(int y);
-	bool ValidateXY(int x, int y);
+	bool TestX(int x);
+	bool TestY(int y);
+	bool TestXY(int x, int y);
 
 	virtual int GetWidth();
 	virtual int GetHeight();

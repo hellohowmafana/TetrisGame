@@ -43,9 +43,9 @@ public:
 	bool IsFull();
 	vector<MassLine*>* GetFullLines(vector<MassLine*>* pvecLines, int from, int to);
 
-	bool ValidateX(int x);
-	bool ValidateY(int y);
-	bool ValidateXY(int x, int y);
+	bool TestX(int x);
+	bool TestY(int y);
+	bool TestXY(int x, int y);
 	int GetTop();
 	int GetBottom();
 	int GetRight();
@@ -79,6 +79,6 @@ public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
 
-	virtual bool Save(char* pData, size_t& size);
+	virtual bool Save(char* pData, unsigned int& size, char argument);
 	virtual bool Load(char* pData);
 };

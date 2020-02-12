@@ -544,7 +544,7 @@ void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, Brush* pBrush)
 {
 	if (!IsValid()) return;
 
-	if (!pUnitFrame->ValidateXY(x, y)) return;
+	if (!pUnitFrame->TestXY(x, y)) return;
 
 	Rect rect;
 	GetUnitRectangle(pUnitFrame, x, y, &rect);
@@ -555,7 +555,7 @@ void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap)
 {
 	if (!IsValid()) return;
 
-	if (!pUnitFrame->ValidateXY(x, y)) return;
+	if (!pUnitFrame->TestXY(x, y)) return;
 
 	Rect rect;
 	GetUnitRectangle(pUnitFrame, x, y, &rect);
@@ -566,7 +566,7 @@ void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush)
 {
 	if (!IsValid()) return;
 
-	if (!pUnitFrame->ValidateY(y)) return;
+	if (!pUnitFrame->TestY(y)) return;
 
 	for (int i = 0; i < pUnitFrame->sizeX; i++)
 	{
@@ -578,7 +578,7 @@ void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap)
 {
 	if (!IsValid()) return;
 
-	if (!pUnitFrame->ValidateY(y)) return;
+	if (!pUnitFrame->TestY(y)) return;
 
 	for (int i = 0; i < pUnitFrame->sizeX; i++)
 	{

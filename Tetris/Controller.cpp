@@ -4,11 +4,14 @@
 #include "Archive.hpp"
 #include "Drawer.hpp"
 #include "Musician.hpp"
+#include "Recorder.hpp"
 
 Controller Controller::singleton;
 
 void Controller::Initialize(Configuration* pConfiguration)
 {
+	this->pConfiguration = pConfiguration;
+
 	this->dropImmediate = pConfiguration->dropImmediate;
 	this->stepDownTimespan = Level::GetLevel(pConfiguration->startLevel)->stepDownTimeSpan;
 	this->dropTimespan = pConfiguration->dropTimespan;
@@ -21,8 +24,9 @@ void Controller::Initialize(Configuration* pConfiguration)
 	this->resumeDelayTimespan = pConfiguration->resumeDelayTimespan;
 	this->shapeBlinkTimespan = pConfiguration->shapeBlinkTimespan;
 
-	soundOn = pConfiguration->soundOn;
-	bgmOn = pConfiguration->bgmOn;
+	this->soundOn = pConfiguration->soundOn;
+	this->bgmOn = pConfiguration->bgmOn;
+	this->record = pConfiguration->record;	
 
 	initialized = true;
 	gameState = GameState::None;
@@ -57,6 +61,11 @@ void Controller::SetMusician(Musician* pMusician)
 Musician* Controller::GetMusician()
 {
 	return pMusician;
+}
+
+void Controller::SetRecorder(Recorder* pRecorder)
+{
+	this->pRecorder = pRecorder;
 }
 
 bool Controller::IsInitialized()
@@ -270,9 +279,13 @@ void Controller::FinishDrop()
 }
 
 bool Controller::Start()
-{
+{		
 	if (!IsResourceInitialized())
 		return false;
+
+	if (record)
+		StartRecord();
+
 	gameState = GameState::Start;
 	isShapeLighting = false;
 	if (pGameFrame->GetShape()->IsPenerable())
@@ -285,6 +298,9 @@ bool Controller::Start()
 
 void Controller::End()
 {
+	if (record)
+		EndRecord();
+
 	gameState = GameState::End;
 	EndStepDown();
 	EndRemoveBlink();
@@ -338,6 +354,32 @@ bool Controller::LoadGame(wstring archive)
 	Archive::Load(archive, this);
 	Start();
 	return true;
+}
+
+bool Controller::StartRecord()
+{
+	wchar_t file[27];
+	SYSTEMTIME systemtime;
+	GetLocalTime(&systemtime);
+	wsprintf(file, L"record %04d-%02d-%02d %02d-%02d-%02d",
+		systemtime.wYear,
+		systemtime.wMonth,
+		systemtime.wDay,
+		systemtime.wHour,
+		systemtime.wMinute,
+		systemtime.wSecond
+	);
+	return pRecorder->StartRecord(file, pConfiguration, this);
+}
+
+bool Controller::EndRecord()
+{
+	return pRecorder->EndRecord();
+}
+
+bool Controller::PlayRecord(wstring record)
+{
+	return pRecorder->Load(record, pConfiguration, this);
 }
 
 GameFrame* Controller::GetGameFrame()

@@ -4,12 +4,13 @@
 #include <vector>
 #include <gdiplus.h>
 #include "RenderMode.hpp"
+#include "IBinarySerializable.hpp"
 using namespace std;
 using Color = Gdiplus::Color;
 
 class Background;
 
-class Configuration
+class Configuration : public IBinarySerializable
 {
 private:
 	// path
@@ -20,6 +21,7 @@ private:
 	const wstring SOUND_PATH = INIS_PATH + L"\\sound";
 	const wstring BGM_PATH = INIS_PATH + L"\\bgm";
 	const wstring ARCHIVES_PATH = L"archives";
+	const wstring RECORDS_PATH = L"records";
 
 	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
 
@@ -54,6 +56,7 @@ public:
 	wstring pathSound;
 	wstring pathBgm;
 	wstring pathArchives;
+	wstring pathRecords;
 
 	wstring pathConfiguration;
 	wstring pathUnitBitmapFile;
@@ -123,6 +126,9 @@ private:
 	const wstring keyResumeDelayTimespan = L"ResumeDelayTimespan";
 	const wstring keyShapeBlinkTimespan = L"ShapeBlinkTimespan";
 
+	const wstring keyOther = L"Other";
+	const wstring keyRecord = L"Record";
+
 	const wstring keyMusic = L"Music";
 	const wstring keySoundOn = L"SoundOn";
 	const wstring keyBgmOn = L"BgmOn";
@@ -179,6 +185,9 @@ public:
 	int resumeDelayTimespan;
 	int shapeBlinkTimespan;
 
+	//other
+	bool record;
+
 	// music
 	bool soundOn;
 	bool bgmOn;
@@ -220,6 +229,7 @@ private:
 	bool GetColorsFromFile(wstring file, vector<Color>& vecColors);
 	wstring& FindFile(wstring& path);
 	void FindFiles(wstring path, vector<wstring>* pvecFiles);
+	bool CreateDirectoryAbsent(wstring path);
 
 	bool SaveWindowPostion(int w, int h, int l, int t, bool c);
 
@@ -243,5 +253,9 @@ private:
 	bool SplitStringToStrings(wstring str, wchar_t ch, vector<wstring>& vecStrings);
 	bool ParseTetrisTypeDeclaration(wstring str, wstring& name,
 		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
+
+public:
+	virtual bool Save(char* pData, unsigned int& size, char argument);
+	virtual bool Load(char* pData);
 };
 

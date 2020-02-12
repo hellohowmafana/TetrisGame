@@ -1,18 +1,18 @@
 #include "UnitFrame.hpp"
 
-bool UnitFrame::ValidateX(int x)
+bool UnitFrame::TestX(int x)
 {
 	return x >= 0 && x < sizeX;
 }
 
-bool UnitFrame::ValidateY(int y)
+bool UnitFrame::TestY(int y)
 {
 	return y >= 0 && y < sizeY;
 }
 
-bool UnitFrame::ValidateXY(int x, int y)
+bool UnitFrame::TestXY(int x, int y)
 {
-	return ValidateX(x) && ValidateY(y);
+	return TestX(x) && TestY(y);
 }
 
 int UnitFrame::GetWidth()

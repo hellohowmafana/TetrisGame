@@ -17,7 +17,7 @@ INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		if (LOWORD(wParam) == IDOK)
 		{
 			HWND hlbArchive = GetDlgItem(hDlg, IDC_ARCHIVELIST);
-			DlgDirSelectEx(hDlg, singleton.szArchive, MAX_ARCHIVE_NAME, IDC_ARCHIVELIST);
+			DlgDirSelectEx(hDlg, singleton.szRecord, MAX_ARCHIVE_NAME, IDC_ARCHIVELIST);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
@@ -33,7 +33,7 @@ INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARA
 
 wchar_t* LoadDialog::GetSelectedArchive()
 {
-	return szArchive;
+	return szRecord;
 }
 
 LoadDialog LoadDialog::singleton;

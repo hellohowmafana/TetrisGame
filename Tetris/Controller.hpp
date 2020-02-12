@@ -1,12 +1,17 @@
 #pragma once
 #include "GameFrame.hpp"
 #include "Musician.hpp"
-
 class Drawer;
+class Recorder;
 
 enum class GameState
 {
 	None, Start, Pause, End, ResumeDelay, BlinkLight, BlinkNormal, RollUp, RollDown
+};
+
+enum class Mode
+{
+	None, Record, Replay
 };
 
 class Controller
@@ -21,6 +26,7 @@ public:
 	Drawer* GetDrawer();
 	void SetMusician(Musician* pMusician);
 	Musician* GetMusician();
+	void SetRecorder(Recorder* pRecorder);
 
 	bool IsInitialized();
 	bool IsResourceInitialized();
@@ -46,6 +52,10 @@ public:
 
 	bool SaveGame(wstring archive);
 	bool LoadGame(wstring archive);
+
+	bool StartRecord();
+	bool EndRecord();
+	bool PlayRecord(wstring record);
 
 public:
 	GameFrame* GetGameFrame();
@@ -117,6 +127,8 @@ private:
 	GameFrame* pGameFrame;
 	Drawer* pDrawer;
 	Musician* pMusician;
+	Recorder* pRecorder;
+	Configuration* pConfiguration;
 	bool initialized;
 	GameState gameState;
 	bool isShapeLighting;
@@ -138,5 +150,6 @@ private:
 
 	bool soundOn;
 	bool bgmOn;
+	bool record;
 };
 

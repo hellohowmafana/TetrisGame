@@ -15,6 +15,8 @@
 #include "LoadDialog.hpp"
 #include "Utility.hpp"
 #include "Musician.hpp"
+#include "Recorder.hpp"
+#include "PlayDialog.hpp"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
 
@@ -180,6 +182,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pController->SetGameFrame(pGameFrame);
    pController->SetDrawer(pDrawer);
    pController->SetMusician(pMusician);
+   pController->SetRecorder(&Recorder::singleton);
 
    HMENU hMenu = GetMenu(hWnd);
    CheckMenuItem(hMenu, ID_MUSIC_BGM, pController->GetBgmOn() ? MF_CHECKED : MF_UNCHECKED);
@@ -227,6 +230,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					InvalidateRect(hWnd, NULL, FALSE);
 				}
 				break;
+            case ID_RECORD_PLAY:
+                if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_PLAY), hWnd, ReplayDialog::ReplayDialogProc))
+                {
+                    Controller::singleton.PlayRecord(ReplayDialog::singleton.GetSelectedRecord());
+                    InvalidateRect(hWnd, NULL, FALSE);
+                }
+                break;
             case IDM_ABOUT:
                 DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
                 break;

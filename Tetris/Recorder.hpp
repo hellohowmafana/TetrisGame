@@ -2,40 +2,61 @@
 
 #include <string>
 #include "Configuration.hpp"
-#include "Controller.hpp"
 using namespace std;
 
-class RecordParameters : public IBinarySerializable
+class Controller;
+
+enum class TrackState : unsigned char
 {
-	Configuration* pConfiguration;
+	// status
+	Start = 1,
+	Halfway = 2,
+	Remove = 3,
+	End = 4,
 
-	virtual bool Save(char* pData, size_t& size);
-	virtual bool Load(char* pData);
-
-	void Set(Configuration* pConfiguration);
-};
-
-enum class RecordState : unsigned char
-{
-	Start = 1, Halfway = 2, Remove = 3, End = 4
-};
-
-enum class RecordAction : unsigned char
-{
-	StepDown = 16, StepLeft = 17, StepRight = 18, Rotate = 19, Drop = 20
+	// action
+	StepDown = 16,
+	StepDownSequence = 17,
+	
+	StepLeft = 18,
+	StepLeftSequence = 19,
+	
+	StepRight = 20,
+	StepRightSequence = 21,
+	
+	Rotate = 22,
+	RotateSequence = 23,
+	
+	Drop = 24
 };
 
 class Recorder
 {
 private:
+	ios* pstream;
+	bool output;
+
 	unsigned short version;
 	char head[7] = "tetris";
 	char tail[2] = "\\";
 
-	bool SaveParameters(Configuration* pConfiguration, char* pData);
+	streampos posTrackSize;
+	TrackState lastTrackedState;
+	int times;
+
+	ofstream& getofstream();
+	ifstream& getifstream();
 
 public:
-	bool Save(wstring file, Configuration* pConfiguration, Controller* pController);
+	static Recorder singleton;
+
+	bool StartRecord(wstring file, Configuration* pConfiguration, Controller* pController);
+	bool EndRecord();
+
 	bool Load(wstring file, Configuration* pConfiguration, Controller* pController);
+	bool Unload();
+
+	bool Track(TrackState state);
+	bool EndTrack();
 };
 

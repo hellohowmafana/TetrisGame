@@ -14,6 +14,6 @@ public:
 private:
 	LoadDialog() {};
 
-	wchar_t szArchive[MAX_ARCHIVE_NAME];
+	wchar_t szRecord[MAX_ARCHIVE_NAME];
 };
 

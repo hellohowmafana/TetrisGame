@@ -291,3 +291,26 @@ bool GameFrame::Load(const wstring label, wstring value)
 	}
 	return true;
 }
+
+bool GameFrame::Save(char* pData, unsigned int& size, char argument)
+{
+	if (!nextTetrisShape.Save(pData, size, 1))
+		return false;
+	
+	if (!tetrisShape.Save(pData, size, 0))
+		return false;
+		
+	if(!mass.Save(pData, size, 0))
+		return false;
+
+	return true;
+}
+
+bool GameFrame::Load(char* pData)
+{
+	if (nextTetrisShape.Load(pData) &&
+		tetrisShape.Load(pData) &&
+		mass.Load(pData))
+		return true;
+	return false;
+}

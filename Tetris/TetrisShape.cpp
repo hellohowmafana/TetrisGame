@@ -2,6 +2,7 @@
 #include "PromptFrame.hpp"
 #include "GameFrame.hpp"
 #include "Utility.hpp"
+#include "BinarySerializer.h"
 
 TetrisShape::TetrisShape() :
 	posX(0),
@@ -122,7 +123,7 @@ bool TetrisShape::SetPostion(int x, int y)
 	int oldPosY = posY;
 	posX = x;
 	posY = y;
-	if (!ValidateShape(posX, posY, true))
+	if (!TestShape(posX, posY, true))
 	{
 		posX = oldPosX;
 		posY = oldPosY;
@@ -137,7 +138,7 @@ bool TetrisShape::Move(int offsetX, int offsetY)
 	int oldPosY = posY;
 	posX = posX + offsetX;
 	posY = posY + offsetY;
-	if (!ValidateShape(posX, posY, true))
+	if (!TestShape(posX, posY, true))
 	{
 		posX = oldPosX;
 		posY = oldPosY;
@@ -152,7 +153,7 @@ bool TetrisShape::MoveTo(int x, int y)
 	int oldPosY = posY;
 	posX = x;
 	posY = y;
-	if (!ValidateShape(posX, posY, true))
+	if (!TestShape(posX, posY, true))
 	{
 		posX = oldPosX;
 		posY = oldPosY;
@@ -261,7 +262,7 @@ bool TetrisShape::Rotate()
 	}
 	CalculateRotationPosition(rotation, oldRotation, &posX, &posY);
 
-	if (!ValidateShape(posX, posY, true))
+	if (!TestShape(posX, posY, true))
 	{
 		rotation = oldRotation;
 		posX = oldPosX;
@@ -297,7 +298,7 @@ bool TetrisShape::RotateBack()
 	}
 	CalculateRotationPosition(rotation, oldRotation, &posX, &posY);
 
-	if (!ValidateShape(posX, posY, true))
+	if (!TestShape(posX, posY, true))
 	{
 		rotation = oldRotation;
 		posX = oldPosX;
@@ -311,7 +312,7 @@ bool TetrisShape::RotateBack()
 bool TetrisShape::StepLeft()
 {
 	posX--;
-	if (!ValidateX(posX, true))
+	if (!TestX(posX, true))
 	{
 		posX++;
 		return false;
@@ -322,7 +323,7 @@ bool TetrisShape::StepLeft()
 bool TetrisShape::StepRight()
 {
 	posX++;
-	if (!ValidateX(posX + GetWidth() - 1, true))
+	if (!TestX(posX + GetWidth() - 1, true))
 	{
 		posX--;
 		return false;
@@ -333,7 +334,7 @@ bool TetrisShape::StepRight()
 bool TetrisShape::StepDown()
 {
 	posY++;
-	if (!ValidateY(posY + GetHeight() - 1, true))
+	if (!TestY(posY + GetHeight() - 1, true))
 	{
 		posY--;
 		return false;
@@ -344,7 +345,7 @@ bool TetrisShape::StepDown()
 bool TetrisShape::StepUp()
 {
 	posY--;
-	if (!ValidateY(posY, true))
+	if (!TestY(posY, true))
 	{
 		posY++;
 		return false;
@@ -357,42 +358,42 @@ bool TetrisShape::IsPenerable()
 	return GetType()->penetrable;
 }
 
-bool TetrisShape::ValidateX(int x, bool frameCoordinate)
+bool TetrisShape::TestX(int x, bool frameCoordinate)
 {
 	if (frameCoordinate)
 	{
-		if (!pUnitFrame->ValidateX(x))
+		if (!pUnitFrame->TestX(x))
 			return false;
 		x = x - posX;
 	}
 	return x >= 0 && x <= GetWidth() - 1;
 }
 
-bool TetrisShape::ValidateY(int y, bool frameCoordinate)
+bool TetrisShape::TestY(int y, bool frameCoordinate)
 {
 	if (frameCoordinate)
 	{
-		if (!pUnitFrame->ValidateY(y))
+		if (!pUnitFrame->TestY(y))
 			return false;
 		y = y - posY;
 	}
 	return y >= 0 && y <= GetHeight() - 1;
 }
 
-bool TetrisShape::ValidateXY(int x, int y, bool frameCoordinate)
+bool TetrisShape::TestXY(int x, int y, bool frameCoordinate)
 {
-	return ValidateX(x, frameCoordinate) && ValidateY(y, frameCoordinate);
+	return TestX(x, frameCoordinate) && TestY(y, frameCoordinate);
 }
 
-bool TetrisShape::ValidateShape(int posX, int posY, bool frameCoordinate)
+bool TetrisShape::TestShape(int posX, int posY, bool frameCoordinate)
 {
-	return ValidateXY(posX, posY, true) &&
-		ValidateXY(posX + GetWidth() - 1, posY + GetHeight() - 1, true);
+	return TestXY(posX, posY, true) &&
+		TestXY(posX + GetWidth() - 1, posY + GetHeight() - 1, true);
 }
 
 char TetrisShape::GetData(int x, int y, bool frameCoordinate)
 {
-	if (!ValidateXY(x, y, frameCoordinate))
+	if (!TestXY(x, y, frameCoordinate))
 		return '0';
 
 	if (frameCoordinate)
@@ -428,7 +429,7 @@ char TetrisShape::GetData(int x, int y, bool frameCoordinate)
 
 bool TetrisShape::IsSolid(int x, int y, bool frameCoordinate)
 {
-	if (!ValidateXY(x, y, frameCoordinate)) return false;
+	if (!TestXY(x, y, frameCoordinate)) return false;
 
 	return GetData(x, y, frameCoordinate) != '0';
 }
@@ -491,7 +492,7 @@ bool TetrisShape::IsOnBottom()
 
 int TetrisShape::GetBottommostSolidY(int x, bool frameCoordinate)
 {
-	if (!ValidateX(x, frameCoordinate)) return -1;
+	if (!TestX(x, frameCoordinate)) return -1;
 
 	int begin = frameCoordinate ? GetBottom() : GetHeight() - 1;
 	int end = frameCoordinate ? GetTop() : 0;
@@ -571,47 +572,49 @@ bool TetrisShape::Load(const wstring label, wstring value)
 	return true;
 }
 
-bool TetrisShape::Save(char* pData, size_t& size)
+bool TetrisShape::Save(char* pData, unsigned int& size, char argument)
 {
-	bool current = pData[0] == 0;
+	BinarySerializer serializer;
+	bool current = argument == 0;
 	if (current)
 	{
 		size = 0;
-		PutWstring(pData, pTetrisType->group, size);
-		PutWstring(pData, pTetrisType->name, size);
-		PutUchar(pData, TetrisRotationToInt(rotation), size);
-		PutUchar(pData, posX, size);
-		PutUchar(pData, posY, size);
+		serializer.PutWstring(pData, pTetrisType->group, size);
+		serializer.PutWstring(pData, pTetrisType->name, size);
+		serializer.PutUchar(pData, TetrisRotationToInt(rotation), size);
+		serializer.PutUchar(pData, posX, size);
+		serializer.PutUchar(pData, posY, size);
 	}
 	else
 	{
 		size = 0;
-		PutWstring(pData, pTetrisType->group, size);
-		PutWstring(pData, pTetrisType->name, size);
-		PutUchar(pData, TetrisRotationToInt(rotation), size);
+		serializer.PutWstring(pData, pTetrisType->group, size);
+		serializer.PutWstring(pData, pTetrisType->name, size);
+		serializer.PutUchar(pData, TetrisRotationToInt(rotation), size);
 	}
 	return true;
 }
 
 bool TetrisShape::Load(char* pData)
 {
+	BinarySerializer serializer;
 	bool current = pData[0] == 0;
 	if (current)
 	{
-		TakeWstring(pData, pTetrisType->group);
-		TakeWstring(pData, pTetrisType->name);
+		serializer.TakeWstring(pData, pTetrisType->group);
+		serializer.TakeWstring(pData, pTetrisType->name);
 		int iRotation;
-		TakeUchar(pData, iRotation);
+		serializer.TakeUchar(pData, iRotation);
 		rotation = IntToTetrisRotation(iRotation);
-		TakeUchar(pData, posX);
-		TakeUchar(pData, posY);
+		serializer.TakeUchar(pData, posX);
+		serializer.TakeUchar(pData, posY);
 	}
 	else
 	{
-		TakeWstring(pData, pTetrisType->group);
-		TakeWstring(pData, pTetrisType->name);
+		serializer.TakeWstring(pData, pTetrisType->group);
+		serializer.TakeWstring(pData, pTetrisType->name);
 		int iRotation;
-		TakeUchar(pData, iRotation);
+		serializer.TakeUchar(pData, iRotation);
 		rotation = IntToTetrisRotation(iRotation);
 	}
 	return true;

@@ -5,6 +5,7 @@
 #include <gdiplus.h>
 #include "Background.hpp"
 #include "Musician.hpp"
+#include "BinarySerializer.h"
 using namespace Gdiplus;
 
 Configuration Configuration::singleton;
@@ -44,6 +45,11 @@ bool Configuration::InitializeIniPaths()
 	pathSound = path + SOUND_PATH;
 	pathBgm = path + BGM_PATH;
 	pathArchives = path + ARCHIVES_PATH;
+	if(!CreateDirectoryAbsent(pathArchives))
+		return false;
+	pathRecords = path + RECORDS_PATH;
+	if (!CreateDirectoryAbsent(pathRecords))
+		return false;
 
 	pathConfiguration = path + CONFIGURATION_PATH;
 	pathUnitBitmapFile = path + UNIT_BITMAP_FILE_PATH;
@@ -123,6 +129,9 @@ bool Configuration::LoadParameters()
 	rollTimespan = GetConfigurationInt(keyGame, keyRollTimespan);
 	resumeDelayTimespan = GetConfigurationInt(keyGame, keyResumeDelayTimespan);
 	shapeBlinkTimespan = GetConfigurationInt(keyGame, keyShapeBlinkTimespan);
+
+	//other
+	record = GetConfigurationBool(keyOther, keyRecord);
 
 	// music
 	soundOn = GetConfigurationBool(keyMusic, keySoundOn);
@@ -343,6 +352,27 @@ void Configuration::FindFiles(wstring path, vector<wstring>* pvecFiles)
 	}
 }
 
+bool Configuration::CreateDirectoryAbsent(wstring path)
+{
+	DWORD attr = GetFileAttributes(path.c_str());
+
+	if (INVALID_FILE_ATTRIBUTES == attr)
+	{
+		// not exist
+		if(ERROR_FILE_NOT_FOUND == GetLastError())
+			return CreateDirectory(path.c_str(), NULL);
+		else
+			return false;
+	}
+
+	// not directory
+	if(!(FILE_ATTRIBUTE_DIRECTORY & attr))
+		return CreateDirectory(path.c_str(), NULL);
+	else
+		// directory exist
+		return true;
+}
+
 bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)
 {
 	return false;
@@ -503,3 +533,112 @@ bool Configuration::ParseTetrisTypeDeclaration(wstring str, wstring& name, bool&
 		return false;
 	}
 }
+
+bool Configuration::Save(char* pData, unsigned int& size, char argument)
+{
+	BinarySerializer serializer;
+
+	// window
+	serializer.PutUshort(pData, windowWidth, size);
+	serializer.PutUshort(pData, windowHeight, size);
+	serializer.PutUshort(pData, windowLeft, size);
+	serializer.PutUshort(pData, windowTop, size);
+	serializer.PutBool(pData, windowCenter, size);
+
+	// display
+	serializer.PutUshort(pData, frameLeft, size);
+	serializer.PutUshort(pData, frameTop, size);
+	serializer.PutUchar(pData, frameSizeX, size);
+	serializer.PutUchar(pData, frameSizeY, size);
+	serializer.PutUshort(pData, promptFrameLeft, size);
+	serializer.PutUshort(pData, promptFrameTop, size);
+	serializer.PutUchar(pData, promptFrameSizeX, size);
+	serializer.PutUchar(pData, promptFrameSizeY, size);
+	serializer.PutUshort(pData, infoFrameLeft, size);
+	serializer.PutUshort(pData, infoFrameTop, size);
+	serializer.PutUshort(pData, infoFrameSizeX, size);
+	serializer.PutUshort(pData, infoFrameSizeY, size);
+	serializer.PutUchar(pData, borderThickness, size);
+	serializer.PutUchar(pData, separatorThickness, size);
+	serializer.PutUshort(pData, unitWidth, size);
+	serializer.PutWstring(pData, infoFontFace, size);
+	serializer.PutUshort(pData, infoFontHeight, size);
+	serializer.PutUshort(pData, infoFontWidth, size);
+	serializer.PutUshort(pData, infoFontWeight, size);
+	serializer.PutFloat(pData, iconScaleRatio, size);
+	serializer.PutFloat(pData, maskTransparency, size);
+
+	// game
+	serializer.PutUshort(pData, startLevel, size);
+	serializer.PutUshort(pData, startLine, size);
+	serializer.PutFloat(pData, startLineBlankRate, size);
+	serializer.PutUshortArray(pData, vecRemoveScores, size);
+	serializer.PutUshort(pData, droppedScore, size);
+	serializer.PutUchar(pData, maxLevel, size);
+	serializer.PutFloatArray(pData, vecScoreGainRate, size);
+	serializer.PutUshortArray(pData, vecLevelScore, size);
+	serializer.PutUshortArray(pData, vecStepDownTimespan, size);
+	serializer.PutUshort(pData, dropTimespan, size);
+	serializer.PutBool(pData, dropImmediate, size);
+	serializer.PutUshort(pData, removeBlinkTimespan, size);
+	serializer.PutUchar(pData, removeBlinkCount, size);
+	serializer.PutUshort(pData, rollTimespan, size);
+	serializer.PutUshort(pData, resumeDelayTimespan, size);
+
+	return true;
+}
+
+bool Configuration::Load(char* pData)
+{
+	BinarySerializer serializer;
+
+	// window
+	serializer.TakeUshort(pData, windowWidth);
+	serializer.TakeUshort(pData, windowHeight);
+	serializer.TakeUshort(pData, windowLeft);
+	serializer.TakeUshort(pData, windowTop);
+	serializer.TakeBool(pData, windowCenter);
+
+	// display
+	serializer.TakeUshort(pData, frameLeft);
+	serializer.TakeUshort(pData, frameTop);
+	serializer.TakeUchar(pData, frameSizeX);
+	serializer.TakeUchar(pData, frameSizeY);
+	serializer.TakeUshort(pData, promptFrameLeft);
+	serializer.TakeUshort(pData, promptFrameTop);
+	serializer.TakeUchar(pData, promptFrameSizeX);
+	serializer.TakeUchar(pData, promptFrameSizeY);
+	serializer.TakeUshort(pData, infoFrameLeft);
+	serializer.TakeUshort(pData, infoFrameTop);
+	serializer.TakeUshort(pData, infoFrameSizeX);
+	serializer.TakeUshort(pData, infoFrameSizeY);
+	serializer.TakeUchar(pData, borderThickness);
+	serializer.TakeUchar(pData, separatorThickness);
+	serializer.TakeUshort(pData, unitWidth);
+	serializer.TakeWstring(pData, infoFontFace);
+	serializer.TakeUshort(pData, infoFontHeight);
+	serializer.TakeUshort(pData, infoFontWidth);
+	serializer.TakeUshort(pData, infoFontWeight);
+	serializer.TakeFloat(pData, iconScaleRatio);
+	serializer.TakeFloat(pData, maskTransparency);
+
+	// game
+	serializer.TakeUshort(pData, startLevel);
+	serializer.TakeUshort(pData, startLine);
+	serializer.TakeFloat(pData, startLineBlankRate);
+	serializer.TakeUshortArray(pData, vecRemoveScores);
+	serializer.TakeUshort(pData, droppedScore);
+	serializer.TakeUchar(pData, maxLevel);
+	serializer.TakeFloatArray(pData, vecScoreGainRate);
+	serializer.TakeUshortArray(pData, vecLevelScore);
+	serializer.TakeUshortArray(pData, vecStepDownTimespan);
+	serializer.TakeUshort(pData, dropTimespan);
+	serializer.TakeBool(pData, dropImmediate);
+	serializer.TakeUshort(pData, removeBlinkTimespan);
+	serializer.TakeUchar(pData, removeBlinkCount);
+	serializer.TakeUshort(pData, rollTimespan);
+	serializer.TakeUshort(pData, resumeDelayTimespan);
+
+	return true;
+}
+

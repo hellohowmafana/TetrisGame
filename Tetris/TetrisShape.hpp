@@ -38,10 +38,10 @@ public:
 	bool StepUp();
 	bool IsPenerable();
 
-	bool ValidateX(int x, bool frameCoordinate);
-	bool ValidateY(int y, bool frameCoordinate);
-	bool ValidateXY(int x, int y, bool frameCoordinate);
-	bool ValidateShape(int posX, int posY, bool frameCoordinate);
+	bool TestX(int x, bool frameCoordinate);
+	bool TestY(int y, bool frameCoordinate);
+	bool TestXY(int x, int y, bool frameCoordinate);
+	bool TestShape(int posX, int posY, bool frameCoordinate);
 	char GetData(int x, int y, bool frameCoordinate);
 	bool IsSolid(int x, int y, bool frameCoordinate);
 	int GetWidth();
@@ -74,7 +74,7 @@ public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
 
-	virtual bool Save(char* pData, size_t& size);
+	virtual bool Save(char* pData, unsigned int& size, char argument);
 	virtual bool Load(char* pData);
 
 	TetrisRotation IntToTetrisRotation(int irotation);

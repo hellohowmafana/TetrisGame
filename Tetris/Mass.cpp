@@ -3,6 +3,7 @@
 #include "GameFrame.hpp"
 #include "Utility.hpp"
 #include <sstream>
+#include "BinarySerializer.h"
 
 bool Mass::Initialize()
 {
@@ -153,14 +154,14 @@ bool Mass::HasFullLine()
 
 void Mass::RemoveLine(int line)
 {
-	if (!ValidateY(line)) return;
+	if (!TestY(line)) return;
 	DeleteLine(line - top);
 	top++;
 }
 
 int Mass::RemoveFullLines(int from, int to)
 {
-	if (!ValidateY(from) || !ValidateY(to)) return 0;
+	if (!TestY(from) || !TestY(to)) return 0;
 	if (from > to)
 		swap(from, to);
 	MassBlock::iterator it = GetLineIterator(from);
@@ -257,19 +258,19 @@ vector<MassLine*>* Mass::GetFullLines(vector<MassLine*>* pvecLines, int from, in
 	return pvecLines;
 }
 
-bool Mass::ValidateX(int x)
+bool Mass::TestX(int x)
 {
 	return x >= 0 && x < pGameFrame->sizeX;
 }
 
-bool Mass::ValidateY(int y)
+bool Mass::TestY(int y)
 {
 	return y >= top && y < pGameFrame->sizeY;
 }
 
-bool Mass::ValidateXY(int x, int y)
+bool Mass::TestXY(int x, int y)
 {
-	return ValidateX(x) && ValidateY(y);
+	return TestX(x) && TestY(y);
 }
 
 int Mass::GetTop()
@@ -294,14 +295,14 @@ int Mass::GetHeight()
 
 bool Mass::IsSolid(int x, int y)
 {
-	if (!ValidateXY(x, y))
+	if (!TestXY(x, y))
 		return false;
 	return GetUnit(x, y)->isSolid;
 }
 
 bool Mass::IsSolid(MassLine* pMassLine, int x)
 {
-	if (!ValidateX(x))
+	if (!TestX(x))
 		return false;
 	return pMassLine->at(x).isSolid;
 }
@@ -318,7 +319,7 @@ GameFrame* Mass::GetGameFrame()
 
 MassUnit* Mass::GetUnit(int x, int y)
 {
-	if (!ValidateXY(x, y))
+	if (!TestXY(x, y))
 		return nullptr;
 
 	return &(GetLine(y)->at(x));
@@ -335,7 +336,7 @@ MassLine* Mass::GetLine(int line)
 
 MassBlock::iterator Mass::GetLineIterator(int line)
 {
-	if (!ValidateY(line))
+	if (!TestY(line))
 	{
 		return massBlock.end();
 	}
@@ -464,14 +465,57 @@ bool Mass::Load(const wstring label, wstring value)
 	return true;
 }
 
-bool Mass::Save(char* pData, size_t& size)
+bool Mass::Save(char* pData, unsigned int& size, char argument)
 {
-	size = 0;
+	typedef map<char, vector<unsigned short>> ColorUnits;
+	ColorUnits colorUnits;
+	for (MassBlock::iterator itb = massBlock.begin(); itb != massBlock.end(); itb++)
+	{
+		MassLine* pMassLine = *itb;
+		for (MassLine::iterator itl = pMassLine->begin(); itl != pMassLine->end(); itl++)
+		{
+			if (itl->isSolid)
+				colorUnits[itl->color].push_back((unsigned short)
+					(((top + distance(itb, massBlock.begin())) << 8) +
+					(distance(itl, pMassLine->begin()))));
+		}
+	}
+	BinarySerializer binarySerializer;
+	binarySerializer.PutUshort(pData, static_cast<int>(colorUnits.size()), size);
+	for (ColorUnits::iterator itc = colorUnits.begin(); itc != colorUnits.end(); itc++)
+	{
+		vector<unsigned short>& units = itc->second;
+		binarySerializer.PutUshort(pData, static_cast<int>(units.size()), size);
+		binarySerializer.PutUchar(pData, itc->first, size);
+		for (vector<unsigned short>::iterator itu = units.begin(); itu != units.end(); itu++)
+		{
+			binarySerializer.PutUshort(pData, *itu, size);
+		}
+	}
 
-	return false;
+	return true;
 }
 
 bool Mass::Load(char* pData)
 {
-	return false;
+	typedef map<char, vector<unsigned short>> ColorUnits;
+	ColorUnits colorUnits;
+	BinarySerializer binarySerializer;
+	int colorUnitsSize;
+	binarySerializer.TakeUshort(pData, colorUnitsSize);
+	for (int i = 0; i < colorUnitsSize; i++)
+	{
+		int unitsSize;
+		binarySerializer.TakeUshort(pData, unitsSize);
+		int color;
+		binarySerializer.TakeUchar(pData, color);
+		for (int j = 0; j < unitsSize; j++)
+		{
+			int unit;
+			binarySerializer.TakeUshort(pData, unit);
+			colorUnits[(char)color].push_back((unsigned short)unit);
+		}
+	}
+
+	return true;
 }

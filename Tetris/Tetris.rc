@@ -56,6 +56,10 @@ BEGIN
         MENUITEM "&Bgm",                        ID_MUSIC_BGM
         MENUITEM "&Sound",                      ID_MUSIC_SOUND
     END
+    POPUP "&Record"
+    BEGIN
+        MENUITEM "&Play",                       ID_RECORD_PLAY
+    END
     POPUP "&Help"
     BEGIN
         MENUITEM "&About ...",                  IDM_ABOUT
@@ -91,6 +95,37 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,113,41,50,14,WS_GROUP
 END
 
+IDD_LOAD DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Load"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_ARCHIVELIST,7,7,295,142,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+END
+
+IDD_SAVE DIALOGEX 0, 0, 159, 59
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Save"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    EDITTEXT        IDC_NAME,41,14,100,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,49,38,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,103,38,50,14
+    CTEXT           "Name",IDC_STATIC,16,16,19,8
+END
+
+IDD_REPLAY DIALOGEX 0, 0, 309, 176
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Play"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    LISTBOX         IDC_RECORDLIST,7,7,295,142,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
+    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -106,6 +141,30 @@ BEGIN
         RIGHTMARGIN, 163
         TOPMARGIN, 7
         BOTTOMMARGIN, 55
+    END
+
+    IDD_LOAD, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
+    END
+
+    IDD_SAVE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 152
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 52
+    END
+
+    IDD_REPLAY, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 302
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 169
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -154,69 +213,6 @@ BEGIN
 END
 
 #endif    // English (United States) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
-/////////////////////////////////////////////////////////////////////////////
-// English (United Kingdom) resources
-
-#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
-LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Dialog
-//
-
-IDD_LOAD DIALOGEX 0, 0, 309, 176
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Load"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    LISTBOX         IDC_ARCHIVELIST,7,7,295,142,LBS_SORT | LBS_NOINTEGRALHEIGHT | LBS_MULTICOLUMN | WS_VSCROLL | WS_TABSTOP,WS_EX_CLIENTEDGE
-    DEFPUSHBUTTON   "OK",IDOK,198,155,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,252,155,50,14
-END
-
-IDD_SAVE DIALOGEX 0, 0, 159, 59
-STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "Save"
-FONT 8, "MS Shell Dlg", 400, 0, 0x1
-BEGIN
-    EDITTEXT        IDC_NAME,41,14,100,14,ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,49,38,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,103,38,50,14
-    CTEXT           "Name",IDC_STATIC,16,16,19,8
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// DESIGNINFO
-//
-
-#ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO
-BEGIN
-    IDD_LOAD, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 302
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 169
-    END
-
-    IDD_SAVE, DIALOG
-    BEGIN
-        LEFTMARGIN, 7
-        RIGHTMARGIN, 152
-        TOPMARGIN, 7
-        BOTTOMMARGIN, 52
-    END
-END
-#endif    // APSTUDIO_INVOKED
-
-#endif    // English (United Kingdom) resources
 /////////////////////////////////////////////////////////////////////////////
 
 
