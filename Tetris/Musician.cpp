@@ -165,15 +165,8 @@ void Musician::PostResume(MusicType musicType)
 	PostEvent(MusicianEvent::Resume, (void*)musicType);
 }
 
-bool Musician::IsInitialized()
+bool Musician::OnUpdate(Configuration* pConfiguration)
 {
-	return initialized;
-}
-
-void Musician::Initialize(Configuration* pConfiguration)
-{
-	if (initialized) return;
-
 	// save music paths
 	mapSoundPaths[MusicType::StepDown] = pConfiguration->pathStepDownSound;
 	mapSoundPaths[MusicType::StepHorizontal] = pConfiguration->pathStepHorizontalSound;
@@ -196,13 +189,11 @@ void Musician::Initialize(Configuration* pConfiguration)
 	bgm.SetMusic(MusicType::Bgm, bgmAlias, L"");
 	ShiftBgm(randomBgm, true);
 
-	initialized = true;
+	return true;
 }
 
-void Musician::Deinitialize()
+bool Musician::OnDeinitialize()
 {
-	if (!initialized) return;
-
 	// close all
 	CloseAll();
 
@@ -212,7 +203,7 @@ void Musician::Deinitialize()
 	ClearSounds();
 	currentBgm = -1;
 
-	initialized = false;
+	return true;
 }
 
 bool Musician::Play(MusicType musicType)

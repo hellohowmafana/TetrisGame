@@ -15,7 +15,7 @@
 #define IDD_LOAD                        130
 #define IDD_SAVE                        131
 #define IDD_PLAY                        132
-#define IDD_REPLAY                      132
+#define IDD_PLAY                      132
 #define IDC_ARCHIVELIST                 1000
 #define IDC_NAME                        1001
 #define IDC_RECORDLIST                  1002

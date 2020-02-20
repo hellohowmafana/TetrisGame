@@ -2,16 +2,17 @@
 #include "UnitFrame.hpp"
 #include "TetrisShape.hpp"
 #include "Configuration.hpp"
+#include "Configurable.hpp"
 
 class GameFrame;
 
-class PromptFrame :	public UnitFrame
+class PromptFrame :	public UnitFrame, public Configurable
 {
 private:
 	TetrisShape tetrisShape;
 
 public:
-	bool Initialize(Configuration* pConfiguration);
+	bool OnUpdate(Configuration* pConfiguration);
 	void SetTetrisShape(TetrisShape* pTetrisShape);
 	TetrisShape* GetTerisShape();
 	void SetGameFrame(GameFrame* pGameFrame);
@@ -19,7 +20,7 @@ public:
 	static PromptFrame singleton;
 
 private:
-	PromptFrame() {};
+	PromptFrame() = default;
 	TetrisShape* pTetrisShape;
 	GameFrame* pGameFrame;
 };

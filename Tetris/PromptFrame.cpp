@@ -1,6 +1,6 @@
 #include "PromptFrame.hpp"
 
-bool PromptFrame::Initialize(Configuration* pConfiguration)
+bool PromptFrame::OnUpdate(Configuration* pConfiguration)
 {
 	left = pConfiguration->promptFrameLeft;
 	top = pConfiguration->promptFrameTop;
@@ -12,7 +12,6 @@ bool PromptFrame::Initialize(Configuration* pConfiguration)
 	backgroundColor = pConfiguration->colorFrameBackground;
 	borderColor = pConfiguration->colorBorder;
 	separatorColor = pConfiguration->colorSeparator;
-
 	return true;
 }
 

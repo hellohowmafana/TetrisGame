@@ -36,15 +36,16 @@ bool Recorder::StartRecord(wstring file, Configuration* pConfiguration, Controll
 		{
 			IBinarySerializable* pBinarySerialiable = binarySerializables[i];
 
+			char* pData = nullptr;
 			unsigned int size = 0;
-			pBinarySerialiable->Save(0, size);
+			pBinarySerialiable->Save(pData, size);
 			ofs.write((char*)&size, sizeof(size));
 
-			char* pData = new char[size];
+			pData = new char[size];
 			size = 0;
 			pBinarySerialiable->Save(pData, size);
-			ofs.write((char*)pData, size);
-			delete[] pData;
+			ofs.write(pData - size, size);
+			delete[] (pData - size);
 		}
 
 		posTrackSize = ofs.tellp();
@@ -88,6 +89,7 @@ bool Recorder::Load(wstring file, Configuration* pConfiguration, Controller* pCo
 	try
 	{
 		bool output = false;
+		file = pConfiguration->pathRecords + L"\\" + file;
 		pstream = new ifstream(file.c_str(), ios::binary, ios::_Default_open_prot);
 		ifstream& ifs = getifstream();
 
@@ -120,7 +122,7 @@ bool Recorder::Load(wstring file, Configuration* pConfiguration, Controller* pCo
 			char* pData = new char[size];
 			ifs.read(pData, size);
 			pBinarySerialiable->Load(pData);
-			delete[] pData;
+			delete[] (pData - size);
 		}
 	}
 	catch (const std::exception&)

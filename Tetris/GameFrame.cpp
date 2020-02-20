@@ -4,11 +4,7 @@
 #include "Level.hpp"
 GameFrame GameFrame::singleton;
 
-GameFrame::GameFrame()
-{
-}
-
-void GameFrame::Initialize(Configuration* pConfiguration)
+bool GameFrame::OnUpdate(Configuration* pConfiguration)
 {
 	left = pConfiguration->frameLeft;
 	top = pConfiguration->frameTop;
@@ -39,6 +35,8 @@ void GameFrame::Initialize(Configuration* pConfiguration)
 	pathResumeIcon = pConfiguration->pathResumeIcon;
 	pathBeginSplash = pConfiguration->pathBeginSplash;
 	pathGameOverSplash = pConfiguration->pathGameOverSplash;
+
+	return true;
 }
 
 void GameFrame::SetPromptFrame(PromptFrame* pPromptFrame)
@@ -292,25 +290,30 @@ bool GameFrame::Load(const wstring label, wstring value)
 	return true;
 }
 
-bool GameFrame::Save(char* pData, unsigned int& size, char argument)
+bool GameFrame::Save(char*& pData, unsigned int& size, char argument)
 {
 	if (!nextTetrisShape.Save(pData, size, 1))
 		return false;
-	
+
 	if (!tetrisShape.Save(pData, size, 0))
 		return false;
-		
-	if(!mass.Save(pData, size, 0))
+
+	if (!mass.Save(pData, size))
 		return false;
 
 	return true;
 }
 
-bool GameFrame::Load(char* pData)
+bool GameFrame::Load(char*& pData, char argument)
 {
-	if (nextTetrisShape.Load(pData) &&
-		tetrisShape.Load(pData) &&
-		mass.Load(pData))
-		return true;
-	return false;
+	if (!nextTetrisShape.Load(pData, 1))
+		return false;
+
+	if (!tetrisShape.Load(pData, 0))
+		return false;
+
+	if (!mass.Load(pData))
+		return false;
+
+	return true;
 }

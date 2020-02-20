@@ -1,4 +1,8 @@
 #include "Drawer.hpp"
+#include "GameFrame.hpp"
+#include "PromptFrame.hpp"
+#include "InfoFrame.hpp"
+#include "Background.hpp"
 #include "Utility.hpp"
 #include "Controller.hpp"
 #include <bitset>
@@ -7,7 +11,7 @@ Drawer Drawer::singleton;
 
 Drawer::Drawer() :
 	pGameFrame(nullptr),
-	hdc(NULL), hdcCmp(NULL), hbmCmp(NULL), initialized(false),
+	hdc(NULL), hdcCmp(NULL), hbmCmp(NULL),
 	dcWidth(0), dcHeight(0),
 	pGifPollerBackground(nullptr)
 {
@@ -27,18 +31,13 @@ Drawer::~Drawer()
 	}
 }
 
-bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
-	PromptFrame* pPromptFrame, InfoFrame*pInfoFrame, Background* pBackground)
+bool Drawer::OnUpdate(Configuration* pConfiguration)
 {
-	if (NULL == hWnd)
+	if (NULL == hWnd ||
+		!pGameFrame || !pPromptFrame || !pInfoFrame || !pBackground)
 		return false;
-	try {
-		this->pController = pController;
-		this->pGameFrame = pGameFrame;
-		this->pPromptFrame = pPromptFrame;
-		this->pInfoFrame = pInfoFrame;
-		this->pBackground = pBackground;
 
+	try {
 		HDC hdc = GetDC(hWnd);
 
 		pbrsFrame = new SolidBrush(pGameFrame->backgroundColor);
@@ -119,15 +118,11 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 		return false;
 	}
 
-	initialized = true;
-
 	return true;
 }
 
-bool Drawer::Deinitialize()
+bool Drawer::OnDeinitialize()
 {
-	if (!initialized) return false;
-
 	delete pbrsFrame;
 	pbrsFrame = nullptr;
 	delete ppenBorder;
@@ -186,14 +181,27 @@ bool Drawer::Deinitialize()
 	delete pbrsMask;
 	pbrsMask = nullptr;
 
+	this->pController = nullptr;
 	this->pGameFrame = nullptr;
 	this->pPromptFrame = nullptr;
 	this->pInfoFrame = nullptr;
 	this->pBackground = nullptr;
 
-	initialized = false;
-
 	return true;
+}
+
+void Drawer::SetController(Controller* pController)
+{
+	this->pController = pController;
+}
+
+void Drawer::SetGraphics(GameFrame* pGameFrame, PromptFrame* pPromptFrame,
+	InfoFrame* pInfoFrame, Background* pBackground)
+{
+	this->pGameFrame = pGameFrame;
+	this->pPromptFrame = pPromptFrame;
+	this->pInfoFrame = pInfoFrame;
+	this->pBackground = pBackground;
 }
 
 void Drawer::SetHWnd(HWND hWnd)
@@ -230,11 +238,6 @@ void Drawer::DetachDC()
 	attached = false;
 }
 
-bool Drawer::IsInitialized()
-{
-	return initialized;
-}
-
 void Drawer::DrawElements()
 {
 	if (IsValid())
@@ -256,7 +259,8 @@ void Drawer::DrawElements()
 		}
 		else
 		{
-			if(GameState::None == pController->GetGameState())
+			if(GameState::None == pController->GetGameState() ||
+				GameState::ResourceInitialized == pController->GetGameState())
 				DrawFill(pGameFrame, 0);
 			else
 				DrawRollingLines(pGameFrame);
@@ -813,14 +817,17 @@ void Drawer::DrawSplash(GameFrame* pGameFrame)
 
 	if (pController->IsStarted())
 		return;
-	
+
+	if (GameState::None == pController->GetGameState())
+		return;
+
 	int x = pGameFrame->GetLeft() + pGameFrame->borderThickness;
 	int y = pGameFrame->GetTop() + pGameFrame->borderThickness;
 	int width = pGameFrame->GetWidth() - pGameFrame->borderThickness * 2;
 	int height = pGameFrame->GetHeight() - pGameFrame->borderThickness * 2;
 	Rect rect(x, y, width, height);
 	DrawBitmap(
-		GameState::None == pController->GetGameState() ?
+		GameState::ResourceInitialized == pController->GetGameState() ?
 		pbmpBegin : pbmpGameOver,
 		RenderMode::Uniform,
 		RenderAlignmentHorizontal::Center, RenderAlignmentVertical::Center, rect);

@@ -2,6 +2,7 @@
 #include <string>
 #include <Windows.h>
 #include <vector>
+#include <array>
 #include <gdiplus.h>
 #include "RenderMode.hpp"
 #include "IBinarySerializable.hpp"
@@ -13,42 +14,42 @@ class Background;
 class Configuration : public IBinarySerializable
 {
 private:
-	// path
-	const wstring INIS_PATH =  L"inis";
-	const wstring BITMAPS_PATH = INIS_PATH + L"\\bitmaps";
-	const wstring ICONS_PATH = INIS_PATH + L"\\icons";
-	const wstring SHAPES_PATH = INIS_PATH + L"\\shapes";
-	const wstring SOUND_PATH = INIS_PATH + L"\\sound";
-	const wstring BGM_PATH = INIS_PATH + L"\\bgm";
-	const wstring ARCHIVES_PATH = L"archives";
-	const wstring RECORDS_PATH = L"records";
+	// paths
+	static const wstring INIS_PATH;
+	static const wstring BITMAPS_PATH;
+	static const wstring ICONS_PATH;
+	static const wstring SHAPES_PATH;
+	static const wstring SOUND_PATH;
+	static const wstring BGM_PATH;
+	static const wstring ARCHIVES_PATH;
+	static const wstring RECORDS_PATH;
 
-	const wstring CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
+	static const wstring CONFIGURATION_PATH;
 
-	const wstring UNIT_BITMAP_FILE_PATH = BITMAPS_PATH + L"\\unit.png";
-	const wstring TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.png";
-	const wstring MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.png";
-	const wstring FRAME_BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\frame background color.png";
-	const wstring BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.png";
-	const wstring SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.png";
-	const wstring INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.png";
-	const wstring BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.png";
-	const wstring BACKGROUND_FILE_PATH = BITMAPS_PATH + L"\\background.*";
-	const wstring BEGIN_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\begin.*";
-	const wstring GAMEOVER_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
+	static const wstring UNIT_BITMAP_FILE_PATH;
+	static const wstring TETRIS_COLOR_FILE_PATH;
+	static const wstring MASS_COLOR_FILE_PATH;
+	static const wstring FRAME_BACKGROUND_COLOR_FILE_PATH;
+	static const wstring BORDER_COLOR_FILE_PATH;
+	static const wstring SEPARATOR_COLOR_FILE_PATH;
+	static const wstring INFORMATION_COLOR_FILE_PATH;
+	static const wstring BACKGROUND_COLOR_FILE_PATH;
+	static const wstring BACKGROUND_FILE_PATH;
+	static const wstring BEGIN_SPLASH_FILE_PATH;
+	static const wstring GAMEOVER_SPLASH_FILE_PATH;
 
-	const wstring PAUSE_ICON_FILE_PATH = ICONS_PATH + L"\\pause.*";
-	const wstring RESUME_ICON_FILE_PATH = ICONS_PATH + L"\\resume.*";
+	static const wstring PAUSE_ICON_FILE_PATH;
+	static const wstring RESUME_ICON_FILE_PATH;
 
-	const wstring STEPDOWN_SOUND_FILE_PATH = SOUND_PATH + L"\\step down.mp3";
-	const wstring STEPHORIZONTAL_SOUND_FILE_PATH = SOUND_PATH + L"\\step horizontal.mp3";
-	const wstring ROTATE_SOUND_FILE_PATH = SOUND_PATH + L"\\rotate.mp3";
-	const wstring DROPPED_SOUND_FILE_PATH = SOUND_PATH + L"\\dropped.mp3";
-	const wstring REMOVE_SOUND_FILE_PATH = SOUND_PATH + L"\\remove.mp3";
-	const wstring GAMEOVER_SOUND_FILE_PATH = SOUND_PATH + L"\\game over.mp3";
+	static const wstring STEPDOWN_SOUND_FILE_PATH;
+	static const wstring STEPHORIZONTAL_SOUND_FILE_PATH;
+	static const wstring ROTATE_SOUND_FILE_PATH;
+	static const wstring DROPPED_SOUND_FILE_PATH;
+	static const wstring REMOVE_SOUND_FILE_PATH;
+	static const wstring GAMEOVER_SOUND_FILE_PATH;
 
 public:
-	// path for use
+	// paths for use
 	wstring pathInis;
 	wstring pathBitmaps;
 	wstring pathIcons;
@@ -82,65 +83,65 @@ public:
 	wstring pathGameOverSound;
 
 private:
-	// keys name
-	const wstring keyWindow = L"Window";
-	const wstring keyWindowSize = L"WindowSize";
-	const wstring keyWindowPostion = L"WindowPostion";
-	const wstring keyWindowCenter = L"WindowCenter";
+	// key names
+	static const wstring keyWindow;
+	static const wstring keyWindowSize;
+	static const wstring keyWindowPostion;
+	static const wstring keyWindowCenter;
 	
-	const wstring keyDisplay = L"Display";
-	const wstring keyFramePostion = L"FramePostion";
-	const wstring keyFrameSize = L"FrameSize";
-	const wstring keyPromptFramePostion = L"PromptFramePostion";
-	const wstring keyPromptFrameSize = L"PromptFrameSize";
-	const wstring keyInfoFramePosition = L"InfoFramePosition";
-	const wstring keyInfoFrameSize = L"InfoFrameSize";
-	const wstring keyBorderThickness = L"BorderThickness";
-	const wstring keySeparatorThickness = L"SeparatorThickness";
-	const wstring keyUnitWidth = L"UnitWidth";
-	const wstring keyInfoFontFace = L"InfoFontFace";
-	const wstring keyInfoFontHeight = L"InfoFontHeight";
-	const wstring keyInfoFontWidth = L"InfoFontWidth"; 
-	const wstring keyInfoFontWeight = L"InfoFontWeight";
-	const wstring keyIconScaleRatio = L"IconScaleRatio";
-	const wstring keyMaskTransparency = L"MaskTransparency";
+	static const wstring keyDisplay;
+	static const wstring keyFramePostion;
+	static const wstring keyFrameSize;
+	static const wstring keyPromptFramePostion;
+	static const wstring keyPromptFrameSize;
+	static const wstring keyInfoFramePosition;
+	static const wstring keyInfoFrameSize;
+	static const wstring keyBorderThickness;
+	static const wstring keySeparatorThickness;
+	static const wstring keyUnitWidth;
+	static const wstring keyInfoFontFace;
+	static const wstring keyInfoFontHeight;
+	static const wstring keyInfoFontWidth; 
+	static const wstring keyInfoFontWeight;
+	static const wstring keyIconScaleRatio;
+	static const wstring keyMaskTransparency;
 
-	const wstring keyGame = L"Game";
-	const wstring keyShape = L"Shape";
-	const wstring keyStartLevel = L"StartLevel";
-	const wstring keyStartLine = L"StartLine";
-	const wstring keyStartLineBlankRate = L"StartLineBlankRate";
-	const wstring keyRemoveScores = L"RemoveScores";
-	const wstring keyDroppedScore = L"DroppedScore";
-	const wstring keyMaxLevel = L"MaxLevel";
-	const wstring keyScoreGainRate = L"ScoreGainRate";
-	const wstring keyLevelScore = L"LevelScore";
-	const wstring keyStepDownTimespan = L"StepDownTimespan";
-	const wstring keyDropTimespan = L"DropTimespan";
-	const wstring keyDropImmediate = L"DropImmediate";
-	const wstring keyStepHorizontalTimespan = L"StepHorizontalTimespan";
-	const wstring keyRotateTimespan = L"RotateTimespan";
-	const wstring keyRemoveBlinkTimespan = L"RemoveBlinkTimespan";
-	const wstring keyRemoveBlinkCount = L"RemoveBlinkCount";
-	const wstring keyRollTimespan = L"RollTimespan";
-	const wstring keyResumeDelayTimespan = L"ResumeDelayTimespan";
-	const wstring keyShapeBlinkTimespan = L"ShapeBlinkTimespan";
+	static const wstring keyGame;
+	static const wstring keyShape;
+	static const wstring keyStartLevel;
+	static const wstring keyStartLine;
+	static const wstring keyStartLineBlankRate;
+	static const wstring keyRemoveScores;
+	static const wstring keyDroppedScore;
+	static const wstring keyMaxLevel;
+	static const wstring keyScoreGainRate;
+	static const wstring keyLevelScore;
+	static const wstring keyStepDownTimespan;
+	static const wstring keyDropTimespan;
+	static const wstring keyDropImmediate;
+	static const wstring keyStepHorizontalTimespan;
+	static const wstring keyRotateTimespan;
+	static const wstring keyRemoveBlinkTimespan;
+	static const wstring keyRemoveBlinkCount;
+	static const wstring keyRollTimespan;
+	static const wstring keyResumeDelayTimespan;
+	static const wstring keyShapeBlinkTimespan;
 
-	const wstring keyOther = L"Other";
-	const wstring keyRecord = L"Record";
+	static const wstring keyOther;
+	static const wstring keyRecord;
 
-	const wstring keyMusic = L"Music";
-	const wstring keySoundOn = L"SoundOn";
-	const wstring keyBgmOn = L"BgmOn";
-	const wstring keyRandomBgm = L"RandomBgm";
+	static const wstring keyMusic;
+	static const wstring keySoundOn;
+	static const wstring keyBgmOn;
+	static const wstring keyRandomBgm;
 
-	const wstring keyBitmap = L"Bitmap";
-	const wstring keyUseColor = L"UseColor";
-	const wstring keyUseColorRandom = L"UseColorRandom";
-	const wstring keyUnitBitmap = L"UnitBitmap";
-	const wstring keyUseMassColor = L"UseMassColor";
-	const wstring keyBackgroundMode = L"BackgroundMode";
-	const wstring keyBackgroundAlignment = L"BackgroundAlignment";
+	static const wstring keyBitmap;
+	static const wstring keyUseColor;
+	static const wstring keyUseColorRandom;
+	static const wstring keyUnitBitmap;
+	static const wstring keyUseMassColor;
+	static const wstring keyBackgroundMode;
+	static const wstring keyBackgroundAlignment;
 
 public:
 	// window
@@ -215,8 +216,13 @@ public:
 public:
 	static Configuration singleton;
 
+private:
+	static Configuration* pBackup;
+
 public:
 	bool Initialize();
+	bool Backup();
+	bool Restore();
 
 private:
 	Configuration() {};
@@ -236,7 +242,7 @@ private:
 private:
 #define MAX_BUFFER_LENGTH 256
 	wchar_t buffer[MAX_BUFFER_LENGTH];
-	const int bufferSize = MAX_BUFFER_LENGTH;
+	int bufferSize = MAX_BUFFER_LENGTH;
 #undef MAX_BUFFER_LENGTH
 	wchar_t* GetConfigurationString(wstring section, wstring key);
 	int GetConfigurationInt(wstring section, wstring key);
@@ -255,7 +261,7 @@ private:
 		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
 
 public:
-	virtual bool Save(char* pData, unsigned int& size, char argument);
-	virtual bool Load(char* pData);
+	virtual bool Save(char*& pData, unsigned int& size, char argument = 0);
+	virtual bool Load(char*& pData, char argument = 0);
 };
 

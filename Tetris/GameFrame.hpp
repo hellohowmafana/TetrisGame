@@ -4,12 +4,15 @@
 #include "TetrisShape.hpp"
 #include "UnitFrame.hpp"
 #include "ISerializable.hpp"
+#include "IBinarySerializable.hpp"
+#include "Configurable.hpp"
 #include <Windows.h>
 
 class PromptFrame;
 class InfoFrame;
 
-class GameFrame : public UnitFrame, public ISerializable, public IBinarySerializable
+class GameFrame : public UnitFrame,
+	public ISerializable, public IBinarySerializable, public Configurable
 {
 public:
 	static GameFrame singleton;
@@ -50,10 +53,10 @@ private:
 	InfoFrame* pInfoFrame;
 
 private:
-	GameFrame();
+	GameFrame() = default;
 
 public:
-	void Initialize(Configuration* pConfiguration);
+	bool OnUpdate(Configuration* pConfiguration);
 	void SetPromptFrame(PromptFrame* pPromptFrame);
 	void SetInfoFrame(InfoFrame* pInfoFrame);
 	void InitializeGame();
@@ -79,7 +82,7 @@ public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
 
-	virtual bool Save(char* pData, unsigned int& size, char argument);
-	virtual bool Load(char* pData);
+	virtual bool Save(char*& pData, unsigned int& size, char argument = 0);
+	virtual bool Load(char*& pData, char argument = 0);
 };
 

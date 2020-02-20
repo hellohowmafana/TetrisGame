@@ -3,32 +3,31 @@
 #pragma comment(lib, "gdiplus.lib")
 
 #include <vector>
-#include "GameFrame.hpp"
-#include "PromptFrame.hpp"
-#include "InfoFrame.hpp"
-#include "Background.hpp"
 #include <Unknwn.h>
 #include <gdiplus.h>
 #include "AnimatedGifPoller.hpp"
+#include "Configurable.hpp"
+#include "GameFrame.hpp"
 
 using namespace std;
 using namespace Gdiplus;
 
 class Controller;
 
-class Drawer
+class Drawer : public Configurable
 {
 public:
 	static Drawer singleton;
 
 public:
-	bool Initialize(Controller* pController, GameFrame* pGameFrame,
-		PromptFrame* pPromptFrame, InfoFrame* pInfoFrame, Background* pBackground);
-	bool Deinitialize();
+	bool OnUpdate(Configuration* pConfiguration);
+	bool OnDeinitialize();
+	void SetController(Controller* pController);
+	void SetGraphics(GameFrame* pGameFrame, PromptFrame* pPromptFrame,
+		InfoFrame* pInfoFrame, Background* pBackground);
 	void SetHWnd(HWND hWnd);
 	void AttachDC(HDC hdc);
 	void DetachDC();
-	bool IsInitialized();
 	void DrawElements();
 	void Invalidate();
 
@@ -114,7 +113,6 @@ private:
 	Bitmap* pbmpResume;
 	Brush* pbrsMask;
 	
-	bool initialized;
 	bool attached;
 
 	HDC hdcCmp;

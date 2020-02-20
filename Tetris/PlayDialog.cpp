@@ -1,8 +1,8 @@
-#include "ReplayDialog.hpp"
+#include "PlayDialog.hpp"
 #include "resource.h"
 #include "Configuration.hpp"
 
-INT_PTR ReplayDialog::ReplayDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR PlayDialog::PlayDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
@@ -31,9 +31,9 @@ INT_PTR ReplayDialog::ReplayDialogProc(HWND hDlg, UINT message, WPARAM wParam, L
 	return (INT_PTR)FALSE;
 }
 
-wchar_t* ReplayDialog::GetSelectedRecord()
+wchar_t* PlayDialog::GetSelectedRecord()
 {
 	return szRecord;
 }
 
-ReplayDialog ReplayDialog::singleton;
+PlayDialog PlayDialog::singleton;

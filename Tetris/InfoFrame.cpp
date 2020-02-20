@@ -1,7 +1,7 @@
 #include "InfoFrame.hpp"
 #include "GameFrame.hpp"
 
-void InfoFrame::Initialize(Configuration* pConfiguration)
+bool InfoFrame::OnUpdate(Configuration* pConfiguration)
 {
 	left = pConfiguration->infoFrameLeft;
 	top = pConfiguration->infoFrameTop;
@@ -12,6 +12,8 @@ void InfoFrame::Initialize(Configuration* pConfiguration)
 	fontHeight = pConfiguration->infoFontHeight;
 	fontWidth = pConfiguration->infoFontWidth;
 	fontWeight = pConfiguration->infoFontWeight;
+
+	return true;
 }
 
 void InfoFrame::SetGameFrame(GameFrame* pGameFrame)

@@ -1,14 +1,14 @@
 #pragma once
 #include "Frame.hpp"
-#include "Configuration.hpp"
+#include "Configurable.hpp"
 
 class GameFrame;
 
 class InfoFrame :
-	public Frame
+	public Frame, public Configurable
 {
 public:
-	void Initialize(Configuration* pConfiguration);
+	bool OnUpdate(Configuration* pConfiguration);
 	void SetGameFrame(GameFrame* pGameFrame);
 	GameFrame* GetGameFrame();
 	int GetLevel();

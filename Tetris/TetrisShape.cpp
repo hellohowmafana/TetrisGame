@@ -572,13 +572,12 @@ bool TetrisShape::Load(const wstring label, wstring value)
 	return true;
 }
 
-bool TetrisShape::Save(char* pData, unsigned int& size, char argument)
+bool TetrisShape::Save(char*& pData, unsigned int& size, char argument)
 {
 	BinarySerializer serializer;
 	bool current = argument == 0;
 	if (current)
 	{
-		size = 0;
 		serializer.PutWstring(pData, pTetrisType->group, size);
 		serializer.PutWstring(pData, pTetrisType->name, size);
 		serializer.PutUchar(pData, TetrisRotationToInt(rotation), size);
@@ -587,7 +586,6 @@ bool TetrisShape::Save(char* pData, unsigned int& size, char argument)
 	}
 	else
 	{
-		size = 0;
 		serializer.PutWstring(pData, pTetrisType->group, size);
 		serializer.PutWstring(pData, pTetrisType->name, size);
 		serializer.PutUchar(pData, TetrisRotationToInt(rotation), size);
@@ -595,10 +593,10 @@ bool TetrisShape::Save(char* pData, unsigned int& size, char argument)
 	return true;
 }
 
-bool TetrisShape::Load(char* pData)
+bool TetrisShape::Load(char*& pData, char argument)
 {
 	BinarySerializer serializer;
-	bool current = pData[0] == 0;
+	bool current = argument == 0;
 	if (current)
 	{
 		serializer.TakeWstring(pData, pTetrisType->group);

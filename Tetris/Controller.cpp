@@ -8,7 +8,7 @@
 
 Controller Controller::singleton;
 
-void Controller::Initialize(Configuration* pConfiguration)
+bool Controller::OnUpdate(Configuration* pConfiguration)
 {
 	this->pConfiguration = pConfiguration;
 
@@ -26,10 +26,17 @@ void Controller::Initialize(Configuration* pConfiguration)
 
 	this->soundOn = pConfiguration->soundOn;
 	this->bgmOn = pConfiguration->bgmOn;
-	this->record = pConfiguration->record;	
+	this->record = pConfiguration->record;
 
-	initialized = true;
 	gameState = GameState::None;
+
+	return true;
+}
+
+bool Controller::OnDeinitialize()
+{
+	this->pConfiguration = nullptr;
+	return true;
 }
 
 void Controller::SetHWnd(HWND hWnd)
@@ -68,11 +75,6 @@ void Controller::SetRecorder(Recorder* pRecorder)
 	this->pRecorder = pRecorder;
 }
 
-bool Controller::IsInitialized()
-{
-	return initialized;
-}
-
 bool Controller::IsResourceInitialized()
 {
 	return pDrawer->IsInitialized() && pMusician->IsInitialized();
@@ -86,6 +88,7 @@ GameState Controller::GetGameState()
 bool Controller::IsStarted()
 {
 	return GameState::None != gameState &&
+		GameState::ResourceInitialized != gameState &&
 		GameState::End != gameState &&
 		GameState::RollUp != gameState &&
 		GameState::RollDown != gameState;
@@ -154,8 +157,13 @@ void Controller::OnKeyDown(WPARAM keyCode)
 		}
 		break;
 	case VK_RETURN:
-		if(IsStarted())
+		if (IsStarted())
 			Restart();
+		else
+		{
+			InitializeGame();
+			Start();
+		}
 		break;
 	case 'P':
 		if (GameState::Pause == gameState)
@@ -283,8 +291,9 @@ bool Controller::Start()
 	if (!IsResourceInitialized())
 		return false;
 
-	if (record)
-		StartRecord();
+	if(!IsReplay())
+		if(record)
+			StartRecord();
 
 	gameState = GameState::Start;
 	isShapeLighting = false;
@@ -330,9 +339,24 @@ void Controller::Resume()
 	}
 }
 
+void Controller::InitializeGame()
+{
+	mode = Mode::Normal;
+	pGameFrame->InitializeGame();
+}
+
 void Controller::Restart()
 {
 	End();
+	if (Mode::Normal == mode)
+	{
+		pGameFrame->Reborn();
+	}
+	else
+	{
+		pConfiguration->Restore();
+
+	}
 	Start();
 }
 
@@ -352,16 +376,17 @@ bool Controller::LoadGame(wstring archive)
 		return false;
 	End();
 	Archive::Load(archive, this);
+	mode = Mode::Normal;
 	Start();
 	return true;
 }
 
 bool Controller::StartRecord()
 {
-	wchar_t file[27];
+	wchar_t file[31];
 	SYSTEMTIME systemtime;
 	GetLocalTime(&systemtime);
-	wsprintf(file, L"record %04d-%02d-%02d %02d-%02d-%02d",
+	wsprintf(file, L"record_%04d-%02d-%02d_%02d-%02d-%02d.rec",
 		systemtime.wYear,
 		systemtime.wMonth,
 		systemtime.wDay,
@@ -379,7 +404,20 @@ bool Controller::EndRecord()
 
 bool Controller::PlayRecord(wstring record)
 {
-	return pRecorder->Load(record, pConfiguration, this);
+	mode = Mode::Replay;
+
+	if(!pRecorder->Load(record, pConfiguration, this))
+		return false;
+
+	if (!Start())
+		return false;
+
+	return true;
+}
+
+bool Controller::IsReplay()
+{
+	return Mode::Replay == mode;
 }
 
 GameFrame* Controller::GetGameFrame()
@@ -669,5 +707,8 @@ void Controller::MusicianCallback(Musician* pMusician, MusicianEvent musicianEve
 {
 	if (pMusician == GetMusician())
 		if (MusicianEvent::Initialize == musicianEvent)
-			Start();
+		{
+			gameState = GameState::ResourceInitialized;
+			InvalidateDraw();
+		}
 }

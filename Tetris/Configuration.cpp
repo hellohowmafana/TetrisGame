@@ -8,7 +8,103 @@
 #include "BinarySerializer.h"
 using namespace Gdiplus;
 
+// path
+const wstring Configuration::INIS_PATH = L"inis";
+const wstring Configuration::BITMAPS_PATH = INIS_PATH + L"\\bitmaps";
+const wstring Configuration::ICONS_PATH = INIS_PATH + L"\\icons";
+const wstring Configuration::SHAPES_PATH = INIS_PATH + L"\\shapes";
+const wstring Configuration::SOUND_PATH = INIS_PATH + L"\\sound";
+const wstring Configuration::BGM_PATH = INIS_PATH + L"\\bgm";
+const wstring Configuration::ARCHIVES_PATH = L"archives";
+const wstring Configuration::RECORDS_PATH = L"records";
+
+const wstring Configuration::CONFIGURATION_PATH = INIS_PATH + L"\\configuration.txt";
+
+const wstring Configuration::UNIT_BITMAP_FILE_PATH = BITMAPS_PATH + L"\\unit.png";
+const wstring Configuration::TETRIS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\tetris color.png";
+const wstring Configuration::MASS_COLOR_FILE_PATH = BITMAPS_PATH + L"\\mass color.png";
+const wstring Configuration::FRAME_BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\frame background color.png";
+const wstring Configuration::BORDER_COLOR_FILE_PATH = BITMAPS_PATH + L"\\border color.png";
+const wstring Configuration::SEPARATOR_COLOR_FILE_PATH = BITMAPS_PATH + L"\\separator color.png";
+const wstring Configuration::INFORMATION_COLOR_FILE_PATH = BITMAPS_PATH + L"\\information color.png";
+const wstring Configuration::BACKGROUND_COLOR_FILE_PATH = BITMAPS_PATH + L"\\background color.png";
+const wstring Configuration::BACKGROUND_FILE_PATH = BITMAPS_PATH + L"\\background.*";
+const wstring Configuration::BEGIN_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\begin.*";
+const wstring Configuration::GAMEOVER_SPLASH_FILE_PATH = BITMAPS_PATH + L"\\game over.*";
+
+const wstring Configuration::PAUSE_ICON_FILE_PATH = ICONS_PATH + L"\\pause.*";
+const wstring Configuration::RESUME_ICON_FILE_PATH = ICONS_PATH + L"\\resume.*";
+
+const wstring Configuration::STEPDOWN_SOUND_FILE_PATH = SOUND_PATH + L"\\step down.mp3";
+const wstring Configuration::STEPHORIZONTAL_SOUND_FILE_PATH = SOUND_PATH + L"\\step horizontal.mp3";
+const wstring Configuration::ROTATE_SOUND_FILE_PATH = SOUND_PATH + L"\\rotate.mp3";
+const wstring Configuration::DROPPED_SOUND_FILE_PATH = SOUND_PATH + L"\\dropped.mp3";
+const wstring Configuration::REMOVE_SOUND_FILE_PATH = SOUND_PATH + L"\\remove.mp3";
+const wstring Configuration::GAMEOVER_SOUND_FILE_PATH = SOUND_PATH + L"\\game over.mp3";
+
+// key names
+const wstring Configuration::keyWindow = L"Window";
+const wstring Configuration::keyWindowSize = L"WindowSize";
+const wstring Configuration::keyWindowPostion = L"WindowPostion";
+const wstring Configuration::keyWindowCenter = L"WindowCenter";
+
+const wstring Configuration::keyDisplay = L"Display";
+const wstring Configuration::keyFramePostion = L"FramePostion";
+const wstring Configuration::keyFrameSize = L"FrameSize";
+const wstring Configuration::keyPromptFramePostion = L"PromptFramePostion";
+const wstring Configuration::keyPromptFrameSize = L"PromptFrameSize";
+const wstring Configuration::keyInfoFramePosition = L"InfoFramePosition";
+const wstring Configuration::keyInfoFrameSize = L"InfoFrameSize";
+const wstring Configuration::keyBorderThickness = L"BorderThickness";
+const wstring Configuration::keySeparatorThickness = L"SeparatorThickness";
+const wstring Configuration::keyUnitWidth = L"UnitWidth";
+const wstring Configuration::keyInfoFontFace = L"InfoFontFace";
+const wstring Configuration::keyInfoFontHeight = L"InfoFontHeight";
+const wstring Configuration::keyInfoFontWidth = L"InfoFontWidth";
+const wstring Configuration::keyInfoFontWeight = L"InfoFontWeight";
+const wstring Configuration::keyIconScaleRatio = L"IconScaleRatio";
+const wstring Configuration::keyMaskTransparency = L"MaskTransparency";
+
+const wstring Configuration::keyGame = L"Game";
+const wstring Configuration::keyShape = L"Shape";
+const wstring Configuration::keyStartLevel = L"StartLevel";
+const wstring Configuration::keyStartLine = L"StartLine";
+const wstring Configuration::keyStartLineBlankRate = L"StartLineBlankRate";
+const wstring Configuration::keyRemoveScores = L"RemoveScores";
+const wstring Configuration::keyDroppedScore = L"DroppedScore";
+const wstring Configuration::keyMaxLevel = L"MaxLevel";
+const wstring Configuration::keyScoreGainRate = L"ScoreGainRate";
+const wstring Configuration::keyLevelScore = L"LevelScore";
+const wstring Configuration::keyStepDownTimespan = L"StepDownTimespan";
+const wstring Configuration::keyDropTimespan = L"DropTimespan";
+const wstring Configuration::keyDropImmediate = L"DropImmediate";
+const wstring Configuration::keyStepHorizontalTimespan = L"StepHorizontalTimespan";
+const wstring Configuration::keyRotateTimespan = L"RotateTimespan";
+const wstring Configuration::keyRemoveBlinkTimespan = L"RemoveBlinkTimespan";
+const wstring Configuration::keyRemoveBlinkCount = L"RemoveBlinkCount";
+const wstring Configuration::keyRollTimespan = L"RollTimespan";
+const wstring Configuration::keyResumeDelayTimespan = L"ResumeDelayTimespan";
+const wstring Configuration::keyShapeBlinkTimespan = L"ShapeBlinkTimespan";
+
+const wstring Configuration::keyOther = L"Other";
+const wstring Configuration::keyRecord = L"Record";
+
+const wstring Configuration::keyMusic = L"Music";
+const wstring Configuration::keySoundOn = L"SoundOn";
+const wstring Configuration::keyBgmOn = L"BgmOn";
+const wstring Configuration::keyRandomBgm = L"RandomBgm";
+
+const wstring Configuration::keyBitmap = L"Bitmap";
+const wstring Configuration::keyUseColor = L"UseColor";
+const wstring Configuration::keyUseColorRandom = L"UseColorRandom";
+const wstring Configuration::keyUnitBitmap = L"UnitBitmap";
+const wstring Configuration::keyUseMassColor = L"UseMassColor";
+const wstring Configuration::keyBackgroundMode = L"BackgroundMode";
+const wstring Configuration::keyBackgroundAlignment = L"BackgroundAlignment";
+
 Configuration Configuration::singleton;
+
+Configuration* Configuration::pBackup = nullptr;
 
 bool Configuration::Initialize()
 {
@@ -29,6 +125,28 @@ bool Configuration::Initialize()
 	{
 		return false;
 	}
+	return true;
+}
+
+bool Configuration::Backup()
+{
+	bool ret = true;
+	if (pBackup)
+	{
+		ret = false;
+		delete pBackup;
+	}
+	pBackup = new Configuration(singleton);
+	return ret;
+}
+
+bool Configuration::Restore()
+{
+	if (!pBackup)
+		return false;
+	singleton = *pBackup;
+	delete pBackup;
+	pBackup = nullptr;
 	return true;
 }
 
@@ -534,7 +652,7 @@ bool Configuration::ParseTetrisTypeDeclaration(wstring str, wstring& name, bool&
 	}
 }
 
-bool Configuration::Save(char* pData, unsigned int& size, char argument)
+bool Configuration::Save(char*& pData, unsigned int& size, char argument)
 {
 	BinarySerializer serializer;
 
@@ -588,7 +706,7 @@ bool Configuration::Save(char* pData, unsigned int& size, char argument)
 	return true;
 }
 
-bool Configuration::Load(char* pData)
+bool Configuration::Load(char*& pData, char argument)
 {
 	BinarySerializer serializer;
 

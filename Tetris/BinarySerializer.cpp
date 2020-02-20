@@ -34,6 +34,23 @@ void BinarySerializer::TakeUshort(char*& pData, int& val)
 	pData += sizeof(unsigned short);
 }
 
+void BinarySerializer::PutChar(char*& pData, int val, unsigned int& totalSize)
+{
+	unsigned int size = sizeof(char);
+	if (pData)
+	{
+		memcpy(pData, &val, size);
+		pData += size;
+	}
+	totalSize += size;
+}
+
+void BinarySerializer::TakeChar(char*& pData, int& val)
+{
+	val = *(char*)pData;
+	pData += sizeof(char);
+}
+
 void BinarySerializer::PutBool(char*& pData, bool val, unsigned int& totalSize)
 {
 	unsigned int size = sizeof(unsigned char);
@@ -96,7 +113,7 @@ void BinarySerializer::PutUshortArray(char*& pData, vector<int>& vecVals, unsign
 	{
 		if (vecVals.back() != *it)
 		{
-			arraySize = it + 1 - vecVals.begin();
+			arraySize = it + 2 - vecVals.begin();
 			break;
 		}
 	}
@@ -105,6 +122,7 @@ void BinarySerializer::PutUshortArray(char*& pData, vector<int>& vecVals, unsign
 	{
 		// array size
 		memcpy(pData, &arraySize, sizeof(unsigned char));
+		pData += sizeof(unsigned char);
 		// array content
 		for (vector<int>::iterator it = vecVals.begin(); it != vecVals.begin() + arraySize; it++)
 		{
@@ -112,7 +130,7 @@ void BinarySerializer::PutUshortArray(char*& pData, vector<int>& vecVals, unsign
 			pData += sizeof(unsigned short);
 		}
 	}
-	unsigned int size = static_cast<unsigned int>((unsigned char)arraySize + sizeof(unsigned short) * arraySize);
+	unsigned int size = static_cast<unsigned int>(sizeof(unsigned char) + sizeof(unsigned short) * arraySize);
 	totalSize += size;
 }
 
@@ -138,7 +156,7 @@ void BinarySerializer::PutFloatArray(char*& pData, vector<float>& vecVals, unsig
 	{
 		if (vecVals.back() != *it)
 		{
-			arraySize = it + 1 - vecVals.begin();
+			arraySize = it + 2 - vecVals.begin();
 			break;
 		}
 	}
@@ -147,6 +165,7 @@ void BinarySerializer::PutFloatArray(char*& pData, vector<float>& vecVals, unsig
 	{
 		// array size
 		memcpy(pData, &arraySize, sizeof(unsigned char));
+		pData += sizeof(unsigned char);
 		// array content
 		for (vector<float>::iterator it = vecVals.begin(); it != vecVals.begin() + arraySize; it++)
 		{

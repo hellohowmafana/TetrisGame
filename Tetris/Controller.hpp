@@ -1,24 +1,29 @@
 #pragma once
 #include "GameFrame.hpp"
 #include "Musician.hpp"
+#include "Configurable.hpp"
+
 class Drawer;
 class Recorder;
 
 enum class GameState
 {
-	None, Start, Pause, End, ResumeDelay, BlinkLight, BlinkNormal, RollUp, RollDown
+	None, ResourceInitialized, Start, Pause, End, ResumeDelay, BlinkLight, BlinkNormal, RollUp, RollDown
 };
 
 enum class Mode
 {
-	None, Record, Replay
+	Normal, Replay
 };
 
-class Controller
+class Controller : public Configurable
 {
 public:
 	static Controller singleton;
-	void Initialize(Configuration* pConfiguration);
+
+	bool OnUpdate(Configuration* pConfiguration);
+	bool OnDeinitialize();
+
 	void SetHWnd(HWND hWnd);
 	void SetGameFrame(GameFrame* pGameFrame);
 
@@ -28,7 +33,6 @@ public:
 	Musician* GetMusician();
 	void SetRecorder(Recorder* pRecorder);
 
-	bool IsInitialized();
 	bool IsResourceInitialized();
 	GameState GetGameState();
 	bool IsStarted();
@@ -48,6 +52,8 @@ public:
 	void End();
 	void Pause();
 	void Resume();
+
+	void InitializeGame();
 	void Restart();
 
 	bool SaveGame(wstring archive);
@@ -56,6 +62,8 @@ public:
 	bool StartRecord();
 	bool EndRecord();
 	bool PlayRecord(wstring record);
+
+	bool IsReplay();
 
 public:
 	GameFrame* GetGameFrame();
@@ -129,7 +137,6 @@ private:
 	Musician* pMusician;
 	Recorder* pRecorder;
 	Configuration* pConfiguration;
-	bool initialized;
 	GameState gameState;
 	bool isShapeLighting;
 	bool startingDrop;
@@ -151,5 +158,7 @@ private:
 	bool soundOn;
 	bool bgmOn;
 	bool record;
+
+	Mode mode;
 };
 

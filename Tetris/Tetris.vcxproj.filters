@@ -40,6 +40,15 @@
     <Filter Include="Header Files\Dialog">
       <UniqueIdentifier>{00933298-ee83-4785-a923-3ec56904339a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Interface">
+      <UniqueIdentifier>{3ad25809-06ed-49b4-97e9-ac593577c75c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\base">
+      <UniqueIdentifier>{43d7954d-24d3-4931-a4cd-0a82238e715d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\base">
+      <UniqueIdentifier>{0994e18d-0ba0-4a75-9ca3-1cbb84b46857}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="framework.h">
@@ -81,9 +90,6 @@
     <ClInclude Include="Archive.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="ISerializable.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Frame.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -117,9 +123,6 @@
     <ClInclude Include="Recorder.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="IBinarySerializable.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="BinarySerializer.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -129,8 +132,17 @@
     <ClInclude Include="SaveDialog.hpp">
       <Filter>Header Files\Dialog</Filter>
     </ClInclude>
-    <ClInclude Include="ReplayDialog.hpp">
+    <ClInclude Include="PlayDialog.hpp">
       <Filter>Header Files\Dialog</Filter>
+    </ClInclude>
+    <ClInclude Include="ISerializable.hpp">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="IBinarySerializable.hpp">
+      <Filter>Header Files\Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Configurable.hpp">
+      <Filter>Header Files\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -206,8 +218,11 @@
     <ClCompile Include="SaveDialog.cpp">
       <Filter>Source Files\Dialog</Filter>
     </ClCompile>
-    <ClCompile Include="ReplayDialog.cpp">
+    <ClCompile Include="PlayDialog.cpp">
       <Filter>Source Files\Dialog</Filter>
+    </ClCompile>
+    <ClCompile Include="Configurable.cpp">
+      <Filter>Source Files\base</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

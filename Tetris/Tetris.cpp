@@ -10,6 +10,9 @@
 #include "Configuration.hpp"
 #include "Drawer.hpp"
 #include "GameFrame.hpp"
+#include "PromptFrame.hpp"
+#include "InfoFrame.hpp"
+#include "Background.hpp"
 #include "Controller.hpp"
 #include "SaveDialog.hpp"
 #include "LoadDialog.hpp"
@@ -163,7 +166,6 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pGameFrame->SetPromptFrame(pPromptFrame);
    pGameFrame->SetInfoFrame(pInfoFrame);
    pGameFrame->Initialize(pConfiguration);
-   pGameFrame->InitializeGame();
 
    Background* pBackground = &Background::singleton;
    pBackground->Initialize(pConfiguration);
@@ -172,7 +174,9 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 
    Drawer* pDrawer = &Drawer::singleton;
    pDrawer->SetHWnd(hWnd);
-   pDrawer->Initialize(pController, pGameFrame, pPromptFrame, pInfoFrame, pBackground);
+   pDrawer->SetController(pController);
+   pDrawer->SetGraphics(pGameFrame, pPromptFrame, pInfoFrame, pBackground);
+   pDrawer->Initialize(pConfiguration);
 
    Musician* pMusician = &Musician::singleton;
    pMusician->InitializeAsync(pConfiguration);
@@ -231,9 +235,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 				break;
             case ID_RECORD_PLAY:
-                if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_PLAY), hWnd, ReplayDialog::ReplayDialogProc))
+                if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_PLAY), hWnd, PlayDialog::PlayDialogProc))
                 {
-                    Controller::singleton.PlayRecord(ReplayDialog::singleton.GetSelectedRecord());
+                    Controller::singleton.PlayRecord(PlayDialog::singleton.GetSelectedRecord());
                     InvalidateRect(hWnd, NULL, FALSE);
                 }
                 break;

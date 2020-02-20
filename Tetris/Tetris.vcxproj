@@ -187,6 +187,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="Archive.hpp" />
     <ClInclude Include="BinarySerializer.h" />
     <ClInclude Include="IBinarySerializable.hpp" />
+    <ClInclude Include="Configurable.hpp" />
     <ClInclude Include="LoadDialog.hpp" />
     <ClInclude Include="Background.hpp" />
     <ClInclude Include="Frame.hpp" />
@@ -201,7 +202,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="GameFrame.hpp" />
     <ClInclude Include="Music.hpp" />
     <ClInclude Include="Musician.hpp" />
-    <ClInclude Include="ReplayDialog.hpp" />
+    <ClInclude Include="PlayDialog.hpp" />
     <ClInclude Include="PromptFrame.hpp" />
     <ClInclude Include="Recorder.hpp" />
     <ClInclude Include="RenderMode.hpp" />
@@ -218,6 +219,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="AnimatedGifPoller.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="BinarySerializer.cpp" />
+    <ClCompile Include="Configurable.cpp" />
     <ClCompile Include="LoadDialog.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Frame.cpp" />
@@ -230,7 +232,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="GameFrame.cpp" />
     <ClCompile Include="Music.cpp" />
     <ClCompile Include="Musician.cpp" />
-    <ClCompile Include="ReplayDialog.cpp" />
+    <ClCompile Include="PlayDialog.cpp" />
     <ClCompile Include="PromptFrame.cpp" />
     <ClCompile Include="Recorder.cpp" />
     <ClCompile Include="SaveDialog.cpp" />

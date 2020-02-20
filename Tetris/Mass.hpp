@@ -79,6 +79,6 @@ public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
 
-	virtual bool Save(char* pData, unsigned int& size, char argument);
-	virtual bool Load(char* pData);
+	virtual bool Save(char*& pData, unsigned int& size, char argument = 0);
+	virtual bool Load(char*& pData, char argument = 0);
 };

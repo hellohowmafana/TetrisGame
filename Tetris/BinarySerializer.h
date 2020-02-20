@@ -12,6 +12,9 @@ public:
 	void PutUshort(char*& pData, int val, unsigned int& totalSize);
 	void TakeUshort(char*& pData, int& val);
 
+	void PutChar(char*& pData, int val, unsigned int& totalSize);
+	void TakeChar(char*& pData, int& val);
+
 	void PutBool(char*& pData, bool val, unsigned int& totalSize);
 	void TakeBool(char*& pData, bool& val);
 

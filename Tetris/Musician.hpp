@@ -4,6 +4,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "Configurable.hpp"
 
 class Configuration;
 class Musician;
@@ -14,7 +15,7 @@ enum class MusicianEvent { Initialize, Deinitialize, Play, Stop, Pause, Resume, 
 
 typedef void (CALLBACK* MusicianCallback)(Musician* pMusician, MusicianEvent musicianEvent);
 
-class Musician
+class Musician : public Configurable
 {
 public:
 	static Musician singleton;
@@ -47,9 +48,8 @@ public:
 	void PostResume(MusicType musicType);
 
 	// sync methods
-	bool IsInitialized();
-	void Initialize(Configuration* pConfiguration);
-	void Deinitialize();
+	bool OnUpdate(Configuration* pConfiguration);
+	bool OnDeinitialize();
 
 	bool Play(MusicType musicType);
 	bool Stop(MusicType musicType);

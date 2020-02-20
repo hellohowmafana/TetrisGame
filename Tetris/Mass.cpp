@@ -465,7 +465,7 @@ bool Mass::Load(const wstring label, wstring value)
 	return true;
 }
 
-bool Mass::Save(char* pData, unsigned int& size, char argument)
+bool Mass::Save(char*& pData, unsigned int& size, char argument)
 {
 	typedef map<char, vector<unsigned short>> ColorUnits;
 	ColorUnits colorUnits;
@@ -486,7 +486,7 @@ bool Mass::Save(char* pData, unsigned int& size, char argument)
 	{
 		vector<unsigned short>& units = itc->second;
 		binarySerializer.PutUshort(pData, static_cast<int>(units.size()), size);
-		binarySerializer.PutUchar(pData, itc->first, size);
+		binarySerializer.PutChar(pData, itc->first, size);
 		for (vector<unsigned short>::iterator itu = units.begin(); itu != units.end(); itu++)
 		{
 			binarySerializer.PutUshort(pData, *itu, size);
@@ -496,7 +496,7 @@ bool Mass::Save(char* pData, unsigned int& size, char argument)
 	return true;
 }
 
-bool Mass::Load(char* pData)
+bool Mass::Load(char*& pData, char argument)
 {
 	typedef map<char, vector<unsigned short>> ColorUnits;
 	ColorUnits colorUnits;
@@ -508,7 +508,7 @@ bool Mass::Load(char* pData)
 		int unitsSize;
 		binarySerializer.TakeUshort(pData, unitsSize);
 		int color;
-		binarySerializer.TakeUchar(pData, color);
+		binarySerializer.TakeChar(pData, color);
 		for (int j = 0; j < unitsSize; j++)
 		{
 			int unit;
