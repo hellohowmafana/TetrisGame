@@ -18,6 +18,7 @@ public:
 	void SetUseRandomColor(bool useRandomColor);
 	TetrisShape* Clone(TetrisShape* pTetrisShape);
 	TetrisType* GetType();
+	bool IsPenetrable();
 	TetrisRotation GetRotation();
 
 	void CenterHorizontal(bool leanLeft, bool careOffset);

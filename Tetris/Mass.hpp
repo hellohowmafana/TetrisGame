@@ -23,6 +23,7 @@ public:
 
 	bool IsEmpty();
 	int GetTopmostSolidY(int x, int yFrom);
+	int GetBottommostBlankY(int x);
 	bool IsTouched(TetrisShape* pTetrisShape);
 	int CalculateDistanceY(TetrisShape* pTetrisShape);
 

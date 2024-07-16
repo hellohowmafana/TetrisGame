@@ -90,6 +90,17 @@ bool Controller::IsStarting()
 		GameState::Pause != gameState;
 }
 
+bool Controller::IsBlinking()
+{
+	return GameState::BlinkLight == gameState ||
+		GameState::BlinkNormal == gameState;
+}
+
+bool Controller::IsAvailable()
+{
+	return IsStarting() && !IsBlinking();
+}
+
 void Controller::OnKeyDown(WPARAM keyCode)
 {
 	switch (keyCode)
@@ -191,7 +202,7 @@ void Controller::OnKeyUp(WPARAM keyCode)
 
 void Controller::Rotate()
 {
-	if (!IsStarting())
+	if (!IsAvailable())
 		return;
 	if (pGameFrame->Rotate())
 	{
@@ -202,7 +213,7 @@ void Controller::Rotate()
 
 void Controller::StepHorizontal(bool left)
 {
-	if (!IsStarting())
+	if (!IsAvailable())
 		return;
 	if (left)
 	{
@@ -218,12 +229,11 @@ void Controller::StepHorizontal(bool left)
 
 void Controller::StepDown()
 {
-	if (!IsStarting())
+	if (!IsAvailable())
 		return;
 	if (pGameFrame->StepDown())
 	{
 		// dropped
-		EndStepDown();
 		EndDrop();
 	}
 	else
@@ -236,7 +246,7 @@ void Controller::StepDown()
 
 void Controller::Drop()
 {
-	if (!IsStarting())
+	if (!IsAvailable())
 		return;
 	pGameFrame->Drop();
 	EndStepDown();
@@ -246,16 +256,16 @@ void Controller::Drop()
 void Controller::EndDrop()
 {
 	PlayMusic(MusicType::Dropped);
+	if (pGameFrame->IsFull())
+	{
+		End();
+		return;
+	}
 	if (pGameFrame->Union() > 0)
 	{
 		InvalidateDraw();
 		PlayMusic(MusicType::Remove);
 		StartRemoveBlink();
-		return;
-	}
-	if (pGameFrame->IsFull())
-	{
-		End();
 		return;
 	}
 	pGameFrame->RebornTetrisShape();

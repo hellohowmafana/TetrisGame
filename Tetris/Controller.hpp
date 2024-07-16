@@ -27,6 +27,8 @@ public:
 	GameState GetGameState();
 	bool IsStarted();
 	bool IsStarting();
+	bool IsBlinking();
+	bool IsAvailable();
 
 	void OnKeyDown(WPARAM keyCode);
 	void OnKeyUp(WPARAM keyCode);

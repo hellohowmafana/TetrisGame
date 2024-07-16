@@ -270,6 +270,10 @@ void Drawer::DrawElements()
 			DrawSplash(pGameFrame);
 		}
 
+#if _DEBUG
+		DrawDebugText();
+#endif
+
 		BitBlt(hdc, 0, 0, dcWidth, dcHeight, hdcCmp, 0, 0, SRCCOPY);
 	}
 }
@@ -939,3 +943,20 @@ void Drawer::BackgroundFrameChangedProc(Bitmap* pBitmap, SHORT sLoopedCount, UIN
 {
 	InvalidateRect(hWnd, NULL, FALSE);
 }
+
+#if _DEBUG
+LPCWCH Drawer::pcDebugText;
+
+void Drawer::DrawDebugText()
+{
+	Font font(L"Arial", 16);
+	PointF origin(0.0f, 0.0f);
+	SolidBrush blackBrush(Color(255, 0, 0, 0));
+	Graphics(hdcCmp).DrawString(Drawer::pcDebugText, -1, &font, origin, &blackBrush);
+}
+
+void Drawer::SetDebugText(LPCWCH pcText)
+{
+	Drawer::pcDebugText = pcText;
+}
+#endif

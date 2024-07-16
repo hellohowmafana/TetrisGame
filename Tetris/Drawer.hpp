@@ -120,5 +120,14 @@ private:
 	HDC hdcCmp;
 	HBITMAP hbmCmp;
 	LONG dcWidth, dcHeight;
+
+#if _DEBUG
+private:
+	static LPCWCH pcDebugText;
+
+	void DrawDebugText();
+public:
+	static void SetDebugText(LPCWCH pcText);
+#endif
 };
 

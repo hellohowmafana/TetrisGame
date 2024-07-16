@@ -3,7 +3,6 @@
 #include "InfoFrame.hpp"
 #include "Level.hpp"
 GameFrame GameFrame::singleton;
-
 GameFrame::GameFrame()
 {
 }
@@ -99,28 +98,18 @@ void GameFrame::StepRight()
 bool GameFrame::StepDown()
 {
 	bool isDropped = false;
+	
 	if (tetrisShape.IsOnBottom())
+	{
+		isDropped = true;
+	}
+	else if (mass.IsTouched(&tetrisShape))
 	{
 		isDropped = true;
 	}
 	else if (tetrisShape.StepDown())
 	{
-		if (!tetrisShape.GetType()->penetrable)
-		{
-			if (mass.IsTouched(&tetrisShape))
-			{
-				tetrisShape.StepUp();
-				isDropped = true;
-			}
-		}
-		else
-		{
-			if (tetrisShape.GetTop() - 1 == mass.FindBottommostBlankY(&tetrisShape, tetrisShape.GetLeft()))
-			{
-				tetrisShape.StepUp();
-				isDropped = true;
-			}
-		}
+		isDropped = false;
 	}
 
 	return isDropped;
@@ -128,7 +117,7 @@ bool GameFrame::StepDown()
 
 void GameFrame::Drop()
 {
-	if (!tetrisShape.GetType()->penetrable)
+	if (!tetrisShape.IsPenetrable())
 	{
 		int distance = mass.CalculateDistanceY(&tetrisShape);
 		tetrisShape.Move(0, distance - 1);

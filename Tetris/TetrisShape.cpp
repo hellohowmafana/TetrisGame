@@ -78,6 +78,11 @@ TetrisType* TetrisShape::GetType()
 	return pTetrisType;
 }
 
+bool TetrisShape::IsPenetrable()
+{
+	return pTetrisType->penetrable;
+}
+
 TetrisRotation TetrisShape::GetRotation()
 {
 	return rotation;
