@@ -6,14 +6,10 @@
 class LoadDialog
 {
 public:
-	static INT_PTR CALLBACK LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-	wchar_t* GetSelectedArchive();
-
-	static LoadDialog singleton;
+	static INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	static wchar_t* GetSelectedArchive();
 
 private:
-	LoadDialog() {};
-
-	wchar_t szArchive[MAX_ARCHIVE_NAME];
+	static wchar_t szArchive[MAX_ARCHIVE_NAME];
 };
 

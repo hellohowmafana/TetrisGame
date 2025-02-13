@@ -6,14 +6,10 @@
 class SaveDialog
 {
 public:
-	static INT_PTR CALLBACK SaveDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
-	wchar_t* GetArchiveName();
-
-	static SaveDialog singleton;
+	static INT_PTR CALLBACK DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam);
+	static wchar_t* GetArchiveName();
 
 private:
-	SaveDialog() {};
-
-	wchar_t szArchive[MAX_ARCHIVE_NAME];
+	static wchar_t szArchive[MAX_ARCHIVE_NAME];
 };
 

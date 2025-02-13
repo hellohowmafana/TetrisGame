@@ -20,60 +20,95 @@
 #undef APSTUDIO_READONLY_SYMBOLS
 
 /////////////////////////////////////////////////////////////////////////////
+// Chinese (Simplified, China) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_SETTINGINPUT DIALOGEX 0, 0, 218, 132
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Input"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,83,97,50,14
+    PUSHBUTTON      "取消",IDCANCEL,138,97,50,14
+    LTEXT           "左移",IDC_STATIC,36,24,18,8
+    LTEXT           "右移",IDC_STATIC,106,24,18,8
+    LTEXT           "转向",IDC_STATIC,36,41,18,8
+    LTEXT           "下降",IDC_STATIC,106,41,18,8
+    EDITTEXT        IDE_LEFT,56,20,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDE_RIGHT,126,20,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDE_ROTATE,56,37,40,14,ES_AUTOHSCROLL
+    EDITTEXT        IDE_DOWN,126,37,40,14,ES_AUTOHSCROLL
+    LTEXT           "速降",IDC_STATIC,106,58,18,8
+    EDITTEXT        IDE_DROP,126,54,40,14,ES_AUTOHSCROLL
+    LTEXT           "暂停",IDC_STATIC,36,76,18,8
+    EDITTEXT        IDE_PAUSE,56,72,40,14,ES_AUTOHSCROLL
+    LTEXT           "重开",IDC_STATIC,106,76,18,8
+    EDITTEXT        IDE_RESTART,126,72,40,14,ES_AUTOHSCROLL
+END
+
+IDD_SETTINGGAME DIALOGEX 0, 0, 215, 164
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION " "
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "确定",IDOK,79,132,50,14
+    PUSHBUTTON      "取消",IDCANCEL,134,132,50,14
+    LTEXT           "行数",IDC_STATIC,39,80,18,8
+    GROUPBOX        "尺寸",IDC_STATIC,18,17,176,108
+    LTEXT           "列数",IDC_STATIC,39,99,18,8
+    CONTROL         "小",IDR_SML,"Button",BS_AUTORADIOBUTTON,38,34,25,10
+    CONTROL         "中",IDR_MID,"Button",BS_AUTORADIOBUTTON,95,34,25,10
+    CONTROL         "大",IDR_BIG,"Button",BS_AUTORADIOBUTTON,152,34,25,10
+    CONTROL         "自定义",IDR_CUSTOM,"Button",BS_AUTORADIOBUTTON,38,57,42,10
+    CONTROL         "",IDS_ROW,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | TBS_ENABLESELRANGE | WS_TABSTOP,71,78,110,15
+    CONTROL         "",IDS_COL,"msctls_trackbar32",TBS_BOTH | TBS_NOTICKS | TBS_ENABLESELRANGE | WS_TABSTOP,71,97,110,15
+    LTEXT           "",IDC_ROW,60,80,8,8
+    LTEXT           "",IDC_COL,60,99,8,8
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_SETTINGINPUT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 211
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 125
+    END
+
+    IDD_SETTINGGAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 208
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 157
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // Chinese (Simplified, China) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
 // English (United States) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Icon
-//
-
-// Icon with lowest ID value placed first to ensure application icon
-// remains consistent on all systems.
-IDI_TETRIS              ICON                    "Tetris.ico"
-
-IDI_SMALL               ICON                    "small.ico"
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Menu
-//
-
-IDC_TETRIS MENU
-BEGIN
-    POPUP "&File"
-    BEGIN
-        MENUITEM "&Save",                       ID_SAVE
-        MENUITEM "&Load",                       ID_LOAD
-        MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       IDM_EXIT
-    END
-    POPUP "&Music"
-    BEGIN
-        MENUITEM "&Bgm",                        ID_MUSIC_BGM
-        MENUITEM "&Sound",                      ID_MUSIC_SOUND
-    END
-    POPUP "&Help"
-    BEGIN
-        MENUITEM "&About ...",                  IDM_ABOUT
-    END
-END
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Accelerator
-//
-
-IDC_TETRIS ACCELERATORS
-BEGIN
-    "?",            IDM_ABOUT,              ASCII,  ALT
-    "/",            IDM_ABOUT,              ASCII,  ALT
-END
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -109,6 +144,61 @@ BEGIN
     END
 END
 #endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_TETRIS              ICON                    "Tetris.ico"
+
+IDI_SMALL               ICON                    "small.ico"
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDC_TETRIS MENU
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&Save",                       ID_SAVE
+        MENUITEM "&Load",                       ID_LOAD
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit",                       IDM_EXIT
+    END
+    POPUP "&Music"
+    BEGIN
+        MENUITEM "&Bgm",                        ID_MUSIC_BGM
+        MENUITEM "&Sound",                      ID_MUSIC_SOUND
+    END
+    POPUP "&Setting"
+    BEGIN
+        MENUITEM "&Input",                      ID_SETTING_INPUT
+        MENUITEM "&Game",                       ID_SETTING_GAME
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About ...",                  IDM_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDC_TETRIS ACCELERATORS
+BEGIN
+    "?",            IDM_ABOUT,              ASCII,  ALT
+    "/",            IDM_ABOUT,              ASCII,  ALT
+END
 
 
 #ifdef APSTUDIO_INVOKED

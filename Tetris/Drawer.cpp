@@ -93,10 +93,10 @@ bool Drawer::Initialize(Controller* pController, GameFrame* pGameFrame,
 		logFont.lfUnderline = FALSE;
 		logFont.lfStrikeOut = FALSE;
 		logFont.lfCharSet = DEFAULT_CHARSET;
-		logFont.lfOutPrecision=OUT_DEFAULT_PRECIS;
-		logFont.lfClipPrecision=CLIP_DEFAULT_PRECIS;
-		logFont.lfQuality=DEFAULT_QUALITY;
-		logFont.lfPitchAndFamily=FF_DONTCARE;
+		logFont.lfOutPrecision = OUT_DEFAULT_PRECIS;
+		logFont.lfClipPrecision = CLIP_DEFAULT_PRECIS;
+		logFont.lfQuality = DEFAULT_QUALITY;
+		logFont.lfPitchAndFamily = FF_DONTCARE;
 		wcscpy(logFont.lfFaceName, pInfoFrame->fontFace.c_str());
 		pfntInfo = new Font(hdc, &logFont);
 		pbrsInfo = new SolidBrush(pInfoFrame->colorInfo);
@@ -573,7 +573,8 @@ void Drawer::DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap)
 	Graphics(hdcCmp).DrawImage(pBitmap, rect);
 }
 
-void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush)
+template <typename T>
+void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, T* pFactor)
 {
 	if (!IsValid()) return;
 
@@ -581,61 +582,41 @@ void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush)
 
 	for (int i = 0; i < pUnitFrame->sizeX; i++)
 	{
-		DrawUnit(pUnitFrame, i, y, pBrush);
+		DrawUnit(pUnitFrame, i, y, pFactor);
 	}
 }
 
-void Drawer::DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap)
-{
-	if (!IsValid()) return;
-
-	if (!pUnitFrame->ValidateY(y)) return;
-
-	for (int i = 0; i < pUnitFrame->sizeX; i++)
-	{
-		DrawUnit(pUnitFrame, i, y, pBitmap);
-	}
-}
-
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush)
+template <typename T>
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, T* pFactor)
 {
 	if (!IsValid()) return;
 	
 	if (1 == blankRate)
 		return;
 
-	int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
+	int count = pUnitFrame->sizeX * pUnitFrame->sizeY;
 	vector<bool> vecSolid(count);
 	Utility::RandomTrue(&vecSolid, (1 - blankRate), false);
 	for (int i = 0; i < count; i++)
 	{
 		if (vecSolid[i])
 		{
-			int x = i % pUnitFrame->GetWidth();
-			int y = i / pUnitFrame->GetWidth();
-			DrawUnit(pUnitFrame, x, y, pBrush);
+			int x = i % pUnitFrame->sizeX;
+			int y = i / pUnitFrame->sizeX;
+			DrawUnit(pUnitFrame, x, y, pFactor);
 		}
 	}
 }
 
-void Drawer::DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap)
+template<typename T>
+void Drawer::DrawUnits(UnitFrame* pUnitFrame, vector<int> indexes, int count, T* pFactor)
 {
-	if (!IsValid()) return;
-	
-	if (1 == blankRate)
-		return;
-
-	int count = pUnitFrame->GetWidth() * pUnitFrame->GetHeight();
-	vector<bool> vecSolid(count);
-	Utility::RandomTrue(&vecSolid, (1 - blankRate), false);
-	for (int i = 0; i < count; i++)
+	for (size_t i = 0; i < count; i++)
 	{
-		if (vecSolid[i])
-		{
-			int x = i % pUnitFrame->GetWidth();
-			int y = i / pUnitFrame->GetWidth();
-			DrawUnit(pUnitFrame, x, y, pBitmap);
-		}
+		int ix = indexes[i];
+		int x = ix % pUnitFrame->sizeX;
+		int y = ix / pUnitFrame->sizeX;
+		DrawUnit(pUnitFrame, x, y, pFactor);
 	}
 }
 
@@ -744,12 +725,12 @@ void Drawer::DrawInfo(InfoFrame* pInfoFrame)
 	if (!IsValid()) return;
 
 	wstring labels;
-	labels.append(L"Level\n\n");
-	labels.append(L"Score\n\n");
-	labels.append(L"StartLine\n\n");
+	labels.append(L"Level\n");
+	labels.append(L"Score\n");
+	labels.append(L"StartLine\n");
 	wstring infos;
-	infos.append(to_wstring(pInfoFrame->GetLevel())).append(L"\n\n");
-	infos.append(to_wstring(pInfoFrame->GetScore())).append(L"\n\n");
+	infos.append(to_wstring(pInfoFrame->GetLevel())).append(L"\n");
+	infos.append(to_wstring(pInfoFrame->GetScore())).append(L"\n");
 	infos.append(to_wstring(pInfoFrame->GetStartLine()));
 
 	RectF rcInfo((REAL)pInfoFrame->left, (REAL)pInfoFrame->top,

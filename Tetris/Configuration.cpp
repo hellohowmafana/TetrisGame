@@ -123,6 +123,15 @@ bool Configuration::LoadParameters()
 	rollTimespan = GetConfigurationInt(keyGame, keyRollTimespan);
 	resumeDelayTimespan = GetConfigurationInt(keyGame, keyResumeDelayTimespan);
 
+	// input
+	actionLeft = GetConfigurationInt(keyInput, keyActionLeft);
+	actionRight = GetConfigurationInt(keyInput, keyActionRight);
+	actionDown = GetConfigurationInt(keyInput, keyActionDown);
+	actionRotate = GetConfigurationInt(keyInput, keyActionRotate);
+	actionDrop = GetConfigurationInt(keyInput, keyActionDrop);
+	operationPause = GetConfigurationInt(keyInput, keyOperationPause);
+	operationRestart = GetConfigurationInt(keyInput, keyOperationRestart);
+
 	// music
 	soundOn = GetConfigurationBool(keyMusic, keySoundOn);
 	bgmOn = GetConfigurationBool(keyMusic, keyBgmOn);
@@ -147,7 +156,7 @@ bool Configuration::LoadLevels()
 {
 	vector<Level>* pvecLevels = &Level::vecLevels;
 	pvecLevels->resize(maxLevel);
-	for (int i = 0; i < maxLevel; i++)
+	for (UINT i = 0; i < maxLevel; i++)
 	{
 		pvecLevels->at(i).level = i + 1;
 		pvecLevels->at(i).minScore =
@@ -337,11 +346,6 @@ void Configuration::FindFiles(wstring path, vector<wstring>* pvecFiles)
 	}
 }
 
-bool Configuration::SaveWindowPostion(int w, int h, int l, int t, bool c)
-{
-	return false;
-}
-
 wchar_t* Configuration::GetConfigurationString(wstring section, wstring key)
 {
 	GetPrivateProfileString(section.c_str(), key.c_str(), L"", buffer, bufferSize, pathConfiguration.c_str());
@@ -471,4 +475,87 @@ bool Configuration::ParseTetrisTypeDeclaration(wstring str, wstring& name, bool&
 	{
 		return false;
 	}
+}
+
+void Configuration::LoadPreconfiguration(int rowCount, int colCount)
+{
+	borderThickness = 5, separatorThickness = 2;
+	unitWidth = 20;
+	frameLeft = 60, frameTop = 60;
+	frameSizeX = colCount, frameSizeY = rowCount;
+	int frameWidth = borderThickness * 2 + separatorThickness * (frameSizeX + 1) + unitWidth * frameSizeX;
+	int frameHeight = borderThickness * 2 + separatorThickness * (frameSizeY + 1) + unitWidth * frameSizeY;
+	promptFrameLeft = 120 + frameWidth, promptFrameTop = 70;
+	promptFrameSizeX = 5, promptFrameSizeY = 6;
+	int promptFrameWidth = borderThickness * 2 + separatorThickness * (promptFrameSizeX + 1) + unitWidth * promptFrameSizeX;
+	int promptFrameHeight = borderThickness * 2 + separatorThickness * (promptFrameSizeY + 1) + unitWidth * promptFrameSizeY;
+	infoFrameLeft = 60 + frameWidth + frameLeft, infoFrameTop = 40 + promptFrameHeight + promptFrameTop;
+	infoFrameSizeX = 120, infoFrameSizeY = 200;
+	windowWidth = frameWidth + promptFrameWidth + 180, windowHeight = frameHeight + 180;
+}
+
+bool Configuration::SavePositions()
+{
+	bool success = true;
+	success &= SaveConfigurationInt(keyDisplay, keyBorderThickness, borderThickness);
+	success &= SaveConfigurationInt(keyDisplay, keySeparatorThickness, separatorThickness);
+	success &= SaveConfigurationInt(keyDisplay, keyUnitWidth, unitWidth);
+	success &= SaveConfigurationIntPair(keyDisplay, keyFramePostion, frameLeft, frameTop);
+	success &= SaveConfigurationIntPair(keyDisplay, keyFrameSize, frameSizeX, frameSizeY);
+	success &= SaveConfigurationIntPair(keyDisplay, keyPromptFramePostion, promptFrameLeft, promptFrameTop);
+	success &= SaveConfigurationIntPair(keyDisplay, keyPromptFrameSize, promptFrameSizeX, promptFrameSizeY);
+	success &= SaveConfigurationIntPair(keyDisplay, keyInfoFramePosition, infoFrameLeft, infoFrameTop);
+	success &= SaveConfigurationIntPair(keyDisplay, keyInfoFrameSize, infoFrameSizeX, infoFrameSizeY);
+	success &= SaveConfigurationIntPair(keyWindow, keyWindowSize, windowWidth, windowHeight);
+	return success;
+}
+
+void Configuration::LoadInput(unsigned char left, unsigned char right, unsigned char down, unsigned char drop, unsigned char rotate, unsigned char pause, unsigned char restart)
+{
+	actionLeft = left;
+	actionRight = right;
+	actionDown = down;
+	actionDrop = drop;
+	actionRotate = rotate;
+	operationPause = pause;
+	operationRestart = restart;
+}
+
+bool Configuration::SaveInput()
+{
+	bool success = true;
+	success &= SaveConfigurationInt(keyInput, keyActionLeft, actionLeft);
+	success &= SaveConfigurationInt(keyInput, keyActionRight, actionRight);
+	success &= SaveConfigurationInt(keyInput, keyActionDown, actionDown);
+	success &= SaveConfigurationInt(keyInput, keyActionRotate, actionRotate);
+	success &= SaveConfigurationInt(keyInput, keyActionDrop, actionDrop);
+	success &= SaveConfigurationInt(keyInput, keyOperationPause, operationPause);
+	success &= SaveConfigurationInt(keyInput, keyOperationRestart, operationRestart);
+	return success;
+}
+
+bool Configuration::SaveBgmOn(bool bgm)
+{
+	return SaveConfigurationBool(keyMusic, keyBgmOn, bgm);
+}
+
+bool Configuration::SaveSoundOn(bool sound)
+{
+	return SaveConfigurationBool(keyMusic, keySoundOn, sound);
+}
+
+bool Configuration::SaveConfigurationInt(wstring section, wstring key, int val)
+{
+	return 0 != WritePrivateProfileString(section.c_str(), key.c_str(), to_wstring(val).c_str(), pathConfiguration.c_str());
+}
+
+bool Configuration::SaveConfigurationIntPair(wstring section, wstring key, int val1, int val2)
+{
+	return 0 != WritePrivateProfileString(section.c_str(), key.c_str(), (to_wstring(val1) + L',' + to_wstring(val2)).c_str(),
+		pathConfiguration.c_str());
+}
+
+bool Configuration::SaveConfigurationBool(wstring section, wstring key, bool val)
+{
+	return 0 != WritePrivateProfileString(section.c_str(), key.c_str(), to_wstring(val ? 1 : 0).c_str(), pathConfiguration.c_str());
 }

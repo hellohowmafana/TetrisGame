@@ -2,7 +2,7 @@
 #include "resource.h"
 #include "Configuration.hpp"
 
-INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR LoadDialog::DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
@@ -17,7 +17,7 @@ INT_PTR LoadDialog::LoadDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARA
 		if (LOWORD(wParam) == IDOK)
 		{
 			HWND hlbArchive = GetDlgItem(hDlg, IDC_ARCHIVELIST);
-			DlgDirSelectEx(hDlg, singleton.szArchive, MAX_ARCHIVE_NAME, IDC_ARCHIVELIST);
+			DlgDirSelectEx(hDlg, szArchive, MAX_ARCHIVE_NAME, IDC_ARCHIVELIST);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
@@ -36,4 +36,4 @@ wchar_t* LoadDialog::GetSelectedArchive()
 	return szArchive;
 }
 
-LoadDialog LoadDialog::singleton;
+wchar_t LoadDialog::szArchive[MAX_ARCHIVE_NAME];

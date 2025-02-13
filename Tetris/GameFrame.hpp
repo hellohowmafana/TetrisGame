@@ -78,5 +78,8 @@ public:
 public:
 	virtual bool Save(const wstring label, wstring& value);
 	virtual bool Load(const wstring label, wstring value);
+
+public:
+	void UpdateSize(Configuration* pConfiguration);
 };
 

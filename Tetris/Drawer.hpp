@@ -50,10 +50,12 @@ private:
 	Rect* GetUnitRectangle(UnitFrame* pUnitFrame, int x, int y, Rect* pRect);
 	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, Brush* pBrush);
 	void DrawUnit(UnitFrame* pUnitFrame, int x, int y, Bitmap* pBitmap);
-	void DrawLine(UnitFrame* pUnitFrame, int y, Brush* pBrush);
-	void DrawLine(UnitFrame* pUnitFrame, int y, Bitmap* pBitmap);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Brush* pBrush);
-	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, Bitmap* pBitmap);
+	template <typename T>
+	void DrawLine(UnitFrame* pUnitFrame, int y, T* pFactor);
+	template <typename T>
+	void DrawUnits(UnitFrame* pUnitFrame, double blankRate, T* pFactor);
+	template <typename T>
+	void DrawUnits(UnitFrame* pUnitFrame, vector<int> indexes, int count, T* pFactor);
 	void DrawShape(UnitFrame* pUnitFrame, TetrisShape* pTetrisShape);
 	void DrawMass(GameFrame* pGameFrame, Mass* pMass);
 	void DrawMassLine(GameFrame* pGameFrame, MassLine* pMassLine, int y);

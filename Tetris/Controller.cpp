@@ -20,11 +20,24 @@ void Controller::Initialize(Configuration* pConfiguration)
 	this->rollTimespan = pConfiguration->rollTimespan;
 	this->resumeDelayTimespan = pConfiguration->resumeDelayTimespan;
 
+	UpdateInputSettings(pConfiguration);
+
 	soundOn = pConfiguration->soundOn;
 	bgmOn = pConfiguration->bgmOn;
 
 	initialized = true;
 	gameState = GameState::None;
+}
+
+void Controller::UpdateInputSettings(Configuration* pConfiguration)
+{
+	this->actionLeft = pConfiguration->actionLeft;
+	this->actionRight = pConfiguration->actionRight;
+	this->actionDown = pConfiguration->actionDown;
+	this->actionRotate = pConfiguration->actionRotate;
+	this->actionDrop = pConfiguration->actionDrop;
+	this->operationPause = pConfiguration->operationPause;
+	this->operationRestart = pConfiguration->operationRestart;
 }
 
 void Controller::SetHWnd(HWND hWnd)
@@ -103,47 +116,64 @@ bool Controller::IsAvailable()
 
 void Controller::OnKeyDown(WPARAM keyCode)
 {
-	switch (keyCode)
+	OnInput(keyCode, true);
+}
+
+void Controller::OnKeyUp(WPARAM keyCode)
+{
+	OnInput(keyCode, false);
+}
+
+void Controller::OnMouseDown(WPARAM buttonCode)
+{
+	OnInput(buttonCode, true);
+}
+
+void Controller::OnMouseUp(WPARAM buttonCode)
+{
+	OnInput(buttonCode, false);
+}
+
+void Controller::OnInput(WPARAM inputCode, bool isKeyDown)
+{
+	if (isKeyDown)
 	{
-	case VK_LEFT:
-		if (IsStarting())
+		if (inputCode == actionLeft)
 		{
-			if (!startingStepLeft)
+			if (IsStarting())
 			{
-				StepHorizontal(true);
-				StartStepHorizontal(true);
+				if (!startingStepLeft)
+				{
+					StepHorizontal(true);
+					StartStepHorizontal(true);
+				}
 			}
 		}
-		break;
-	case VK_RIGHT:
-		if (IsStarting())
+		else if (inputCode == actionRight)
 		{
-			if (!startingStepRight)
+			if (IsStarting())
 			{
-				StepHorizontal(false);
-				StartStepHorizontal(false);
+				if (!startingStepRight)
+				{
+					StepHorizontal(false);
+					StartStepHorizontal(false);
+				}
 			}
 		}
-		break;
-	case VK_UP:
-		if (IsStarting())
+		else if (inputCode == actionRotate)
 		{
-			if (!startingRotate)
+			if (IsStarting())
 			{
-				Rotate();
-				StartRotate();
+				if (!startingRotate)
+				{
+					Rotate();
+					StartRotate();
+				}
 			}
 		}
-		break;
-	case VK_DOWN:
-	case VK_SPACE:
-		if (IsStarting())
+		else if (inputCode == actionDown)
 		{
-			if (dropImmediate)
-			{
-				Drop();
-			}
-			else
+			if (IsStarting())
 			{
 				if (!startingDrop)
 				{
@@ -152,51 +182,68 @@ void Controller::OnKeyDown(WPARAM keyCode)
 				}
 			}
 		}
-		break;
-	case VK_RETURN:
-		if(IsStarted())
-			Restart();
-		break;
-	case 'P':
-		if (GameState::Pause == gameState)
-			StartResume();
-		else if(GameState::Start == gameState)
-			Pause();
-		break;
-	default:
-		break;
-	}
-}
-
-void Controller::OnKeyUp(WPARAM keyCode)
-{
-	switch (keyCode)
-	{
-	case VK_LEFT:
-		if (IsStarting())
-			EndStepHorizontal();
-		break;
-	case VK_RIGHT:
-		if (IsStarting())
-			EndStepHorizontal();
-		break;
-	case VK_UP:
-		if (IsStarting())
-			EndRotate();
-		break;
-	case VK_DOWN:
-	case VK_SPACE:
-		if (IsStarting())
+		else if (inputCode == actionDrop)
 		{
-			if (!dropImmediate)
+			if (IsStarting())
+			{
+				if (dropImmediate)
+				{
+					Drop();
+				}
+				else
+				{
+					if (!startingDrop)
+					{
+						StepDown();
+						StartStepDown(true);
+					}
+				}
+			}
+		}
+		else if (inputCode == operationRestart)
+		{
+			if (IsStarted())
+				Restart();
+		}
+		else if (inputCode == operationPause)
+		{
+			if (GameState::Pause == gameState)
+				StartResume();
+			else if (GameState::Start == gameState)
+				Pause();
+		}
+	}
+	else
+	{
+		if (inputCode == actionLeft || inputCode == actionRight)
+		{
+			if (IsStarting())
+				EndStepHorizontal();
+		}
+		else if (inputCode == actionRotate)
+		{
+			if (IsStarting())
+				EndRotate();
+		}
+		else if (inputCode == actionDown)
+		{
+			if (IsStarting())
 			{
 				startingDrop = false;
 				StartStepDown(false);
 			}
 		}
-		break;
-	default:
-		break;
+		else if (inputCode == actionDrop)
+		{
+			if (IsStarting())
+			{
+				if (!dropImmediate)
+				{
+					startingDrop = false;
+					StartStepDown(false);
+				}
+			}
+		}
 	}
 }
 
@@ -318,7 +365,6 @@ void Controller::Resume()
 void Controller::Restart()
 {
 	End();
-	Start();
 }
 
 bool Controller::SaveGame(wstring archive)

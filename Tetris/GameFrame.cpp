@@ -280,3 +280,14 @@ bool GameFrame::Load(const wstring label, wstring value)
 	}
 	return true;
 }
+
+void GameFrame::UpdateSize(Configuration* pConfiguration)
+{
+	left = pConfiguration->frameLeft;
+	top = pConfiguration->frameTop;
+	sizeX = pConfiguration->frameSizeX;
+	sizeY = pConfiguration->frameSizeY;
+	unitWidth = pConfiguration->unitWidth;
+	borderThickness = pConfiguration->borderThickness;
+	separatorThickness = pConfiguration->separatorThickness;
+}

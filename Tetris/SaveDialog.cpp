@@ -1,7 +1,7 @@
 #include "SaveDialog.hpp"
 #include "resource.h"
 
-INT_PTR SaveDialog::SaveDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
+INT_PTR SaveDialog::DialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	UNREFERENCED_PARAMETER(lParam);
 	switch (message)
@@ -13,7 +13,7 @@ INT_PTR SaveDialog::SaveDialogProc(HWND hDlg, UINT message, WPARAM wParam, LPARA
 	case WM_COMMAND:
 		if (LOWORD(wParam) == IDOK)
 		{
-			GetDlgItemText(hDlg, IDC_NAME, singleton.szArchive, MAX_ARCHIVE_NAME);
+			GetDlgItemText(hDlg, IDC_NAME, szArchive, MAX_ARCHIVE_NAME);
 			EndDialog(hDlg, LOWORD(wParam));
 			return (INT_PTR)TRUE;
 		}
@@ -32,4 +32,4 @@ wchar_t* SaveDialog::GetArchiveName()
 	return szArchive;
 }
 
-SaveDialog SaveDialog::singleton;
+wchar_t SaveDialog::szArchive[MAX_ARCHIVE_NAME];

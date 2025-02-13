@@ -13,7 +13,10 @@
 #include "Controller.hpp"
 #include "SaveDialog.hpp"
 #include "LoadDialog.hpp"
+#include "SettingInputDialog.hpp"
+#include "SettingGameDialog.hpp"
 #include "Utility.hpp"
+#include "Helper.hpp"
 #include "Musician.hpp"
 using namespace Gdiplus;
 #pragma comment (lib,"Gdiplus.lib")
@@ -144,12 +147,7 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 	   PostQuitMessage(0);
    }
    
-   Utility::ResizeWindow(hWnd, pConfiguration->windowWidth, pConfiguration->windowHeight);
-   Utility::ResizableWindow(hWnd, false);
-   if (pConfiguration->windowCenter)
-	   Utility::CenterWindow(hWnd);
-   else
-	   Utility::MoveWindow(hWnd, pConfiguration->windowLeft, pConfiguration->windowTop);
+   Helper::AdjustWindow(hWnd, pConfiguration);
 
    PromptFrame* pPromptFrame = &PromptFrame::singleton;
    InfoFrame* pInfoFrame = &InfoFrame::singleton;
@@ -208,12 +206,13 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         {
             int wmId = LOWORD(wParam);
             // Parse the menu selections:
-            switch (wmId)
-            {
+			switch (wmId)
+			{
 			case ID_SAVE:
-				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SAVE), hWnd, SaveDialog::SaveDialogProc))
+				SaveDialog saveDialog;
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SAVE), hWnd, SaveDialog::DialogProc))
 				{
-					wstring archive = SaveDialog::singleton.GetArchiveName();
+					wstring archive = saveDialog.GetArchiveName();
 					if (Archive::Exist(archive))
 						if (IDNO == MessageBox(hWnd, L"File exists, overwrite it?", L"Save", MB_YESNO))
 							break;
@@ -221,18 +220,19 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				}
 				break;
 			case ID_LOAD:
-				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_LOAD), hWnd, LoadDialog::LoadDialogProc))
+				LoadDialog loadDialog;
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_LOAD), hWnd, LoadDialog::DialogProc))
 				{
-					Controller::singleton.LoadGame(LoadDialog::singleton.GetSelectedArchive());
+					Controller::singleton.LoadGame(loadDialog.GetSelectedArchive());
 					InvalidateRect(hWnd, NULL, FALSE);
 				}
 				break;
-            case IDM_ABOUT:
-                DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
-                break;
-            case IDM_EXIT:
-                DestroyWindow(hWnd);
-                break;
+			case IDM_ABOUT:
+				DialogBox(hInst, MAKEINTRESOURCE(IDD_ABOUTBOX), hWnd, About);
+				break;
+			case IDM_EXIT:
+				DestroyWindow(hWnd);
+				break;
 			case ID_MUSIC_BGM:
 			{
 				Controller* pController = &Controller::singleton;
@@ -244,6 +244,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 					pController->PlayBgm();
 				else
 					pController->StopBgm();
+				Configuration::singleton.SaveBgmOn(bgmOn);
 				break;
 			}
 			case ID_MUSIC_SOUND:
@@ -253,6 +254,38 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 				pController->SetSoundOn(soundOn);
 				HMENU hMenu = GetMenu(hWnd);
 				CheckMenuItem(hMenu, ID_MUSIC_SOUND, soundOn ? MF_CHECKED : MF_UNCHECKED);
+				Configuration::singleton.SaveSoundOn(soundOn);
+				break;
+			}
+			case ID_SETTING_INPUT:
+			{
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGINPUT), hWnd, SettingInputDialog::DialogProc))
+				{
+					SettingInputDialog::Setting* pSetting = &SettingInputDialog::setting;
+					Configuration* pConfiguration = &Configuration::singleton;
+					pConfiguration->LoadInput(pSetting->left, pSetting->right, pSetting->down,
+						pSetting->drop, pSetting->rotate, pSetting->pause, pSetting->restart);
+					Controller* pController = &Controller::singleton;
+					pController->UpdateInputSettings(pConfiguration);
+					pConfiguration->SaveInput();
+				}
+				break;
+			}
+			case ID_SETTING_GAME:
+			{
+				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGGAME), hWnd, SettingGameDialog::DialogProc))
+				{
+					Controller* pController = &Controller::singleton;
+					pController->End();
+					Configuration* pConfiguration = &Configuration::singleton;
+					pConfiguration->LoadPreconfiguration(SettingGameDialog::setting.row, SettingGameDialog::setting.col);
+					GameFrame::singleton.Initialize(pConfiguration);
+					PromptFrame::singleton.Initialize(pConfiguration);
+					InfoFrame::singleton.Initialize(pConfiguration);
+					Helper::AdjustWindow(hWnd, pConfiguration);
+					pConfiguration->SavePositions();
+				}
+
 				break;
 			}
 			default:
@@ -287,6 +320,42 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 		Controller* pController = &Controller::singleton;
 		pController->OnKeyUp(wParam);
+		break;
+	}
+	case WM_LBUTTONDOWN:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseDown(VK_LBUTTON);
+		break;
+	}
+	case WM_MBUTTONDOWN:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseDown(VK_MBUTTON);
+		break;
+	}
+	case WM_RBUTTONDOWN:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseDown(VK_RBUTTON);
+		break;
+	}
+	case WM_LBUTTONUP:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseUp(VK_LBUTTON);
+		break;
+	}
+	case WM_MBUTTONUP:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseUp(VK_MBUTTON);
+		break;
+	}
+	case WM_RBUTTONUP:
+	{
+		Controller* pController = &Controller::singleton;
+		pController->OnMouseUp(VK_RBUTTON);
 		break;
 	}
 	case WM_DESTROY:

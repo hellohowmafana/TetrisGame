@@ -186,6 +186,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="AnimatedGifPoller.hpp" />
     <ClInclude Include="Archive.hpp" />
     <ClInclude Include="Debugger.hpp" />
+    <ClInclude Include="Helper.hpp" />
     <ClInclude Include="LoadDialog.hpp" />
     <ClInclude Include="Background.hpp" />
     <ClInclude Include="Frame.hpp" />
@@ -205,6 +206,8 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClInclude Include="RenderMode.hpp" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="SaveDialog.hpp" />
+    <ClInclude Include="SettingGameDialog.hpp" />
+    <ClInclude Include="SettingInputDialog.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Tetris.hpp" />
     <ClInclude Include="TetrisShape.hpp" />
@@ -216,6 +219,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="AnimatedGifPoller.cpp" />
     <ClCompile Include="Archive.cpp" />
     <ClCompile Include="Debugger.cpp" />
+    <ClCompile Include="Helper.cpp" />
     <ClCompile Include="LoadDialog.cpp" />
     <ClCompile Include="Background.cpp" />
     <ClCompile Include="Frame.cpp" />
@@ -231,6 +235,8 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="PromptFrame.cpp" />
     <ClCompile Include="Recorder.cpp" />
     <ClCompile Include="SaveDialog.cpp" />
+    <ClCompile Include="SettingGameDialog.cpp" />
+    <ClCompile Include="SettingInputDialog.cpp" />
     <ClCompile Include="Source.cpp" />
     <ClCompile Include="Tetris.cpp" />
     <ClCompile Include="TetrisShape.cpp" />
@@ -239,7 +245,10 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <ClCompile Include="Utility.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="Tetris.rc" />
+    <ResourceCompile Include="Tetris.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+      </ExcludedFromBuild>
+    </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
     <Image Include="inis\icons\pause.png" />

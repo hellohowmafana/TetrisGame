@@ -14,6 +14,7 @@ class Controller
 public:
 	static Controller singleton;
 	void Initialize(Configuration* pConfiguration);
+	void UpdateInputSettings(Configuration* pConfiguration);
 	void SetHWnd(HWND hWnd);
 	void SetGameFrame(GameFrame* pGameFrame);
 
@@ -32,6 +33,9 @@ public:
 
 	void OnKeyDown(WPARAM keyCode);
 	void OnKeyUp(WPARAM keyCode);
+	void OnMouseDown(WPARAM buttonCode);
+	void OnMouseUp(WPARAM buttonCode);
+	void OnInput(WPARAM inputCode, bool isKeyDown);
 
 	void Rotate();
 	void StepHorizontal(bool left);
@@ -127,6 +131,14 @@ private:
 	UINT removeBlinkTimespan;
 	UINT rollTimespan;
 	UINT resumeDelayTimespan;
+
+	unsigned char actionLeft;
+	unsigned char actionRight;
+	unsigned char actionDown;
+	unsigned char actionRotate;
+	unsigned char actionDrop;
+	unsigned char operationPause;
+	unsigned char operationRestart;
 
 	bool soundOn;
 	bool bgmOn;

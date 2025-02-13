@@ -125,6 +125,15 @@ private:
 	const wstring keyRollTimespan = L"RollTimespan";
 	const wstring keyResumeDelayTimespan = L"ResumeDelayTimespan";
 
+	const wstring keyInput = L"Input";
+	const wstring keyActionLeft = L"KeyLeft";
+	const wstring keyActionRight = L"KeyRight";
+	const wstring keyActionDown = L"KeyDown";
+	const wstring keyActionRotate = L"KeyRotate";
+	const wstring keyActionDrop = L"KeyDrop";
+	const wstring keyOperationPause = L"KeyPause";
+	const wstring keyOperationRestart = L"KeyRestart";
+
 	const wstring keyMusic = L"Music";
 	const wstring keySoundOn = L"SoundOn";
 	const wstring keyBgmOn = L"BgmOn";
@@ -166,7 +175,7 @@ public:
 	double startLineBlankRate;
 	vector<int> vecRemoveScores;
 	int droppedScore;
-	int maxLevel;
+	UINT maxLevel;
 	vector<double> vecScoreGainRate;
 	vector<int> vecLevelScore;
 	vector<int> vecStepDownTimespan;
@@ -178,6 +187,15 @@ public:
 	int removeBlinkCount;
 	int rollTimespan;
 	int resumeDelayTimespan;
+
+	// input
+	unsigned char actionLeft;
+	unsigned char actionRight;
+	unsigned char actionDown;
+	unsigned char actionRotate;
+	unsigned char actionDrop;
+	unsigned char operationPause;
+	unsigned char operationRestart;
 
 	// music
 	bool soundOn;
@@ -221,8 +239,6 @@ private:
 	wstring& FindFile(wstring& path);
 	void FindFiles(wstring path, vector<wstring>* pvecFiles);
 
-	bool SaveWindowPostion(int w, int h, int l, int t, bool c);
-
 private:
 #define MAX_BUFFER_LENGTH 256
 	wchar_t buffer[MAX_BUFFER_LENGTH];
@@ -233,13 +249,27 @@ private:
 	bool GetConfigurationBool(wstring section, wstring key);
 	double GetConfigurationDouble(wstring section, wstring key);
 	bool GetConfigurationIntPair(wstring section, wstring key, int& val1, int& val2);
-	bool  GetConfigurationIntArray(wstring section, wstring key, vector<int>& vec);
-	bool  GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec);
+	bool GetConfigurationIntArray(wstring section, wstring key, vector<int>& vec);
+	bool GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec);
 
 	bool SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2);
 	bool SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecInts);
 	bool SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles);
 	bool ParseTetrisTypeDeclaration(wstring str, wstring& name,
 		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
+
+public:
+	void LoadPreconfiguration(int rowCount, int colCount);
+	bool SavePositions();
+	void LoadInput(unsigned char left, unsigned char right, unsigned char down,
+		unsigned char drop, unsigned char rotate, unsigned char pause, unsigned char restart);
+	bool SaveInput();
+	bool SaveBgmOn(bool bgm);
+	bool SaveSoundOn(bool sound);
+
+private:
+	bool SaveConfigurationInt(wstring section, wstring key, int val);
+	bool SaveConfigurationIntPair(wstring section, wstring key, int val1, int val2);
+	bool SaveConfigurationBool(wstring section, wstring key, bool val);
 };
 
