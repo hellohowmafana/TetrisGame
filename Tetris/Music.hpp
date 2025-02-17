@@ -28,8 +28,8 @@ public:
 
 	MusicType GetType();
 	wstring GetAlias();
-	MusicStatus GetStatus();
-	MCIDEVICEID GetDeviceId();
+	MusicStatus GetStatus() const;
+	MCIDEVICEID GetDeviceId() const;
 	bool IsSound();
 	bool IsBgm();
 

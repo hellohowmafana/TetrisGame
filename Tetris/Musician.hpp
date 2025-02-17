@@ -8,7 +8,7 @@
 class Configuration;
 class Musician;
 
-#define UM_MUSICIAN WM_USER + 1
+#define UM_MUSICIAN WM_USER
 
 enum class MusicianEvent { Initialize, Deinitialize, Play, Stop, Pause, Resume, ExitThread };
 
@@ -20,71 +20,63 @@ public:
 	static Musician singleton;
 
 private:
-	void CreateMusicThread(Configuration* pConfiguration);
+	bool CreateMusicThread();
 	void EndMusicThread();
 	static DWORD WINAPI MusicThreadProc(LPVOID param);
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 	void PostEvent(MusicianEvent musicianEvent, void* param);
-	MusicianCallback musicianCallback;
+	
 	HANDLE hThread;
+	HANDLE hevThreadStarted;
+	HANDLE hevInitialized;
 	HWND hWnd;
 	bool initialized;
-
+	
 	Musician();
 	~Musician();
 
 public:
-	// async methods
-	void InitializeAsync(Configuration* pConfiguration);
-	void DeinitializeAsync();
-	void SetCallback(MusicianCallback musicianCallback);
+	bool InitializeInNewThread(Configuration* pConfiguration);
+	void DeinitializeAndDestroyThread();
 
+	// async methods
 	void PostInitialize(Configuration* pConfiguration);
 	void PostDeinitialize();
-	void PostPlay(MusicType musicType);
-	void PostStop(MusicType musicType);
-	void PostPause(MusicType musicType);
-	void PostResume(MusicType musicType);
+	void PostBgmPlay();
+	void PostBgmStop();
+	void PostBgmPause();
+	void PostBgmResume();
+	void PostSndPlay(MusicType musicType);
 
 	// sync methods
 	bool IsInitialized();
 	void Initialize(Configuration* pConfiguration);
 	void Deinitialize();
 
-	bool Play(MusicType musicType);
-	bool Stop(MusicType musicType);
-	bool Pause(MusicType musicType);
-	bool Resume(MusicType musicType);
+	Music* ShiftBgm(bool random, bool open);
+	bool PlayBgm();
+	bool StopBgm();
+	bool PauseBgm();
+	bool ResumeBgm();
+
+	bool PlaySnd(MusicType musicType);
+	bool CloseSnd(MCIDEVICEID deviceId);
 
 	bool CloseAll();
 
 private:
 	// sound
+	typedef vector<Music*> SoundGroup;
+	typedef map<MusicType, SoundGroup> SoundSet;
+	SoundSet sounds;
 	map<MusicType, wstring> mapSoundPaths;
-
-	// for overlapped playing
-	typedef vector<Music*> SoundClass;
-	typedef map<MusicType, SoundClass> SoundGroup;
-	SoundGroup sounds;
-
-	Music* CreateSound(MusicType musicType);
-	bool DeleteSound(Music* pMusic);
-	void ClearSounds();
-	Music* FindSound(MCIDEVICEID deviceId);
-	Music* GetPlayableSound(MusicType musicType);
-	bool StopSound(MusicType musicType);
-
-	// aliases
-	set<int> setSoundAliases;
-	wstring CreateSoundAlias();
-	bool DeleteAlias(wstring alias);
+	int soundAlias;
 
 private:
 	// bgm
 	int currentBgm;
 	bool randomBgm;
 	vector<wstring> vecBgms;
-	Music* ShiftBgm(bool random, bool open);
 
 	Music bgm;
 	wstring bgmAlias = L"bgm";

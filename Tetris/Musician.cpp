@@ -4,9 +4,25 @@
 
 Musician Musician::singleton;
 
-void Musician::CreateMusicThread(Configuration* pConfiguration)
+bool Musician::CreateMusicThread()
 {
-	hThread = CreateThread(NULL, 0, MusicThreadProc, pConfiguration, 0, 0);
+	hevThreadStarted = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (hevThreadStarted == NULL)
+	{
+		return false;
+	}
+
+	hThread = CreateThread(NULL, 0, MusicThreadProc, this, 0, 0);
+	if (hThread == NULL)
+	{
+		CloseHandle(hevThreadStarted);
+		return false;
+	}
+
+	WaitForSingleObject(hevThreadStarted, INFINITE);
+	CloseHandle(hevThreadStarted);
+	hevThreadStarted = nullptr;
+	return true;
 }
 
 void Musician::EndMusicThread()
@@ -16,7 +32,7 @@ void Musician::EndMusicThread()
 
 DWORD WINAPI Musician::MusicThreadProc(LPVOID pParam)
 {
-	Musician* pMusician = &Musician::singleton;
+	Musician* pMusician = (Musician*)pParam;
 
 	// create message window
 	wchar_t* szWindowClass = (wchar_t*)L"MessageMusician";
@@ -28,9 +44,9 @@ DWORD WINAPI Musician::MusicThreadProc(LPVOID pParam)
 	if (RegisterClass(&wndClass))
 		pMusician->hWnd = CreateWindow(szWindowClass, nullptr, 0, 0, 0, 0, 0,
 			HWND_MESSAGE, NULL, GetModuleHandle(NULL), 0);
-
-	// initialize musician
-	pMusician->PostInitialize((Configuration*)pParam);
+	
+	// signal the thread has started
+	SetEvent(pMusician->hevThreadStarted);
 
 	// dispatch messages
 	MSG msg;
@@ -63,16 +79,22 @@ LRESULT CALLBACK Musician::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 			pMusician->Deinitialize();
 			break;
 		case MusicianEvent::Play:
-			pMusician->Play((MusicType)lParam);
+		{
+			MusicType musicType = (MusicType)lParam;
+			if (MusicType::Bgm == musicType)
+				pMusician->PlayBgm();
+			else
+				pMusician->PlaySnd(musicType);
 			break;
+		}
 		case MusicianEvent::Stop:
-			pMusician->Stop((MusicType)lParam);
+			if(MusicType::Bgm == (MusicType)lParam) pMusician->StopBgm();
 			break;
 		case MusicianEvent::Pause:
-			pMusician->Pause((MusicType)lParam);
+			if (MusicType::Bgm == (MusicType)lParam) pMusician->PauseBgm();
 			break;
 		case MusicianEvent::Resume:
-			pMusician->Resume((MusicType)lParam);
+			if (MusicType::Bgm == (MusicType)lParam) pMusician->ResumeBgm();
 			break;
 		case MusicianEvent::ExitThread:
 			PostQuitMessage(0);
@@ -80,17 +102,24 @@ LRESULT CALLBACK Musician::WindowProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARA
 		default:
 			break;
 		}
-		if(pMusician->musicianCallback)
-			pMusician->musicianCallback(pMusician, musicianEvent);
 	}
 	break;
 	case MM_MCINOTIFY:
 		if (MCI_NOTIFY_SUCCESSFUL == wParam)
 		{
-			// bgm playing end
 			Musician* pMusician = &Musician::singleton;
-			pMusician->ShiftBgm(pMusician->randomBgm, true);
-			pMusician->bgm.Play(true);
+			MCIDEVICEID devId = (MCIDEVICEID)lParam;
+			if (devId == Musician::singleton.bgm.GetDeviceId())
+			{
+				// bgm playing end
+				pMusician->ShiftBgm(pMusician->randomBgm, true);
+				pMusician->bgm.Play(true);
+			}
+			else
+			{
+				// sound playback end
+				pMusician->CloseSnd(devId);
+			}
 		}
 		break;
 	case WM_QUIT:
@@ -109,30 +138,32 @@ void Musician::PostEvent(MusicianEvent musicianEvent, void* param)
 
 Musician::Musician() :
 	currentBgm(-1),
-	initialized(false),
-	musicianCallback(nullptr)
+	initialized(false)
 {
+	hevInitialized = CreateEvent(NULL, TRUE, FALSE, NULL);
 }
 
 Musician::~Musician()
 {
 	if(initialized)
 		Deinitialize();
+	if(hevInitialized)
+		CloseHandle(hevInitialized);
 }
 
-void Musician::InitializeAsync(Configuration* pConfiguration)
+bool Musician::InitializeInNewThread(Configuration* pConfiguration)
 {
-	CreateMusicThread(pConfiguration);
+	bool success =
+	CreateMusicThread();
+	PostInitialize(pConfiguration);
+	WaitForSingleObject(hevInitialized, INFINITE);
+	return success;
 }
 
-void Musician::DeinitializeAsync()
+void Musician::DeinitializeAndDestroyThread()
 {
+	PostDeinitialize();
 	EndMusicThread();
-}
-
-void Musician::SetCallback(MusicianCallback musicianCallback)
-{
-	this->musicianCallback = musicianCallback;
 }
 
 void Musician::PostInitialize(Configuration* pConfiguration)
@@ -145,24 +176,31 @@ void Musician::PostDeinitialize()
 	PostEvent(MusicianEvent::Deinitialize, nullptr);
 }
 
-void Musician::PostPlay(MusicType musicType)
+void Musician::PostBgmPlay()
 {
+	PostEvent(MusicianEvent::Play, (void*)MusicType::Bgm);
+}
+
+void Musician::PostBgmStop()
+{
+	PostEvent(MusicianEvent::Stop, (void*)MusicType::Bgm);
+}
+
+void Musician::PostBgmPause()
+{
+	PostEvent(MusicianEvent::Pause, (void*)MusicType::Bgm);
+}
+
+void Musician::PostBgmResume()
+{
+	PostEvent(MusicianEvent::Resume, (void*)MusicType::Bgm);
+}
+
+void Musician::PostSndPlay(MusicType musicType)
+{
+	if (MusicType::Bgm == musicType)
+		return;
 	PostEvent(MusicianEvent::Play, (void*)musicType);
-}
-
-void Musician::PostStop(MusicType musicType)
-{
-	PostEvent(MusicianEvent::Stop, (void*)musicType);
-}
-
-void Musician::PostPause(MusicType musicType)
-{
-	PostEvent(MusicianEvent::Pause, (void*)musicType);
-}
-
-void Musician::PostResume(MusicType musicType)
-{
-	PostEvent(MusicianEvent::Resume, (void*)musicType);
 }
 
 bool Musician::IsInitialized()
@@ -182,13 +220,9 @@ void Musician::Initialize(Configuration* pConfiguration)
 	mapSoundPaths[MusicType::Remove] = pConfiguration->pathRemoveSound;
 	vecBgms = pConfiguration->vecBgms;
 	sort(vecBgms.begin(), vecBgms.end());
-
-	// open sounds
-	CreateSound(MusicType::StepDown)->Open();
-	CreateSound(MusicType::StepHorizontal)->Open();
-	CreateSound(MusicType::Rotate)->Open();
-	CreateSound(MusicType::Dropped)->Open();
-	CreateSound(MusicType::Remove)->Open();
+	
+	// soundAlias
+	soundAlias = 0;
 
 	// open bgm
 	randomBgm = pConfiguration->randomBgm;
@@ -197,6 +231,8 @@ void Musician::Initialize(Configuration* pConfiguration)
 	ShiftBgm(randomBgm, true);
 
 	initialized = true;
+	if (hevInitialized)
+		SetEvent(hevInitialized);
 }
 
 void Musician::Deinitialize()
@@ -209,156 +245,11 @@ void Musician::Deinitialize()
 	// clear
 	mapSoundPaths.clear();
 	vecBgms.clear();
-	ClearSounds();
 	currentBgm = -1;
 
 	initialized = false;
-}
-
-bool Musician::Play(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		return bgm.Play(true);
-	else
-		return GetPlayableSound(musicType)->Play(false);
-}
-
-bool Musician::Stop(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		return bgm.Stop();
-	else
-		return StopSound(musicType);
-}
-
-bool Musician::Pause(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		return bgm.Pause();
-	return false;
-}
-
-bool Musician::Resume(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		return bgm.Resume();
-	return false;
-}
-
-bool Musician::CloseAll()
-{
-	wstring mciString;
-	mciString.append(L"close all");
-	if (0 == mciSendString(mciString.c_str(), NULL, 0, NULL))
-	{
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-}
-
-Music* Musician::CreateSound(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		return nullptr;
-
-	Music* pMusic = new Music(musicType, mapSoundPaths[musicType].c_str(), CreateSoundAlias().c_str());
-	sounds[musicType].push_back(pMusic);
-	return pMusic;
-}
-
-bool Musician::DeleteSound(Music* pMusic)
-{
-	if (MusicType::Bgm == pMusic->GetType())
-		return false;
-
-	for (SoundGroup::iterator it = sounds.begin(); it != sounds.end(); it++)
-	{
-		SoundClass* pSoundClass = &it->second;
-		SoundClass::iterator itc = find(pSoundClass->begin(), pSoundClass->end(), pMusic);
-		if (pSoundClass->end() != itc)
-		{
-			DeleteAlias((*itc)->GetAlias());
-			delete* itc;
-			pSoundClass->erase(itc);
-			return true;
-		}
-	}
-	return false;
-}
-
-void Musician::ClearSounds()
-{
-	for (SoundGroup::iterator it = sounds.begin(); it != sounds.end(); it++)
-	{
-		for (SoundClass::iterator itc = it->second.begin(); itc != it->second.end(); itc++)
-		{
-			delete* itc;
-		}
-	}
-	sounds.clear();
-}
-
-Music* Musician::FindSound(MCIDEVICEID deviceId)
-{
-	for (SoundGroup::iterator it = sounds.begin(); it != sounds.end(); it++)
-	{
-		SoundClass* pSoundClass = &it->second;
-		for (SoundClass::iterator itc = pSoundClass->begin(); itc != pSoundClass->end(); itc++)
-		{
-			if (deviceId == (*itc)->GetDeviceId())
-				return *itc;
-		}
-	}
-	return nullptr;
-}
-
-Music* Musician::GetPlayableSound(MusicType musicType)
-{
-	// find exist playable sound
-	SoundClass* pMusicianClass = &sounds[musicType];
-	for (SoundClass::iterator it = pMusicianClass->begin(); it != pMusicianClass->end(); it++)
-	{
-		if (MusicStatus::Stop == (*it)->GetStatus())
-		{
-			return *it;
-		}
-	}
-
-	// create and open one sound
-	Music* pMusic = CreateSound(musicType);
-	pMusic->Open();
-	return pMusic;
-}
-
-bool Musician::StopSound(MusicType musicType)
-{
-	bool result = true;
-	for (SoundClass::iterator it = sounds[musicType].begin(); it != sounds[musicType].end(); it++)
-	{
-		result = result && (*it)->Close();
-	}
-	return result;
-}
-
-wstring Musician::CreateSoundAlias()
-{
-	int i = 0;
-	while (true)
-	{
-		if (setSoundAliases.end() == setSoundAliases.find(i))
-			break;
-		i++;
-	}
-	setSoundAliases.emplace(i);
-	return to_wstring(i);
-}
-
-bool Musician::DeleteAlias(wstring alias)
-{
-	return 0 != setSoundAliases.erase(stoi(alias));
+	if (hevInitialized)
+		ResetEvent(hevInitialized);
 }
 
 Music* Musician::ShiftBgm(bool random, bool open)
@@ -391,4 +282,75 @@ Music* Musician::ShiftBgm(bool random, bool open)
 
 	bgm.Shift(vecBgms[currentBgm], true, open);
 	return &bgm;
+}
+
+bool Musician::PlayBgm()
+{
+	return bgm.Play(true);
+}
+
+bool Musician::StopBgm()
+{
+	return bgm.Stop();
+}
+
+bool Musician::PauseBgm()
+{
+	return bgm.Pause();
+}
+
+bool Musician::ResumeBgm()
+{
+	return bgm.Resume();
+}
+
+bool Musician::PlaySnd(MusicType musicType)
+{
+	if (MusicType::Bgm == musicType)
+		return false;
+	Music* sound = new Music(musicType, mapSoundPaths[musicType], to_wstring(soundAlias++));
+	sounds[musicType].push_back(sound);
+	sound->SetNotifyWindow(hWnd);
+	return sound->Open() && sound->Play(true);
+}
+
+bool Musician::CloseSnd(MCIDEVICEID deviceId)
+{
+	for (SoundSet::iterator its = sounds.begin(); its != sounds.end(); its++)
+	{
+		auto it = std::find_if((*its).second.begin(), (*its).second.end(),
+			[&](const Music* sound) {
+				return sound->GetDeviceId() == deviceId;
+			});
+		if (it != (*its).second.end())
+		{
+			(*it)->Close();
+			delete (*it);
+			(*its).second.erase(it);
+			return true;
+		}
+	}
+	return false;
+}
+
+bool Musician::CloseAll()
+{
+	wstring mciString;
+	mciString.append(L"close all");
+	if (0 == mciSendString(mciString.c_str(), NULL, 0, NULL))
+	{
+		for (SoundSet::iterator its = sounds.begin(); its != sounds.end(); its++)
+		{
+			for (SoundGroup::iterator itg = (*its).second.begin(); itg != (*its).second.end(); itg++)
+			{
+				delete* itg;
+			}
+		}
+		sounds.clear();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

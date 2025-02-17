@@ -171,13 +171,14 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    pDrawer->Initialize(pController, pGameFrame, pPromptFrame, pInfoFrame, pBackground);
 
    Musician* pMusician = &Musician::singleton;
-   pMusician->InitializeAsync(pConfiguration);
+   pMusician->InitializeInNewThread(pConfiguration);
 
    pController->Initialize(pConfiguration);
    pController->SetHWnd(hWnd);
    pController->SetGameFrame(pGameFrame);
    pController->SetDrawer(pDrawer);
    pController->SetMusician(pMusician);
+   pController->Start();
 
    HMENU hMenu = GetMenu(hWnd);
    CheckMenuItem(hMenu, ID_MUSIC_BGM, pController->GetBgmOn() ? MF_CHECKED : MF_UNCHECKED);

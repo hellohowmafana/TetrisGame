@@ -164,7 +164,7 @@ wstring Music::GetAlias()
 	return alias;
 }
 
-MusicStatus Music::GetStatus()
+MusicStatus Music::GetStatus() const
 {
 	wstring mciString;
 	mciString.append(L"status \"").append(alias).append(L"\" mode");
@@ -191,7 +191,7 @@ MusicStatus Music::GetStatus()
 	return MusicStatus::Close;
 }
 
-MCIDEVICEID Music::GetDeviceId()
+MCIDEVICEID Music::GetDeviceId() const
 {
 	return deviceId;
 }

@@ -63,7 +63,6 @@ Drawer* Controller::GetDrawer()
 void Controller::SetMusician(Musician* pMusician)
 {
 	this->pMusician = pMusician;
-	pMusician->SetCallback(MusicianCallbackStatic);
 }
 
 Musician* Controller::GetMusician()
@@ -253,7 +252,7 @@ void Controller::Rotate()
 		return;
 	if (pGameFrame->Rotate())
 	{
-		PlayMusic(MusicType::Rotate);
+		PlaySnd(MusicType::Rotate);
 		InvalidateDraw();
 	}
 }
@@ -270,7 +269,7 @@ void Controller::StepHorizontal(bool left)
 	{
 		pGameFrame->StepRight();
 	}
-	PlayMusic(MusicType::StepHorizontal);
+	PlaySnd(MusicType::StepHorizontal);
 	InvalidateDraw();
 }
 
@@ -286,7 +285,7 @@ void Controller::StepDown()
 	else
 	{
 		// not dropped
-		PlayMusic(MusicType::StepDown);
+		PlaySnd(MusicType::StepDown);
 		InvalidateDraw();
 	}
 }
@@ -302,7 +301,7 @@ void Controller::Drop()
 
 void Controller::EndDrop()
 {
-	PlayMusic(MusicType::Dropped);
+	PlaySnd(MusicType::Dropped);
 	if (pGameFrame->IsFull())
 	{
 		End();
@@ -311,7 +310,7 @@ void Controller::EndDrop()
 	if (pGameFrame->Union() > 0)
 	{
 		InvalidateDraw();
-		PlayMusic(MusicType::Remove);
+		PlaySnd(MusicType::Remove);
 		StartRemoveBlink();
 		return;
 	}
@@ -326,7 +325,7 @@ bool Controller::Start()
 		return false;
 	gameState = GameState::Start;
 	InvalidateDraw();
-	PlayMusic(MusicType::Bgm);
+	PlaySnd(MusicType::Bgm);
 	StartStepDown(false);
 	return true;
 }
@@ -352,7 +351,7 @@ void Controller::Resume()
 {
 	if (pGameFrame->HasFullLine())
 	{
-		PlayMusic(MusicType::Remove);
+		PlaySnd(MusicType::Remove);
 		StartRemoveBlink();
 	}
 	else
@@ -414,12 +413,13 @@ bool Controller::GetSoundOn()
 
 void Controller::PlayBgm()
 {
-	PlayMusic(MusicType::Bgm);
+	if(bgmOn)	
+		pMusician->PostBgmPlay();
 }
 
 void Controller::StopBgm()
 {
-	StopMusic(MusicType::Bgm);
+	pMusician->PostBgmStop();
 }
 
 bool Controller::StartStepDown(bool isDropping)
@@ -616,34 +616,8 @@ void Controller::InvalidateDraw()
 	pDrawer->Invalidate();
 }
 
-void Controller::PlayMusic(MusicType musicType)
+void Controller::PlaySnd(MusicType musicType)
 {
-	if (MusicType::Bgm == musicType)
-	{
-		if (bgmOn)
-			pMusician->PostPlay(musicType);
-	}
-	else
-	{
-		if (soundOn)
-			pMusician->PostPlay(musicType);
-	}
-}
-
-void Controller::StopMusic(MusicType musicType)
-{
-	if (MusicType::Bgm == musicType)
-		pMusician->PostStop(musicType);
-}
-
-void CALLBACK Controller::MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent)
-{
-	Controller::singleton.MusicianCallback(pMusician, musicianEvent);
-}
-
-void Controller::MusicianCallback(Musician* pMusician, MusicianEvent musicianEvent)
-{
-	if (pMusician == GetMusician())
-		if (MusicianEvent::Initialize == musicianEvent)
-			Start();
+	if (soundOn)
+		pMusician->PostSndPlay(musicType);
 }

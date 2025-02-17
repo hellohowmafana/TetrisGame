@@ -106,10 +106,7 @@ private:
 private:
 	Controller() {};
 	void InvalidateDraw();
-	void PlayMusic(MusicType musicType);
-	void StopMusic(MusicType musicType);
-	static void CALLBACK MusicianCallbackStatic(Musician* pMusician, MusicianEvent musicianEvent);
-	void MusicianCallback(Musician* pMusician, MusicianEvent musicianEvent);
+	void PlaySnd(MusicType musicType);
 
 	HWND hWnd;
 	GameFrame* pGameFrame;
