@@ -248,7 +248,7 @@
     <Text Include="archives\save1.txt">
       <Filter>archives</Filter>
     </Text>
-    <Text Include="inis\shapes\penerable_calssic.txt">
+    <Text Include="inis\shapes\penerable_classic.txt">
       <Filter>inis\shapes</Filter>
     </Text>
     <Text Include="records\record1.txt">

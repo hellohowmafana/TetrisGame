@@ -38,8 +38,6 @@ private:
 	const wstring PAUSE_ICON_FILE_PATH = ICONS_PATH + L"\\pause.*";
 	const wstring RESUME_ICON_FILE_PATH = ICONS_PATH + L"\\resume.*";
 
-	const wstring CLASSIC_SHAPES_PATH = SHAPES_PATH + L"\\classic.txt";
-
 	const wstring STEPDOWN_SOUND_FILE_PATH = SOUND_PATH + L"\\step down.mp3";
 	const wstring STEPHORIZONTAL_SOUND_FILE_PATH = SOUND_PATH + L"\\step horizontal.mp3";
 	const wstring ROTATE_SOUND_FILE_PATH = SOUND_PATH + L"\\rotate.mp3";
@@ -74,6 +72,7 @@ public:
 	wstring pathResumeIcon;
 
 	wstring pathClassicShapes;
+	wstring pathPenerableClassicShapes;
 
 	wstring pathStepDownSound;
 	wstring pathStepHorizontalSound;
@@ -107,6 +106,7 @@ private:
 	const wstring keyMaskTransparency = L"MaskTransparency";
 
 	const wstring keyGame = L"Game";
+	const wstring keyShapes = L"Shapes";
 	const wstring keyStartLevel = L"StartLevel";
 	const wstring keyStartLine = L"StartLine";
 	const wstring keyStartLineBlankRate = L"StartLineBlankRate";
@@ -170,6 +170,7 @@ public:
 	double maskTransparency;
 
 	// game
+	vector<wstring> vecShapes;
 	int startLevel;
 	int startLine;
 	double startLineBlankRate;
@@ -251,10 +252,14 @@ private:
 	bool GetConfigurationIntPair(wstring section, wstring key, int& val1, int& val2);
 	bool GetConfigurationIntArray(wstring section, wstring key, vector<int>& vec);
 	bool GetConfigurationDoubleArray(wstring section, wstring key, vector<double>& vec);
+	bool GetConfigurationStringArray(wstring section, wstring key, vector<wstring>& vec);
 
+	template <typename T>
+	bool SplitStringToVector(wstring str, wchar_t ch, vector<T>& vec, T(*fun)(const wchar_t*));
 	bool SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2);
 	bool SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecInts);
 	bool SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles);
+	bool SplitStringToStrings(wstring str, wchar_t ch, vector<wstring>& vecStrings);
 	bool ParseTetrisTypeDeclaration(wstring str, wstring& name,
 		bool& penetrable, bool& clockwiseRotation, bool& twoRotation, int& horizontalCenterOffset);
 

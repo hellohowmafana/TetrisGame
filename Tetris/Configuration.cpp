@@ -66,8 +66,6 @@ bool Configuration::InitializeIniPaths()
 	pathResumeIcon = path + RESUME_ICON_FILE_PATH;
 	FindFile(pathResumeIcon);
 
-	pathClassicShapes = path + CLASSIC_SHAPES_PATH;
-
 	pathStepDownSound = path + STEPDOWN_SOUND_FILE_PATH;
 	pathStepHorizontalSound = path + STEPHORIZONTAL_SOUND_FILE_PATH;
 	pathRotateSound = path + ROTATE_SOUND_FILE_PATH;
@@ -105,6 +103,7 @@ bool Configuration::LoadParameters()
 	maskTransparency = GetConfigurationDouble(keyDisplay, keyMaskTransparency);
 
 	// game
+	GetConfigurationStringArray(keyGame, keyShapes, vecShapes);
 	startLevel = GetConfigurationInt(keyGame, keyStartLevel);
 	startLine = GetConfigurationInt(keyGame, keyStartLine);
 	startLineBlankRate = GetConfigurationDouble(keyGame, keyStartLineBlankRate);
@@ -175,79 +174,82 @@ bool Configuration::LoadLevels()
 
 bool Configuration::LoadShapes()
 {
-	wfstream fs;
-	try {
-		fs.open(pathClassicShapes, wfstream::in);
+	for (size_t i = 0; i < vecShapes.size(); i++)
+	{
+		wfstream fs;
+		try {
+			fs.open(pathShapes + L"\\" + vecShapes[i] + L".txt", wfstream::in);
 		
-		wstring group = TetrisType::classic;
-		wstring name;
-		bool penetrable = false;
-		bool twoRotation;
-		bool clockwiseRotation;
-		int horizontalCenterOffset = 0;
-		int row = 0, col = 0;
-		int color = 0;
-		vector<char> vecData;
+			wstring group = vecShapes[i];
+			wstring name;
+			bool penetrable = false;
+			bool twoRotation;
+			bool clockwiseRotation;
+			int horizontalCenterOffset = 0;
+			int row = 0, col = 0;
+			int color = 0;
+			vector<char> vecData;
 
-		while (true)
-		{
-			fs.getline(buffer, bufferSize);
-			wchar_t* psz = buffer + wcsspn(buffer, L" \t");
-			if (wcschr(psz, L':')) // type declare
+			while (true)
 			{
-				if (L"" != name && row != 0 && col != 0)
+				fs.getline(buffer, bufferSize);
+				wchar_t* psz = buffer + wcsspn(buffer, L" \t");
+				if (wcschr(psz, L':')) // type declare
 				{
-					TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
-						horizontalCenterOffset,
-						row, col, vecData.data(), vecData.size(), color);
-					color++;
-				}
-				ParseTetrisTypeDeclaration(psz, name, penetrable, twoRotation, clockwiseRotation, horizontalCenterOffset);
-				row = col = 0;
-				vecData.clear();
-			}
-			else if (fs.rdstate() & wfstream::eofbit) // end of file
-			{
-				if (*psz == L'\0') // blank line
-				{
-					break;
-				}
-				else
-				{
-					// type data
-					col = (int)wcslen(psz);
-					row++;
-					for (int i = 0; i < col; i++)
-						vecData.push_back((char)psz[i]);
-					// last type
 					if (L"" != name && row != 0 && col != 0)
 					{
 						TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
 							horizontalCenterOffset,
 							row, col, vecData.data(), vecData.size(), color);
+						color++;
 					}
-					break;
+					ParseTetrisTypeDeclaration(psz, name, penetrable, twoRotation, clockwiseRotation, horizontalCenterOffset);
+					row = col = 0;
+					vecData.clear();
+				}
+				else if (fs.rdstate() & wfstream::eofbit) // end of file
+				{
+					if (*psz == L'\0') // blank line
+					{
+						break;
+					}
+					else
+					{
+						// type data
+						col = (int)wcslen(psz);
+						row++;
+						for (int i = 0; i < col; i++)
+							vecData.push_back((char)psz[i]);
+						// last type
+						if (L"" != name && row != 0 && col != 0)
+						{
+							TetrisType::Create(group, name, penetrable, twoRotation, clockwiseRotation,
+								horizontalCenterOffset,
+								row, col, vecData.data(), vecData.size(), color);
+						}
+						break;
+					}
+				}
+				else if (L'\0' == *psz) // blank line
+				{
+					continue;
+				}
+				else // type data
+				{
+					col = (int)wcslen(psz);
+					row++;
+					for (int i = 0; i < col; i++)
+						vecData.push_back((char)psz[i]);
 				}
 			}
-			else if (L'\0' == *psz) // blank line
-			{
-				continue;
-			}
-			else // type data
-			{
-				col = (int)wcslen(psz);
-				row++;
-				for (int i = 0; i < col; i++)
-					vecData.push_back((char)psz[i]);
-			}
 		}
-	}
-	catch(...)
-	{
-	}
+		catch(...)
+		{
+		}
 
-	if (fs.is_open())
-		fs.close();
+		if (fs.is_open())
+			fs.close();
+	}
 
 	return true;
 }
@@ -393,6 +395,32 @@ bool Configuration::GetConfigurationDoubleArray(wstring section, wstring key, ve
 	return SplitStringToDoubles(pszBuffer, L',', vec);
 }
 
+bool Configuration::GetConfigurationStringArray(wstring section, wstring key, vector<wstring>& vec)
+{
+	wchar_t* pszBuffer = GetConfigurationString(section, key);
+	return SplitStringToStrings(pszBuffer, L',', vec);
+}
+
+template<typename T>
+bool Configuration::SplitStringToVector(wstring str, wchar_t ch, vector<T>& vec, T(*fun)(const wchar_t*))
+{
+	try {
+		vector<wchar_t*> tokens; // token pointers
+		tokens.resize(Utility::SplitString((wchar_t*)str.c_str(), ch, nullptr, 0));
+		Utility::SplitString((wchar_t*)str.c_str(), ch, tokens.data(), 0);
+		vec.clear();
+		for (size_t i = 0; i < tokens.size(); i++)
+		{
+			vec.push_back(fun(tokens[i]));
+		}
+		return true;
+	}
+	catch (...)
+	{
+		return false;
+	}
+}
+
 bool Configuration::SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2)
 {
 	try {
@@ -413,40 +441,17 @@ bool Configuration::SplitStringToInts(wstring str, wchar_t ch, int& v1, int& v2)
 
 bool Configuration::SplitStringToInts(wstring str, wchar_t ch, vector<int>& vecInts)
 {
-	try {
-		vector<wchar_t*> tokens; // token pointers
-		tokens.resize(Utility::SplitString((wchar_t*)str.c_str(), L',', nullptr, 0));
-		Utility::SplitString((wchar_t*)str.c_str(), L',', tokens.data(), 0);
-		vecInts.clear();
-		for (size_t i = 0; i < tokens.size(); i++)
-		{
-			vecInts.push_back(stoi(tokens[i]));
-		}
-		return true;
-	}
-	catch (...)
-	{
-		return false;
-	}
+	return SplitStringToVector<int>(str, ch, vecInts, [](const wchar_t* token) { return std::stoi(token); });
 }
 
 bool Configuration::SplitStringToDoubles(wstring str, wchar_t ch, vector<double>& vecDoubles)
 {
-	try {
-		vector<wchar_t*> tokens; // token pointers
-		tokens.resize(Utility::SplitString((wchar_t*)str.c_str(), L',', nullptr, 0));
-		Utility::SplitString((wchar_t*)str.c_str(), L',', tokens.data(), 0);
-		vecDoubles.clear();
-		for (size_t i = 0; i < tokens.size(); i++)
-		{
-			vecDoubles.push_back(stod(tokens[i]));
-		}
-		return true;
-	}
-	catch (...)
-	{
-		return false;
-	}
+	return SplitStringToVector<double>(str, ch, vecDoubles, [](const wchar_t* token) { return std::stod(token); });
+}
+
+bool Configuration::SplitStringToStrings(wstring str, wchar_t ch, vector<wstring>& vecStrings)
+{
+	return SplitStringToVector<wstring>(str, ch, vecStrings, [](const wchar_t* token) { return wstring(token); });
 }
 
 bool Configuration::ParseTetrisTypeDeclaration(wstring str, wstring& name, bool& penetrable,

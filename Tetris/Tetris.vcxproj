@@ -265,7 +265,7 @@ XCOPY /E /Y /D /I "$(ProjectDir)archives" "$(OutputPath)archives"</Command>
     <Text Include="inis\shapes\classic.txt">
       <DeploymentContent>true</DeploymentContent>
     </Text>
-    <Text Include="inis\shapes\penerable_calssic.txt" />
+    <Text Include="inis\shapes\penerable_classic.txt" />
     <Text Include="readme.txt" />
     <Text Include="records\record1.txt" />
   </ItemGroup>

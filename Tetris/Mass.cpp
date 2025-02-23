@@ -38,29 +38,25 @@ int Mass::GetBottommostBlankY(int x)
 
 bool Mass::IsTouched(TetrisShape* pTetrisShape)
 {
-	for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
+	if (!pTetrisShape->IsPenetrable())
 	{
-		if (pTetrisShape->
-			GetBottommostSolidY(i, true) == pGameFrame->sizeY - 1)
-			return true;
-
-		if (!pTetrisShape->IsPenetrable())
+		for (int i = pTetrisShape->GetLeft(); i <= pTetrisShape->GetRight(); i++)
 		{
+			if (pTetrisShape->
+				GetBottommostSolidY(i, true) == pGameFrame->sizeY - 1)
+				return true;
+
 			if (IsSolid(i, pTetrisShape->GetBottommostSolidY(i, true) + 1))
 			{
 				return true;
 			}
 		}
-		else
-		{
-			if (GetBottommostBlankY(i) == pTetrisShape->GetBottommostSolidY(i, true))
-			{
-				return true;
-			}
-		}
+		return false;
 	}
-
-	return false;
+	else
+	{
+		return FindBottommostBlankY(pTetrisShape, pTetrisShape->GetLeft()) == pTetrisShape->GetTop();
+	}
 }
 
 int Mass::CalculateDistanceY(TetrisShape* pTetrisShape)
