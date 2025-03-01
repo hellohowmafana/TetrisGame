@@ -314,6 +314,7 @@ void Controller::EndDrop()
 		StartRemoveBlink();
 		return;
 	}
+	UpdateLevel();
 	pGameFrame->RebornTetrisShape();
 	InvalidateDraw();
 	StartStepDown(startingDrop);
@@ -364,6 +365,19 @@ void Controller::Resume()
 void Controller::Restart()
 {
 	End();
+}
+
+void Controller::UpdateLevel()
+{
+	if(lastLevel == pGameFrame->level)
+		return;
+	lastLevel = pGameFrame->level;
+	Level* pLevel = Level::GetLevel(lastLevel);
+	if (pLevel)
+	{
+		stepDownTimespan = pLevel->stepDownTimeSpan;
+		StartStepDown(false);
+	}
 }
 
 bool Controller::SaveGame(wstring archive)
@@ -521,6 +535,7 @@ void Controller::RemoveBlinkTimerProc(HWND hWnd, UINT msg, UINT_PTR id, DWORD mi
 		EndRemoveBlink();
 
 		pGameFrame->RemoveFullLines();
+		UpdateLevel();
 		pGameFrame->RebornTetrisShape();
 		
 		InvalidateDraw();

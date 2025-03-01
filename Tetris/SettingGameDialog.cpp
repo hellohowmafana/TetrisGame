@@ -59,6 +59,11 @@ INT_PTR SettingGameDialog::DialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			SetSize(hDlg, IDR_CUSTOM, setting.row, setting.col);
 		}
 
+		SendMessage(GetDlgItem(hDlg, IDN_LEVEL), UDM_SETRANGE, 0, MAKELPARAM(Configuration::singleton.maxLevel, 1));
+		SendMessage(GetDlgItem(hDlg, IDN_STARTLINE), UDM_SETRANGE, 0, MAKELPARAM(Configuration::singleton.frameSizeY, 0));
+		SendMessage(GetDlgItem(hDlg, IDN_LEVEL), UDM_SETPOS32, 0, Configuration::singleton.startLevel);
+		SendMessage(GetDlgItem(hDlg, IDN_STARTLINE), UDM_SETPOS32, 0, Configuration::singleton.startLine);
+
 		return TRUE;
 	}
 	case WM_HSCROLL:
@@ -104,6 +109,8 @@ INT_PTR SettingGameDialog::DialogProc(HWND hDlg, UINT message, WPARAM wParam, LP
 			{
 				setting.row = GetDlgItemInt(hDlg, IDC_ROW, NULL, FALSE);
 				setting.col = GetDlgItemInt(hDlg, IDC_COL, NULL, FALSE);
+				setting.level = GetDlgItemInt(hDlg, IDE_LEVEL, NULL, FALSE);
+				setting.startLine = GetDlgItemInt(hDlg, IDE_STARTLINE, NULL, FALSE);
 				EndDialog(hDlg, LOWORD(wParam));
 				break;
 			}

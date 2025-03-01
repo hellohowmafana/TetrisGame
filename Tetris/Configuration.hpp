@@ -266,6 +266,8 @@ private:
 public:
 	void LoadPreconfiguration(int rowCount, int colCount);
 	bool SavePositions();
+	bool SaveStartLevel(int level);
+	bool SaveStartLine(int line);
 	void LoadInput(unsigned char left, unsigned char right, unsigned char down,
 		unsigned char drop, unsigned char rotate, unsigned char pause, unsigned char restart);
 	bool SaveInput();

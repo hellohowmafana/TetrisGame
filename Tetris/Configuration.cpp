@@ -174,22 +174,25 @@ bool Configuration::LoadLevels()
 
 bool Configuration::LoadShapes()
 {
+	wfstream fs;		
+	wstring group;
+	wstring name;
+	bool penetrable;
+	bool twoRotation;
+	bool clockwiseRotation;
+	int horizontalCenterOffset;
+	int row, col;
+	int color = 0;
+	vector<char> vecData;
 	for (size_t i = 0; i < vecShapes.size(); i++)
 	{
-		wfstream fs;
+		group = vecShapes[i];
+		name = L"";
+		penetrable = false;
+		horizontalCenterOffset = 0;
+		row = col = 0;
 		try {
 			fs.open(pathShapes + L"\\" + vecShapes[i] + L".txt", wfstream::in);
-		
-			wstring group = vecShapes[i];
-			wstring name;
-			bool penetrable = false;
-			bool twoRotation;
-			bool clockwiseRotation;
-			int horizontalCenterOffset = 0;
-			int row = 0, col = 0;
-			int color = 0;
-			vector<char> vecData;
-
 			while (true)
 			{
 				fs.getline(buffer, bufferSize);
@@ -513,6 +516,16 @@ bool Configuration::SavePositions()
 	success &= SaveConfigurationIntPair(keyDisplay, keyInfoFrameSize, infoFrameSizeX, infoFrameSizeY);
 	success &= SaveConfigurationIntPair(keyWindow, keyWindowSize, windowWidth, windowHeight);
 	return success;
+}
+
+bool Configuration::SaveStartLevel(int level)
+{
+	return SaveConfigurationInt(keyGame, keyStartLevel, level);
+}
+
+bool Configuration::SaveStartLine(int line)
+{
+	return SaveConfigurationInt(keyGame, keyStartLine, line);
 }
 
 void Configuration::LoadInput(unsigned char left, unsigned char right, unsigned char down, unsigned char drop, unsigned char rotate, unsigned char pause, unsigned char restart)

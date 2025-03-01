@@ -79,7 +79,7 @@ int TetrisType::GetTetrisTypesCount(wstring group)
 
 int TetrisType::GetRandomColor(wstring group)
 {
-	return Utility::Random(0, GetTetrisTypesCount(group) - 1);
+	return Utility::Random(0, GetTetrisTypesCount() - 1);
 }
 
 TetrisType* TetrisType::Random()

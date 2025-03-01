@@ -48,6 +48,7 @@ public:
 	void Pause();
 	void Resume();
 	void Restart();
+	void UpdateLevel();
 
 	bool SaveGame(wstring archive);
 	bool LoadGame(wstring archive);
@@ -114,6 +115,7 @@ private:
 	Musician* pMusician;
 	bool initialized;
 	GameState gameState;
+	int lastLevel;
 	bool startingDrop;
 	bool startingStepLeft;
 	bool startingStepRight;

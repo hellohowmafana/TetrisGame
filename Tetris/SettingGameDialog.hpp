@@ -13,6 +13,8 @@ public:
 	public:
 		UINT row;
 		UINT col;
+		UINT level;
+		UINT startLine;
 	};
 	static Setting setting;
 
