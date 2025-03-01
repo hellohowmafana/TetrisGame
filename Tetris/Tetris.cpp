@@ -276,15 +276,35 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			{
 				if (IDOK == DialogBox(hInst, MAKEINTRESOURCE(IDD_SETTINGGAME), hWnd, SettingGameDialog::DialogProc))
 				{
-					Controller* pController = &Controller::singleton;
-					pController->End();
 					Configuration* pConfiguration = &Configuration::singleton;
-					pConfiguration->LoadPreconfiguration(SettingGameDialog::setting.row, SettingGameDialog::setting.col);
+					bool sizeChanged = pConfiguration->frameSizeX != SettingGameDialog::setting.col ||
+						pConfiguration->frameSizeY != SettingGameDialog::setting.row;
+					if (sizeChanged)
+					{
+						pConfiguration->LoadPreconfiguration(SettingGameDialog::setting.row, SettingGameDialog::setting.col);
+						pConfiguration->SavePositions();
+					}
+					if (pConfiguration->startLevel != SettingGameDialog::setting.level)
+					{
+						pConfiguration->startLevel = SettingGameDialog::setting.level;
+						pConfiguration->SaveStartLevel(pConfiguration->startLevel);
+					}
+					if (pConfiguration->startLine != SettingGameDialog::setting.startLine)
+					{
+						pConfiguration->startLine = SettingGameDialog::setting.startLine;
+						pConfiguration->SaveStartLine(pConfiguration->startLine);
+					}
 					GameFrame::singleton.Initialize(pConfiguration);
-					PromptFrame::singleton.Initialize(pConfiguration);
-					InfoFrame::singleton.Initialize(pConfiguration);
-					Helper::AdjustWindow(hWnd, pConfiguration);
-					pConfiguration->SavePositions();
+					if (sizeChanged)
+					{
+						PromptFrame::singleton.Initialize(pConfiguration);
+						InfoFrame::singleton.Initialize(pConfiguration);
+						Helper::AdjustWindow(hWnd, pConfiguration);
+					}
+					GameFrame::singleton.InitializeGame();
+					Controller* pController = &Controller::singleton;
+					pController->UpdateLevel();
+					pController->End();
 				}
 
 				break;

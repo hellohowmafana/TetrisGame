@@ -515,6 +515,16 @@ bool Configuration::SavePositions()
 	return success;
 }
 
+bool Configuration::SaveStartLevel(int level)
+{
+	return SaveConfigurationInt(keyGame, keyStartLevel, level);
+}
+
+bool Configuration::SaveStartLine(int line)
+{
+	return SaveConfigurationInt(keyGame, keyStartLine, line);
+}
+
 void Configuration::LoadInput(unsigned char left, unsigned char right, unsigned char down, unsigned char drop, unsigned char rotate, unsigned char pause, unsigned char restart)
 {
 	actionLeft = left;

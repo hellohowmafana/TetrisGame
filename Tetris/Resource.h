@@ -33,6 +33,10 @@
 #define IDS_ROW                         1012
 #define IDS_COL                         1013
 #define IDR_CUSTOM                      1014
+#define IDE_LEVEL                       1016
+#define IDN_LEVEL                       1017
+#define IDE_STARTLINE                   1018
+#define IDN_STARTLINE                   1019
 #define ID_Menu                         32771
 #define ID_SAVE                         32774
 #define ID_LOAD                         32775
@@ -49,7 +53,7 @@
 #define _APS_NO_MFC                     1
 #define _APS_NEXT_RESOURCE_VALUE        134
 #define _APS_NEXT_COMMAND_VALUE         32780
-#define _APS_NEXT_CONTROL_VALUE         1015
+#define _APS_NEXT_CONTROL_VALUE         1020
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif
